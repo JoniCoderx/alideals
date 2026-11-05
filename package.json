@@ -1,0 +1,15 @@
+{
+  "name": "alikod",
+  "version": "1.0.0",
+  "private": true,
+  "description": "אליקוד - אתר קופונים וקודי הנחה לאליאקספרס לישראלים, עם עדכון אוטומטי ולינקי שותפים",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "fetch": "node scripts/fetch.mjs",
+    "build": "node scripts/build.mjs",
+    "all": "node scripts/fetch.mjs && node scripts/build.mjs",
+    "dev": "node scripts/build.mjs && node scripts/serve.mjs",
+    "test": "node --test scripts/*.test.mjs"
+  }
+}

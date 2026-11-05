@@ -1,0 +1,23 @@
+{
+  "_readme": "רשימת הקופונים הידנית. כל קופון: code, discount, minOrder (בדולרים), expires (YYYY-MM-DD). קופון עם sample:true יוצג ככפתור 'לקבלת הקופון' בלי להציג קוד – החליפו בקודים אמיתיים והסירו את sample. link ריק = הקישור הכללי שלכם מ-Portals.",
+  "coupons": [
+    { "id": "t2",  "code": "IL02", "discount": 2,  "minOrder": 15,  "expires": "2026-11-30", "tier": "A", "sample": true },
+    { "id": "t4",  "code": "IL04", "discount": 4,  "minOrder": 29,  "expires": "2026-11-30", "tier": "A", "sample": true },
+    { "id": "t7",  "code": "IL07", "discount": 7,  "minOrder": 49,  "expires": "2026-11-30", "tier": "A", "sample": true, "featured": true },
+    { "id": "t12", "code": "IL12", "discount": 12, "minOrder": 89,  "expires": "2026-11-30", "tier": "A", "sample": true, "featured": true },
+    { "id": "t20", "code": "IL20", "discount": 20, "minOrder": 149, "expires": "2026-11-30", "tier": "A", "sample": true, "featured": true },
+    { "id": "t30", "code": "IL30", "discount": 30, "minOrder": 219, "expires": "2026-11-30", "tier": "A", "sample": true },
+    { "id": "t45", "code": "IL45", "discount": 45, "minOrder": 329, "expires": "2026-11-30", "tier": "A", "sample": true }
+  ],
+  "deals": [
+    { "id": "new-user", "type": "deal", "title": "מתנת הצטרפות למשתמשים חדשים", "text": "חבילת קופונים ומוצרים ב-1₪ למי שפותח חשבון חדש באליאקספרס.", "badge": "משתמשים חדשים", "link": "" },
+    { "id": "coupon-center", "type": "deal", "title": "מרכז הקופונים הרשמי", "text": "קופוני חנויות וקופוני פלטפורמה שנאספים לחשבון בלחיצה – מצטברים עם קוד ההנחה.", "badge": "רשמי", "link": "" },
+    { "id": "coins", "type": "deal", "title": "הנחה במטבעות אליאקספרס", "text": "אוספים מטבעות באפליקציה ומקבלים הנחה נוספת על מוצרים מסומנים.", "badge": "באפליקציה", "link": "" },
+    { "id": "choice", "type": "deal", "title": "Choice – משלוח חינם ומהיר", "text": "מוצרים עם תג Choice מגיעים עם משלוח חינם מעל סכום מינימום והחזרה חינם.", "badge": "Choice", "link": "" }
+  ],
+  "events": [
+    { "slug": "11-11", "name": "11.11 – יום הרווקים", "start": "2026-11-11", "end": "2026-11-13" },
+    { "slug": "black-friday", "name": "בלאק פריידי", "start": "2026-11-24", "end": "2026-12-02" },
+    { "slug": "anniversary", "name": "יום ההולדת של אליאקספרס", "start": "2027-03-25", "end": "2027-03-31" }
+  ]
+}

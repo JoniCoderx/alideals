@@ -1,0 +1,37 @@
+{
+  "name": "אליקוד",
+  "nameEn": "AliKod",
+  "domain": "alikod.co.il",
+  "url": "https://alikod.co.il",
+  "tagline": "קודי קופון לאליאקספרס שבאמת עובדים בישראל",
+  "description": "כל קודי הקופון וההנחות של אליאקספרס לישראלים במקום אחד – מתעדכן אוטומטית כמה פעמים ביום, נבדק ומסודר לפי סכום ההזמנה.",
+  "locale": "he_IL",
+  "currency": "ILS",
+  "contactEmail": "hello@alikod.co.il",
+  "analytics": {
+    "ga4Id": ""
+  },
+  "affiliate": {
+    "_comment": "defaultLink = הקישור הכללי שלך מ-AliExpress Portals (s.click.aliexpress.com/e/...). כל לחיצה על קופון שאין לו קישור משלו תגיע לכאן.",
+    "defaultLink": "https://s.click.aliexpress.com/e/_REPLACE_WITH_YOUR_LINK",
+    "couponCenterUrl": "https://www.aliexpress.com/p/coupon-pages/center.html",
+    "homeUrl": "https://he.aliexpress.com/"
+  },
+  "social": {
+    "telegram": "",
+    "whatsapp": "",
+    "facebook": "",
+    "instagram": "",
+    "tiktok": ""
+  },
+  "dealCategories": [
+    { "slug": "electronics", "name": "אלקטרוניקה וגאדג'טים", "keywords": ["wireless earbuds", "smart watch", "power bank", "bluetooth speaker"] },
+    { "slug": "phone-accessories", "name": "אביזרים לסלולר", "keywords": ["iphone case", "magsafe charger", "usb c cable fast charging", "screen protector"] },
+    { "slug": "home", "name": "בית ומטבח", "keywords": ["kitchen gadgets", "led strip lights", "storage organizer", "robot vacuum"] },
+    { "slug": "fashion", "name": "אופנה ונעליים", "keywords": ["women dress", "men sneakers", "hoodie", "sunglasses"] },
+    { "slug": "kids", "name": "ילדים ותינוקות", "keywords": ["kids toys", "baby clothes", "educational toys", "lego compatible blocks"] },
+    { "slug": "tools", "name": "כלי עבודה ורכב", "keywords": ["cordless drill", "car accessories", "dash cam", "tool set"] },
+    { "slug": "beauty", "name": "יופי וטיפוח", "keywords": ["makeup brushes", "hair dryer brush", "nail art", "skincare tools"] },
+    { "slug": "sports", "name": "ספורט וטיולים", "keywords": ["camping gear", "fitness equipment", "cycling accessories", "yoga mat"] }
+  ]
+}

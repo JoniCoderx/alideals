@@ -1,0 +1,72 @@
+name: Update coupons & deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */3 * * *'   # every 3 hours
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Keep the last successful fetch so a failed API call never empties the site.
+      - name: Restore previous data
+        uses: actions/cache/restore@v4
+        with:
+          path: data/generated.json
+          key: generated-${{ github.run_id }}
+          restore-keys: generated-
+
+      - name: Tests
+        run: npm test
+
+      - name: Fetch coupons & deals
+        env:
+          ALI_APP_KEY: ${{ secrets.ALI_APP_KEY }}
+          ALI_APP_SECRET: ${{ secrets.ALI_APP_SECRET }}
+          ALI_TRACKING_ID: ${{ secrets.ALI_TRACKING_ID }}
+          COUPONS_SHEET_CSV_URL: ${{ secrets.COUPONS_SHEET_CSV_URL }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: npm run fetch
+
+      - name: Save data
+        uses: actions/cache/save@v4
+        with:
+          path: data/generated.json
+          key: generated-${{ github.run_id }}
+
+      - name: Build site
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
