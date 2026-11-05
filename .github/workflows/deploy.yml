@@ -49,6 +49,14 @@ jobs:
           REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
         run: npm run fetch
 
+      # Posts new codes / "ends tomorrow" reminders to the Telegram channel (skips if not configured).
+      - name: Telegram channel
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+        run: node scripts/telegram.mjs
+
       - name: Save data
         uses: actions/cache/save@v4
         with:
