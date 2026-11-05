@@ -83,3 +83,16 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Tell Bing/Yandex about updated pages right away (only when content was pushed or run manually).
+  indexnow:
+    needs: deploy
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Ping IndexNow
+        run: sleep 30 && node scripts/indexnow.mjs

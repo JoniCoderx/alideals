@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { faq } from '../src/content/faq.mjs';
 import { guides } from '../src/content/guides.mjs';
+import { eventContent } from '../src/content/events.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
 import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
@@ -79,6 +80,7 @@ function heDate(dateStr) {
 function heLong(dateStr) {
   return new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(dateStr + 'T12:00:00Z'));
 }
+const le = (w) => (/^[\dA-Za-z]/.test(String(w)) ? `ל-${w}` : `ל${w}`);
 const money = (n, cur = 'USD') => (cur === 'ILS' ? `₪${n}` : `$${n}`);
 const abs = (p) => site.url.replace(/\/$/, '') + p;
 const scriptJSON = (v) => JSON.stringify(v).replace(/[<\u2028\u2029]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
@@ -249,6 +251,8 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${canonical}">
+<link rel="alternate" hreflang="he-IL" href="${canonical}">
+<link rel="alternate" hreflang="x-default" href="${canonical}">
 <meta name="robots" content="${robots}">
 <meta property="og:type" content="${ogType}">
 <meta property="og:locale" content="${site.locale}">
@@ -299,7 +303,7 @@ ${body}
       <a href="/">קוד קופון אליאקספרס</a>
       <a href="/deals/">דילים מאליאקספרס</a>
       <a href="/new-user/">קופון למשתמש חדש</a>
-      ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ל${esc(e.name.split(' –')[0])}</a>`).join('')}
+      ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ${esc(le(e.name.split(' –')[0]))}</a>`).join('')}
     </div>
     <div>
       <h2>מדריכים</h2>
@@ -385,13 +389,10 @@ function homePage() {
     ? `${realCodes.length} קודי קופון פעילים לאליאקספרס לקונים מישראל, עד $${maxDiscount} הנחה, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`
     : `קודי הקופון וההנחות של אליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
-  const bc = breadcrumbs([{ name: 'קוד קופון אליאקספרס', url: '/' }]);
-
   const body = `
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-text">
-      ${bc.html}
       <h1>קוד קופון אליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
       <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים · עד <strong>$${maxDiscount}</strong> הנחה` : 'כל קודי ההנחה, מסודרים לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
       <ul class="trust">
@@ -473,7 +474,7 @@ ${hotProducts.length ? `
       <li>בשורה <b>"קוד מבצע"</b> מדביקים את הקוד ולוחצים "החל".</li>
       <li>בודקים שהסכום ירד, ורק אז משלמים.</li>
     </ol>
-    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון באליאקספרס</a>.</p>
+    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון באליאקספרס</a>. מזמינים בפעם הראשונה? ראו <a href="/new-user/">קופון אליאקספרס למשתמש חדש</a>.</p>
 
     <h2>למה הקוד לא נכנס?</h2>
     <ul>
@@ -495,7 +496,7 @@ ${expired.length ? `<section class="section"><div class="wrap narrow"><details c
 ${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה באליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
 <section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מאליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
-  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, bc.ld, faqLd(faq)] });
+  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)] });
 }
 
 function dealsIndexPage() {
@@ -548,36 +549,40 @@ function dealCategoryPage(cat) {
 function eventPage(ev) {
   const pathname = `/sale/${ev.slug}/`;
   const short = ev.name.split(' –')[0];
-  const bc = breadcrumbs([{ name: `קופונים ל${short}`, url: pathname }]);
+  const content = eventContent[ev.slug] || {};
+  const bc = breadcrumbs([{ name: `קופונים ${le(short)}`, url: pathname }]);
   const live = ev.start <= today && ev.end >= today;
   const upcoming = ev.start > today;
   const year = ev.start.slice(0, 4);
-  const evCoupons = coupons.filter((c) => !c.event || c.event === ev.slug);
+  const own = coupons.filter((c) => c.event === ev.slug);
+  const evCoupons = own.length ? own : coupons;
+  const faqItems = content.faq || [];
   const body = `
-<section class="hero"><div class="wrap">${bc.html}
-  <h1>קוד קופון אליאקספרס ל${esc(ev.name)} ${year}</h1>
-  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. נעדכן כאן את הקודים כשאליאקספרס תפרסם אותם. בינתיים, אלה הקודים הפעילים.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
+<section class="hero"><div class="wrap narrow">${bc.html}
+  <h1>קוד קופון אליאקספרס ${esc(le(ev.name))} ${year}</h1>
+  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשאליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
   ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
 <section class="section"><div class="wrap narrow">
-  <h2 class="section-title">${live ? 'קודי המבצע' : 'הקודים הפעילים כרגע'}</h2>
+  ${content.intro ? `<div class="prose">${content.intro}</div>` : ''}
+  <h2 class="section-title">${own.length && live ? `קודי ${esc(short)}` : 'הקודים הפעילים כרגע'}</h2>
   <div class="coupon-list">${evCoupons.map((c) => couponCard(c)).join('')}</div>
-  <h2 class="section-title">טבלת מדרגות</h2>
-  ${tierTable(evCoupons)}
+  ${evCoupons.length ? `<h2 class="section-title">טבלת מדרגות</h2>${tierTable(evCoupons)}` : ''}
   <div class="prose">
-    <h2>איך מתכוננים ל${esc(short)}</h2>
+    <h2>איך מתכוננים ${esc(le(short))}</h2>
     <ol>
       <li>מוסיפים לעגלה כבר עכשיו את המוצרים שרוצים. ככה רואים מה המחיר לפני המבצע ומה ההנחה האמיתית.</li>
-      <li>אוספים קופונים ממרכז הקופונים של אליאקספרס כשהם נפתחים.</li>
-      <li>בפתיחת המבצע חוזרים לעמוד הזה, בוחרים קוד לפי סכום העגלה ומשלמים.</li>
+      <li>אוספים קופונים ממרכז הקופונים של אליאקספרס כשהם נפתחים, ומטבעות באפליקציה.</li>
+      <li>בפתיחת המבצע חוזרים לעמוד הזה, בוחרים קוד לפי סכום העגלה ב<a href="/#calc">מחשבון</a> ומשלמים מהר, לפני שהמכסה נגמרת.</li>
     </ol>
-    <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a></p>
+    <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a> · <a href="/guides/how-to-use-aliexpress-coupon/">איך מפעילים קוד</a></p>
   </div>
+  ${faqItems.length ? `<h2 class="section-title">שאלות נפוצות על ${esc(short)}</h2><div class="faq">${faqItems.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>` : ''}
 </div></section>`;
   return layout({
-    title: `קוד קופון אליאקספרס ל${short} ${year} | ${site.name}`,
-    description: `קודי הקופון של אליאקספרס ל${ev.name} ${year} לקונים מישראל, לפי מדרגות, וטיפים להתכונן למבצע.`,
-    pathname, body, ld: [bc.ld],
+    title: `קוד קופון אליאקספרס ${le(short)} ${year} | ${site.name}`,
+    description: `קודי הקופון של אליאקספרס ${le(ev.name)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
+    pathname, body, ld: faqItems.length ? [bc.ld, faqLd(faqItems)] : [bc.ld],
   });
 }
 
@@ -738,5 +743,6 @@ await write('404.html', layout({
 await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
 await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 await write('.nojekyll', '');
+if (site.indexNowKey) await write(`${site.indexNowKey}.txt`, site.indexNowKey);
 
 console.log(`✓ built ${sitemap.length} indexable pages + ${goTargets.size} redirects → dist/  (${realCodes.length} real codes, ${coupons.length - realCodes.length} sample, ${community.length} community, ${allProducts().length} products)${SAMPLE_MODE ? '  [PREVIEW – noindex]' : ''}`);
