@@ -263,6 +263,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <meta property="og:image" content="${abs('/assets/og.png')}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(site.name)}: קוד קופון אליאקספרס לישראל">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ff3d2e">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
