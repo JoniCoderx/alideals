@@ -172,7 +172,7 @@ function productCard(p) {
   const off = parseInt(String(p.discount || ''), 10);
   return `
 <a class="product" href="${esc(link)}" ${OUT} data-product="${esc(p.id)}">
-  <div class="product-img"><img src="${esc(img)}_350x350.jpg" alt="${esc(p.title)}" loading="lazy" decoding="async" width="350" height="350"></div>
+  <div class="product-img"><img src="${esc(img)}_350x350.jpg" alt="${esc(p.title)}" loading="lazy" decoding="async" width="350" height="350" onerror="this.onerror=null;this.src=this.src.replace(/_350x350\.jpg$/,'')"></div>
   ${off > 0 && off < 100 ? `<span class="product-off">-${off}%</span>` : ''}
   <div class="product-info">
     <h3>${esc(p.title)}</h3>
@@ -241,7 +241,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
     ['/guides/', 'מדריכים'],
   ];
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
@@ -317,9 +317,9 @@ ${body}
   <div class="wrap footer-legal">© ${now.getFullYear()} ${esc(site.name)} · חלק מהקישורים באתר הם קישורי שותפים. <a href="/disclosure/">פרטים</a></div>
 </footer>
 <dialog class="modal" id="code-modal" aria-labelledby="modal-title">
-  <form method="dialog"><button class="modal-x" aria-label="סגירה">×</button></form>
+  <form method="dialog"><button type="submit" class="modal-x" aria-label="סגירה">×</button></form>
   <p class="modal-kicker" id="modal-kicker">הקוד הועתק ✓</p>
-  <h2 id="modal-title"></h2>
+  <h2 id="modal-title">הקוד שלכם</h2>
   <div class="modal-code"><code id="modal-code"></code><button class="btn btn-primary" type="button" id="modal-copy">${ICON.copy}<span>העתקה</span></button></div>
   <ol class="modal-steps">
     <li id="modal-step1">אליאקספרס נפתחה בלשונית חדשה</li>
@@ -557,7 +557,7 @@ function eventPage(ev) {
 <section class="hero"><div class="wrap">${bc.html}
   <h1>קוד קופון אליאקספרס ל${esc(ev.name)} ${year}</h1>
   <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. נעדכן כאן את הקודים כשאליאקספרס תפרסם אותם. בינתיים, אלה הקודים הפעילים.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
-  ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" aria-label="זמן עד תחילת המבצע"></div>` : ''}
+  ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
 <section class="section"><div class="wrap narrow">
   <h2 class="section-title">${live ? 'קודי המבצע' : 'הקודים הפעילים כרגע'}</h2>
@@ -659,7 +659,7 @@ function staticPage(pathname, h1, html, description) {
 function goPage(target) {
   // Interstitial redirect: noindex. Every outbound affiliate click flows through /go/<id>/.
   const t = safeLink(target, DEFAULT_LINK);
-  return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+  return `<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>מעבר לאליאקספרס…</title>
 <meta http-equiv="refresh" content="0;url=${esc(t)}">
 <style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#fffaf7;color:#1b1b24;text-align:center;padding:16px}a{color:#c20c33}</style>
@@ -692,17 +692,17 @@ for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), { lastmod
 await page('/about/', staticPage('/about/', 'אודות', `
 <p><b>${esc(site.name)}</b> הוא אתר עצמאי שמרכז את קודי הקופון של אליאקספרס לקונים מישראל, במקום אחד ובעברית.</p>
 <p>הקודים נאספים ממקורות רשמיים של אליאקספרס ומתוכנית השותפים שלה ומוזנים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
-<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name} ואיך האתר עובד.`));
+<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name}, מאיפה מגיעים קודי הקופון לאליאקספרס שמופיעים באתר, ואיך פונים אלינו עם קוד חדש או קוד שלא עובד.`));
 await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
 <p>${esc(site.name)} משתתף בתוכנית השותפים של אליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מאליאקספרס.</p>
 <p>העמלה לא מייקרת את המחיר שלכם, ולא משפיעה על סדר הקודים. הם מסודרים לפי סכום ההזמנה.</p>
 <p>האתר אינו קשור, מאושר או מופעל ע"י AliExpress או Alibaba Group. כל הסימנים המסחריים שייכים לבעליהם.</p>
-<p>התנאים של כל קוד נקבעים ע"י אליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות על קישורי השותפים באתר.'));
+<p>התנאים של כל קוד נקבעים ע"י אליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות: איך האתר מרוויח מקישורי השותפים של אליאקספרס, ולמה זה לא משנה את המחיר שלכם ולא את סדר הקודים.'));
 await page('/privacy/', staticPage('/privacy/', 'מדיניות פרטיות', `
 <p>האתר לא דורש הרשמה ולא אוסף פרטים מזהים.</p>
 ${site.analytics?.ga4Id ? '<p>אנחנו משתמשים ב-Google Analytics כדי להבין באופן אנונימי איך משתמשים באתר.</p>' : ''}
 <p>כשעוברים מהאתר לאליאקספרס, אליאקספרס עשויה לשמור עוגייה כדי לשייך את הרכישה לתוכנית השותפים. המדיניות של אליאקספרס חלה באתר שלה.</p>
-<p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר.'));
+<p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר: אילו נתונים נאספים (בלי הרשמה ובלי פרטים מזהים), ומה קורה כשעוברים לאליאקספרס.'));
 
 // Outbound redirect pages
 const goTargets = new Map([
