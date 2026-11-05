@@ -2,7 +2,7 @@
 
 אתר קופונים לאליאקספרס בעברית, לקונים מישראל. האתר מתעדכן לבד כל 3 שעות, וכל לחיצה על קופון עוברת דרך קישור השותפים שלכם.
 
-## השם והדומיין: קוד היום, `kodhayom.co.il`
+## השם והדומיין: קוד היום, `kodhayom.com`
 
 | | |
 |---|---|
@@ -11,9 +11,9 @@
 | **בולט מול המתחרים** | כמעט כל המתחרים נקראים "קופון משהו" (hacoupon, couponexpress, israelcoupon, freecoupon, coupon-code...). "קוד" כמעט לא תפוס כמותג. |
 | **SEO** | לגוגל אין בונוס לדומיין עם מילת מפתח (Exact Match Domain), כך שהשם לא חייב להכיל "אליאקספרס". את מילות המפתח, בכל האיותים (אליאקספרס, אלי אקספרס, עלי אקספרס), שמים בכותרות ובתוכן. |
 | **למה לא "אליקוד"** | alikod.com כבר פעיל: זה אתר קודי אליאקספרס מתחרה, שנרשם ביולי 2026. בנוסף, השם מסכן את חשבון השותפים ונשמע כמו "עלי-קוד" או "ליכוד". |
-| **מה פנוי (נבדק 5.11.2026)** | `kodhayom.co.il`, `kodhayom.il`, `kodhayom.com`, `codehayom.co.il`, `codehayom.com` |
+| **מה פנוי (נבדק 5.11.2026)** | `kodhayom.com`, `kodhayom.il`, `kodhayom.com`, `codehayom.co.il`, `codehayom.com` |
 
-**מה להירשם:** `kodhayom.co.il` כדומיין הראשי, ובנוסף `kodhayom.com`, `codehayom.co.il` ו-`קודהיום.co.il` עם הפניה לראשי. הבדיקה נעשתה דרך DNS ו-RDAP, ולפני התשלום כדאי לאשר שהדומיין פנוי אצל רשם מוסמך של ISOC-IL.
+**מה להירשם:** `kodhayom.com` כדומיין הראשי, ובנוסף `kodhayom.com`, `codehayom.co.il` ו-`קודהיום.co.il` עם הפניה לראשי. הבדיקה נעשתה דרך DNS ו-RDAP, ולפני התשלום כדאי לאשר שהדומיין פנוי אצל רשם מוסמך של ISOC-IL.
 
 ## איך זה עובד
 
@@ -66,11 +66,11 @@ r/AliExpressCode (Reddit)  ┘   (קודים מהקהילה, מסומנים "ל�
    | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USERNAME` | אפליקציה מסוג script ב-[reddit.com/prefs/apps](https://www.reddit.com/prefs/apps). שימו לב: לפי תנאי ה-Data API של Reddit, שימוש מסחרי דורש אישור מהם. בלי המפתחות האלה המקור פשוט מדולג. |
 
 5. **דומיין:**
-   * ב-Settings ← Pages ← Custom domain מזינים `kodhayom.co.il` ומסמנים Enforce HTTPS.
+   * ב-Settings ← Pages ← Custom domain מזינים `kodhayom.com` ומסמנים Enforce HTTPS.
    * אצל הרשם מגדירים 4 רשומות **A** לדומיין עצמו: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
    * מגדירים רשומת **CNAME** ל-`www` שמפנה ל-`<user>.github.io`.
 6. **אנליטיקס:** שמים את מזהה GA4 ב-`analytics.ga4Id`. האירועים `coupon_reveal`, `outbound_click` ו-`product_click` נשלחים אוטומטית.
-7. **Google Search Console:** מאמתים את הדומיין ומגישים את `https://kodhayom.co.il/sitemap.xml`.
+7. **Google Search Console:** מאמתים את הדומיין ומגישים את `https://kodhayom.com/sitemap.xml`.
 
 ## פיתוח מקומי
 

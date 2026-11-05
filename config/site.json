@@ -1,13 +1,13 @@
 {
   "name": "קוד היום",
   "nameEn": "KodHayom",
-  "domain": "kodhayom.co.il",
-  "url": "https://kodhayom.co.il",
+  "domain": "kodhayom.com",
+  "url": "https://kodhayom.com",
   "tagline": "קודי הקופון של אליאקספרס לישראל, מתעדכנים כל יום",
   "description": "קודי הקופון וההנחות של אליאקספרס לישראלים במקום אחד, מסודרים לפי סכום ההזמנה ומתעדכנים אוטומטית כמה פעמים ביום.",
   "locale": "he_IL",
   "currency": "ILS",
-  "contactEmail": "hello@kodhayom.co.il",
+  "contactEmail": "hello@kodhayom.com",
   "analytics": {
     "ga4Id": ""
   },
