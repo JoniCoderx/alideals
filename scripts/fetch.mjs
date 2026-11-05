@@ -16,6 +16,8 @@ const outFile = path.join(ROOT, 'data/generated.json');
 const previous = await readJSON(outFile, {});
 
 const out = {
+  // Keep every key from the previous run (e.g. telegram.posted state) – only the fields below are refreshed.
+  ...previous,
   fetchedAt: new Date().toISOString(),
   // Only moves forward when at least one source actually returned data.
   updatedAt: previous.updatedAt ?? null,

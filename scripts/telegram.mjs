@@ -155,6 +155,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const today = process.env.TODAY || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
   const { active } = mergeCoupons(manual.coupons, (gen.sheetCoupons || []).filter((c) => c.type !== 'deal'), today);
   const repost = process.env.TELEGRAM_REPOST === '1' || process.env.TELEGRAM_REPOST === 'true';
+  // Safety net: if the CI cache was lost, recover what was already posted from the live site.
+  if (!gen.telegram?.posted || !Object.keys(gen.telegram.posted).length) {
+    try {
+      const r = await fetch(`${site.url}/telegram-state.json`, { headers: { 'Cache-Control': 'no-cache' } });
+      if (r.ok) { gen.telegram = await r.json(); console.log(`• recovered telegram state from site (${Object.keys(gen.telegram.posted || {}).length} entries)`); }
+    } catch { /* first run */ }
+  }
   const { messages, posted } = planPosts({ coupons: active, events: manual.events || [], posted: gen.telegram?.posted || {}, today, siteUrl: site.url, repost: repost || !!previewDir });
 
   if (dry || previewDir) {
