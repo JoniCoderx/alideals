@@ -84,6 +84,13 @@
       go.href = goUrl(id);
       go.textContent = opened ? 'לא נפתח? מעבר לאליאקספרס' : 'מעבר לאליאקספרס';
       go.setAttribute('data-go', id);
+      var share = $('modal-share');
+      if (share) {
+        var site = window.SITE || { url: location.origin, name: '' };
+        var msg = site.name + ' קוד קופון לאליאקספרס: ' + code + ' (' + title + ')\n' + site.url + '/#c-' + id;
+        share.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+        share.setAttribute('data-share', id);
+      }
       if (!modal.open) modal.showModal();
     });
   }
@@ -91,6 +98,12 @@
   document.addEventListener('click', function (e) {
     var r = e.target.closest('[data-reveal]');
     if (r) { e.preventDefault(); reveal(r); return; }
+
+    var sh = e.target.closest('[data-share]');
+    if (sh) { track('share', { method: 'whatsapp', coupon_id: sh.getAttribute('data-share') }); return; }
+
+    var cur = e.target.closest('[data-cur]');
+    if (cur) { setCurrency(cur.getAttribute('data-cur')); return; }
 
     var g = e.target.closest('[data-go]');
     if (g) { track('outbound_click', { target_id: g.getAttribute('data-go') }); return; }
@@ -119,6 +132,90 @@
       if (empty) empty.hidden = shown > 0;
     }
   });
+
+  // Whole coupon card is a tap target (bigger hit area on mobile = more reveals).
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.target.closest('a,button,input,summary,dialog')) return;
+    var card = e.target.closest('.coupon[data-clickable]');
+    if (!card) return;
+    var btn = card.querySelector('[data-reveal]') || card.querySelector('[data-go]');
+    if (btn) btn.click();
+  });
+  document.querySelectorAll('.coupon').forEach(function (c) {
+    if (c.querySelector('[data-reveal],[data-go]')) c.setAttribute('data-clickable', '');
+  });
+
+  /* ---------- Cart calculator: the best code for the amount in the cart ---------- */
+  var calc = $('calc'), input = $('calc-amount'), out = $('calc-out');
+  var tiers = [];
+  try { tiers = JSON.parse(($('calc-data') || {}).textContent || '[]'); } catch (e) {}
+  var currency = 'USD';
+  try { currency = localStorage.getItem('calc-cur') || 'USD'; } catch (e) {}
+  var rate = calc ? Number(calc.getAttribute('data-rate')) || 3.7 : 3.7;
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var fmt = function (n) { return '$' + (Math.round(n * 100) / 100).toLocaleString('en-US'); };
+
+  function setCurrency(c) {
+    currency = c === 'ILS' ? 'ILS' : 'USD';
+    try { localStorage.setItem('calc-cur', currency); } catch (e) {}
+    document.querySelectorAll('[data-cur]').forEach(function (b) {
+      var on = b.getAttribute('data-cur') === currency;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (input) { input.placeholder = currency === 'ILS' ? 'למשל 220' : 'למשל 60'; runCalc(); }
+  }
+
+  function runCalc() {
+    if (!out || !tiers.length) return;
+    var raw = parseFloat(String(input.value).replace(/[^\d.]/g, ''));
+    if (!(raw > 0)) { out.textContent = 'הקלידו את סכום העגלה ונציג את הקוד הכי משתלם בשבילכם.'; return; }
+    var usd = currency === 'ILS' ? raw / rate : raw;
+    var fits = tiers.filter(function (t) { return t.m <= usd; });
+    var best = fits.sort(function (a, b) { return b.d - a.d; })[0];
+    var next = tiers.filter(function (t) { return t.m > usd && (!best || t.d > best.d); }).sort(function (a, b) { return a.m - b.m; })[0];
+    var approx = currency === 'ILS' ? ' (בערך ' + fmt(usd) + ')' : '';
+    var html = '';
+    if (best) {
+      var cta = best.s
+        ? '<a class="btn btn-primary" href="/go/' + esc(best.id) + '/" target="_blank" rel="nofollow sponsored noopener" data-go="' + esc(best.id) + '">לקבלת הקוד</a>'
+        : '<button class="btn btn-primary" type="button" data-reveal="' + esc(best.id) + '" data-code="' + esc(best.code) + '" data-title="' + esc(best.t) + '">הצג את הקוד</button>';
+      html += '<div class="best"><span>לעגלה שלכם' + esc(approx) + ': <b>' + fmt(best.d) + ' הנחה</b></span>' + cta + '</div>';
+    } else {
+      html += '<div>הקוד הראשון מתחיל בהזמנה מעל ' + fmt(tiers.reduce(function (m, t) { return Math.min(m, t.m); }, Infinity)) + esc(approx) + '.</div>';
+    }
+    if (next) {
+      var gap = next.m - usd;
+      if (!best || gap <= Math.max(10, usd * 0.35)) {
+        html += '<p class="upsell">💡 הוסיפו עוד ' + fmt(gap) + ' לעגלה וקבלו ' + fmt(next.d) + ' הנחה במקום ' + (best ? fmt(best.d) : '0') + '.</p>';
+      }
+    }
+    out.innerHTML = html;
+  }
+
+  if (input) {
+    var t;
+    input.addEventListener('input', function () { clearTimeout(t); t = setTimeout(runCalc, 120); });
+    input.addEventListener('change', function () { track('calc_use', { currency: currency }); });
+    setCurrency(currency);
+  }
+
+  /* ---------- Sticky mobile CTA: appears after the hero, hides at the calculator/footer ---------- */
+  var sticky = $('sticky-cta');
+  if (sticky && 'IntersectionObserver' in window) {
+    sticky.hidden = false;
+    var heroVisible = true, footVisible = false;
+    var upd = function () { sticky.classList.toggle('is-on', !heroVisible && !footVisible); };
+    new IntersectionObserver(function (en) { heroVisible = en[0].isIntersecting; upd(); }).observe(document.querySelector('.hero'));
+    var foot = document.querySelector('.site-footer');
+    if (foot) new IntersectionObserver(function (en) { footVisible = en[0].isIntersecting; upd(); }).observe(foot);
+    sticky.querySelector('a').addEventListener('click', function (e) {
+      e.preventDefault();
+      calc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function () { input && input.focus({ preventScroll: true }); }, 400);
+      track('sticky_cta');
+    });
+  }
 
   var mc = $('modal-copy');
   if (mc) mc.addEventListener('click', function () {

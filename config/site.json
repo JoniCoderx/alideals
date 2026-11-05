@@ -25,13 +25,94 @@
     "tiktok": ""
   },
   "dealCategories": [
-    { "slug": "electronics", "name": "אלקטרוניקה וגאדג'טים", "keywords": ["wireless earbuds", "smart watch", "power bank", "bluetooth speaker"] },
-    { "slug": "phone-accessories", "name": "אביזרים לסלולר", "keywords": ["iphone case", "magsafe charger", "usb c cable fast charging", "screen protector"] },
-    { "slug": "home", "name": "בית ומטבח", "keywords": ["kitchen gadgets", "led strip lights", "storage organizer", "robot vacuum"] },
-    { "slug": "fashion", "name": "אופנה ונעליים", "keywords": ["women dress", "men sneakers", "hoodie", "sunglasses"] },
-    { "slug": "kids", "name": "ילדים ותינוקות", "keywords": ["kids toys", "baby clothes", "educational toys", "lego compatible blocks"] },
-    { "slug": "tools", "name": "כלי עבודה ורכב", "keywords": ["cordless drill", "car accessories", "dash cam", "tool set"] },
-    { "slug": "beauty", "name": "יופי וטיפוח", "keywords": ["makeup brushes", "hair dryer brush", "nail art", "skincare tools"] },
-    { "slug": "sports", "name": "ספורט וטיולים", "keywords": ["camping gear", "fitness equipment", "cycling accessories", "yoga mat"] }
-  ]
+    {
+      "slug": "electronics",
+      "name": "אלקטרוניקה וגאדג'טים",
+      "keywords": [
+        "wireless earbuds",
+        "smart watch",
+        "power bank",
+        "bluetooth speaker"
+      ]
+    },
+    {
+      "slug": "phone-accessories",
+      "name": "אביזרים לסלולר",
+      "keywords": [
+        "iphone case",
+        "magsafe charger",
+        "usb c cable fast charging",
+        "screen protector"
+      ]
+    },
+    {
+      "slug": "home",
+      "name": "בית ומטבח",
+      "keywords": [
+        "kitchen gadgets",
+        "led strip lights",
+        "storage organizer",
+        "robot vacuum"
+      ]
+    },
+    {
+      "slug": "fashion",
+      "name": "אופנה ונעליים",
+      "keywords": [
+        "women dress",
+        "men sneakers",
+        "hoodie",
+        "sunglasses"
+      ]
+    },
+    {
+      "slug": "kids",
+      "name": "ילדים ותינוקות",
+      "keywords": [
+        "kids toys",
+        "baby clothes",
+        "educational toys",
+        "lego compatible blocks"
+      ]
+    },
+    {
+      "slug": "tools",
+      "name": "כלי עבודה ורכב",
+      "keywords": [
+        "cordless drill",
+        "car accessories",
+        "dash cam",
+        "tool set"
+      ]
+    },
+    {
+      "slug": "beauty",
+      "name": "יופי וטיפוח",
+      "keywords": [
+        "makeup brushes",
+        "hair dryer brush",
+        "nail art",
+        "skincare tools"
+      ]
+    },
+    {
+      "slug": "sports",
+      "name": "ספורט וטיולים",
+      "keywords": [
+        "camping gear",
+        "fitness equipment",
+        "cycling accessories",
+        "yoga mat"
+      ]
+    }
+  ],
+  "fx": {
+    "_comment": "שער גיבוי למחשבון העגלה. מתעדכן אוטומטית מ-open.er-api.com בכל בנייה.",
+    "usdIls": 3.7
+  },
+  "verification": {
+    "_comment": "קודי אימות מ-Google Search Console ו-Bing Webmaster Tools (רק הערך של content).",
+    "google": "",
+    "bing": ""
+  }
 }

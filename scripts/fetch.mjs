@@ -24,6 +24,7 @@ const out = {
   deals: previous.deals ?? {},
   promos: previous.promos ?? [],
   links: previous.links ?? {},
+  fx: previous.fx ?? null,
   log: [],
 };
 const log = (m) => { console.log(m); out.log.push(m); };
@@ -49,6 +50,15 @@ if (env.REDDIT_CLIENT_ID && env.REDDIT_CLIENT_SECRET && env.REDDIT_DISABLED !== 
     log(`✓ reddit: ${out.community.length} community codes`); success();
   } catch (e) { log(`✗ reddit: ${e.message} (keeping previous)`); }
 }
+
+// USD→ILS rate for the cart calculator (free, no key). Keeps the previous rate on failure.
+try {
+  const r = await fetch('https://open.er-api.com/v6/latest/USD');
+  const j = await r.json();
+  const ils = Number(j?.rates?.ILS);
+  if (ils > 2 && ils < 6) { out.fx = { usdIls: Math.round(ils * 100) / 100, at: out.fetchedAt }; log(`✓ fx: 1 USD = ${out.fx.usdIls} ILS`); }
+  else throw new Error('bad rate');
+} catch (e) { log(`✗ fx: ${e.message} (keeping previous)`); }
 
 // 3) AliExpress affiliate API
 if (env.ALI_APP_KEY && env.ALI_APP_SECRET) {

@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { faq } from '../src/content/faq.mjs';
 import { guides } from '../src/content/guides.mjs';
+import { minifyCSS, minifyHTML } from './minify.mjs';
 import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -90,13 +91,15 @@ async function readJSON(rel, fallback) {
 async function write(rel, content) {
   const f = path.join(DIST, rel);
   await fs.mkdir(path.dirname(f), { recursive: true });
-  await fs.writeFile(f, content);
+  await fs.writeFile(f, rel.endsWith('.html') ? minifyHTML(content) : content);
 }
 
 /* ------------------------------------------------------------------ */
 /* Components                                                          */
 /* ------------------------------------------------------------------ */
-const logo = (id) => `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff6a2b"/><stop offset="1" stop-color="#e8113a"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#${id})"/><path d="M11 14.5c0-1.4 1.1-2.5 2.5-2.5h13c1.4 0 2.5 1.1 2.5 2.5v2.2a3.3 3.3 0 0 0 0 6.6v2.2c0 1.4-1.1 2.5-2.5 2.5h-13a2.5 2.5 0 0 1-2.5-2.5v-2.2a3.3 3.3 0 0 0 0-6.6z" fill="#fff"/><path d="m17 23.5 6-7" stroke="#ff3d2e" stroke-width="2.2" stroke-linecap="round"/><circle cx="17.3" cy="17" r="1.6" fill="#ff3d2e"/><circle cx="22.7" cy="23" r="1.6" fill="#ff3d2e"/></svg>`;
+const logoMark = (id) => `<svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#ff7a2f"/><stop offset="1" stop-color="#e5122f"/></linearGradient></defs><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="url(#${id})"/><path d="M22 39 42 19" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="#fff"/><circle cx="41" cy="37" r="5" fill="#fff"/></svg>`;
+const wordmark = () => { const n = esc(site.name); return n.endsWith('!') ? `${n.slice(0, -1)}<span class="bang">!</span>` : n; };
+const logo = (id) => `${logoMark(id)}<span class="wordmark">${wordmark()}</span>`;
 const ICON = {
   check: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   clock: `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 6v4.3l2.8 1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
@@ -224,6 +227,9 @@ function topbar() {
 /* Layout                                                              */
 /* ------------------------------------------------------------------ */
 const BUILD_ID = Date.now().toString(36);
+const INLINE_CSS = minifyCSS(await fs.readFile(path.join(ROOT, 'src/assets/style.css'), 'utf8'));
+const USD_ILS = Number(gen.fx?.usdIls) || Number(site.fx?.usdIls) || 3.7;
+const verification = site.verification || {};
 
 function layout({ title, description, pathname, body, ld = [], noindex = false, ogType = 'website' }) {
   const canonical = abs(pathname);
@@ -257,10 +263,13 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <meta name="theme-color" content="#ff3d2e">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=${BUILD_ID}">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="alternate" type="application/atom+xml" title="${esc(site.name)}: קודים חדשים" href="/feed.xml">
+<link rel="preload" href="/assets/fonts/rubik-hebrew.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="format-detection" content="telephone=no">
+${verification.google ? `<meta name="google-site-verification" content="${esc(verification.google)}">` : ''}
+${verification.bing ? `<meta name="msvalidate.01" content="${esc(verification.bing)}">` : ''}
+<style>${INLINE_CSS}</style>
 ${ga ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga)}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',${scriptJSON(ga)});</script>` : ''}
 ${ld.map(jsonLd).join('\n')}
 </head>
@@ -270,7 +279,7 @@ ${SAMPLE_MODE ? '<div class="preview-bar" role="note">תצוגה מקדימה ע
 ${topbar()}
 <header class="site-header">
   <div class="wrap header-row">
-    <a class="brand" href="/" aria-label="${esc(site.name)}, דף הבית">${logo('lg-h')}<span>${esc(site.name)}</span></a>
+    <a class="brand" href="/" aria-label="${esc(site.name)}, דף הבית">${logo('lg-h')}</a>
     <nav class="main-nav" aria-label="ניווט ראשי">
       ${nav.map(([href, label]) => `<a href="${href}"${href === pathname ? ' aria-current="page"' : ''}>${esc(label)}</a>`).join('')}
     </nav>
@@ -282,13 +291,14 @@ ${body}
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div>
-      <a class="brand brand-footer" href="/">${logo('lg-f')}<span>${esc(site.name)}</span></a>
+      <a class="brand brand-footer" href="/">${logo('lg-f')}</a>
       <p>${esc(site.tagline)}. האתר עצמאי ואינו קשור לאליאקספרס או לקבוצת עליבאבא.</p>
     </div>
     <div>
       <h2>קופונים</h2>
       <a href="/">קוד קופון אליאקספרס</a>
       <a href="/deals/">דילים מאליאקספרס</a>
+      <a href="/new-user/">קופון למשתמש חדש</a>
       ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ל${esc(e.name.split(' –')[0])}</a>`).join('')}
     </div>
     <div>
@@ -317,7 +327,9 @@ ${body}
     <li>מדביקים את הקוד בשדה <b>"קוד מבצע"</b></li>
   </ol>
   <a class="btn btn-ghost btn-block" id="modal-go" href="/go/home/" ${OUT}>מעבר לאליאקספרס</a>
+  <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
+<script>window.SITE=${scriptJSON({ url: site.url, name: site.name })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
 </html>`;
@@ -328,11 +340,31 @@ ${body}
 /* ------------------------------------------------------------------ */
 const orgLd = {
   '@context': 'https://schema.org', '@type': 'Organization', name: site.name, alternateName: site.nameEn,
-  url: site.url, logo: abs('/assets/apple-touch-icon.png'),
+  url: site.url, logo: abs('/assets/icon-512.png'),
   ...(Object.values(site.social).some(Boolean) ? { sameAs: Object.values(site.social).filter(Boolean) } : {}),
 };
 const websiteLd = { '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, alternateName: site.nameEn, url: site.url, inLanguage: 'he-IL' };
 const faqLd = (items) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
+
+function calcWidget() {
+  const data = coupons.filter((c) => (c.currency || 'USD') === 'USD').map((c) => ({
+    id: c.id, d: c.discount, m: c.minOrder, s: c.sample || !c.code ? 1 : 0, code: c.sample ? '' : c.code,
+    t: `${money(c.discount)} הנחה מעל ${money(c.minOrder)}`,
+  }));
+  if (!data.length) return '';
+  return `<div class="calc" id="calc" data-rate="${USD_ILS}">
+    <label class="calc-label" for="calc-amount">כמה יש לכם בעגלה?</label>
+    <div class="calc-row">
+      <input id="calc-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="למשל 60" aria-describedby="calc-out">
+      <div class="seg" role="group" aria-label="מטבע">
+        <button type="button" class="is-on" aria-pressed="true" data-cur="USD">$</button>
+        <button type="button" aria-pressed="false" data-cur="ILS">₪</button>
+      </div>
+    </div>
+    <div class="calc-out" id="calc-out" aria-live="polite">הקלידו את סכום העגלה ונציג את הקוד הכי משתלם בשבילכם.</div>
+    <script type="application/json" id="calc-data">${scriptJSON(data)}</script>
+  </div>`;
+}
 
 function faqBlock(items) {
   return `<section class="section" id="faq"><div class="wrap narrow">
@@ -357,15 +389,18 @@ function homePage() {
 
   const body = `
 <section class="hero">
-  <div class="wrap">
-    ${bc.html}
-    <h1>קוד קופון אליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
-    <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים · עד <strong>$${maxDiscount}</strong> הנחה` : 'כל קודי ההנחה, מסודרים לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
-    <ul class="trust">
-      <li>${ICON.check} קודים שפג תוקפם יורדים מהרשימה</li>
-      <li>${ICON.check} מסודר לפי סכום העגלה</li>
-      <li>${ICON.check} חינם, בלי הרשמה</li>
-    </ul>
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      ${bc.html}
+      <h1>קוד קופון אליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
+      <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים · עד <strong>$${maxDiscount}</strong> הנחה` : 'כל קודי ההנחה, מסודרים לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
+      <ul class="trust">
+        <li>${ICON.check} קודים שפג תוקפם יורדים מהרשימה</li>
+        <li>${ICON.check} מסודר לפי סכום העגלה</li>
+        <li>${ICON.check} חינם, בלי הרשמה</li>
+      </ul>
+    </div>
+    ${calcWidget()}
     ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c) => `
       <button class="featured" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>
         <span class="f-amount">${money(c.discount, c.currency)}</span>
@@ -457,6 +492,7 @@ ${faqBlock(faq)}
 
 ${expired.length ? `<section class="section"><div class="wrap narrow"><details class="expired"><summary>קודים שפג תוקפם (${expired.length})</summary><ul>${expired.slice(0, 20).map((c) => `<li><s>${esc(c.code)}</s>: ${money(c.discount, c.currency)} מעל ${money(c.minOrder, c.currency)} (עד ${heDate(c.expires)})</li>`).join('')}</ul></details></div></section>` : ''}
 
+${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה באליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
 <section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מאליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
   return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, bc.ld, faqLd(faq)] });
@@ -545,6 +581,42 @@ function eventPage(ev) {
   });
 }
 
+function newUserPage() {
+  const pathname = '/new-user/';
+  const bc = breadcrumbs([{ name: 'קופון למשתמש חדש', url: pathname }]);
+  const nu = deals.find((d) => d.id === 'new-user');
+  const firstTier = coupons.filter((c) => c.code && !c.sample).sort((a, b) => a.minOrder - b.minOrder)[0];
+  const items = [
+    { q: 'מה מקבלים כמשתמש חדש באליאקספרס?', a: 'אליאקספרס נותנת למצטרפים חדשים הטבות שמשתנות מעת לעת, למשל קופון להזמנה ראשונה או מוצרים במחיר מוזל. ההטבה המדויקת מופיעה באתר אחרי ההרשמה.' },
+    { q: 'אפשר לשלב את הטבת ההצטרפות עם קוד קופון?', a: 'בדרך כלל אפשר להשתמש בקוד מבצע אחד בכל הזמנה, ולשלב אותו עם קופונים שנאספים לחשבון. אם ההטבה היא קופון שנאסף לחשבון, לרוב אפשר להוסיף עליו קוד מבצע מהרשימה שלנו.' },
+    { q: 'מי נחשב משתמש חדש?', a: 'מי שעדיין לא ביצע הזמנה באליאקספרס. פתיחת חשבון נוסף לאותו אדם עלולה להפר את התנאים של אליאקספרס, ולכן לא כדאי.' },
+  ];
+  const body = `
+<section class="hero hero-sm"><div class="wrap narrow">${bc.html}
+  <h1>קופון אליאקספרס למשתמש חדש</h1>
+  <p class="lead">מצטרפים לאליאקספרס בפעם הראשונה? כך מוציאים את המקסימום מההזמנה הראשונה.</p>
+  <a class="btn btn-primary" href="/go/${nu ? nu.id : 'home'}/" ${OUT} data-go="${nu ? nu.id : 'home'}">להטבות ההצטרפות באליאקספרס ${ICON.arrow}</a>
+</div></section>
+<section class="section"><div class="wrap narrow">
+  <div class="prose">
+    <h2>3 צעדים להזמנה הראשונה</h2>
+    <ol>
+      <li><b>נרשמים</b> דרך הכפתור למעלה ובודקים אילו הטבות הצטרפות פעילות כרגע.</li>
+      <li><b>ממלאים את העגלה</b> ובוחרים <a href="/#tiers">קוד מבצע לפי סכום העגלה</a>.</li>
+      <li><b>מדביקים את הקוד בתשלום</b> ובודקים שההנחה ירדה לפני שמשלמים.</li>
+    </ol>
+  </div>
+  ${firstTier ? `<h2 class="section-title">קוד שאפשר להוסיף כבר בהזמנה הראשונה</h2><div class="coupon-list">${couponCard(firstTier, { compact: true })}</div><p><a href="/">לכל קודי הקופון ←</a></p>` : ''}
+  <h2 class="section-title">שאלות על הזמנה ראשונה</h2>
+  <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
+</div></section>`;
+  return layout({
+    title: `קופון אליאקספרס למשתמש חדש ${monthYear}: הטבות להזמנה ראשונה | ${site.name}`,
+    description: 'מה מקבלים בהזמנה ראשונה באליאקספרס, איך משלבים את הטבת ההצטרפות עם קוד קופון, ומה כדאי לדעת לפני שנרשמים.',
+    pathname, body, ld: [bc.ld, faqLd(items)],
+  });
+}
+
 function guidesIndexPage() {
   const pathname = '/guides/';
   const bc = breadcrumbs([{ name: 'מדריכים', url: pathname }]);
@@ -570,7 +642,7 @@ function guidePage(g) {
   const ld = [bc.ld, {
     '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.description, inLanguage: 'he-IL',
     datePublished: g.published, dateModified: g.updated, author: { '@type': 'Organization', name: site.name, url: site.url },
-    publisher: { '@type': 'Organization', name: site.name, logo: { '@type': 'ImageObject', url: abs('/assets/apple-touch-icon.png') } },
+    publisher: { '@type': 'Organization', name: site.name, logo: { '@type': 'ImageObject', url: abs('/assets/icon-512.png') } },
     image: abs('/assets/og.png'), mainEntityOfPage: abs(pathname),
   }];
   return layout({ title: `${g.title} | ${site.name}`, description: g.description, pathname, body, ld, ogType: 'article' });
@@ -641,6 +713,23 @@ for (const c of [...coupons, ...expired]) goTargets.set(c.id, resolveLink(c));
 for (const c of community) goTargets.set(c.id, DEFAULT_LINK);
 for (const d of deals) goTargets.set(d.id, d.id === 'coupon-center' && !safeLink(d.link) ? goTargets.get('coupon-center') : resolveLink(d));
 for (const [id, target] of goTargets) await write(`go/${id}/index.html`, goPage(target));
+
+await page('/new-user/', newUserPage(), { lastmod: dataUpdated });
+
+// Atom feed of active codes: lets Telegram/WhatsApp bots and feed readers pick up new codes automatically.
+await write('feed.xml', `<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="he">
+  <title>${esc(site.name)}: קודי קופון לאליאקספרס</title>
+  <link href="${abs('/')}"/><link rel="self" href="${abs('/feed.xml')}"/>
+  <id>${abs('/')}</id><updated>${dataUpdated}T00:00:00Z</updated>
+${(SAMPLE_MODE ? [] : realCodes).map((c) => `  <entry><title>${esc(`${couponTitle(c)}: ${c.code}`)}</title><link href="${abs(`/#c-${c.id}`)}"/><id>${abs(`/#c-${c.id}-${c.code}`)}</id><updated>${(c.verified || dataUpdated)}T00:00:00Z</updated><summary>${esc(`קוד ${c.code}: ${couponTitle(c)}${c.expires ? `, בתוקף עד ${heDate(c.expires)}` : ''}`)}</summary></entry>`).join('\n')}
+</feed>
+`);
+await write('site.webmanifest', JSON.stringify({
+  name: `${site.name} | קודי קופון לאליאקספרס`, short_name: site.name, lang: 'he', dir: 'rtl', start_url: '/', display: 'standalone',
+  background_color: '#fffaf7', theme_color: '#e5122f',
+  icons: [{ src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' }, { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png' }],
+}));
 
 await write('404.html', layout({
   title: `הדף לא נמצא | ${site.name}`, description: 'הדף לא נמצא', pathname: '/404.html', noindex: true,
