@@ -1,4 +1,4 @@
-// קוד היום: reveal codes, copy, open affiliate link, filters, countdown, client-side expiry. No dependencies.
+// יש דיל: reveal codes, copy, open affiliate link, filters, countdown, client-side expiry. No dependencies.
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };

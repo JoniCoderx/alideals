@@ -1,4 +1,4 @@
-// Static site generator for קוד היום. Zero dependencies.
+// Static site generator for יש דיל. Zero dependencies.
 // Reads config/site.json + data/coupons.json + data/generated.json → writes dist/
 //
 // BUILD_STRICT=1 (set in CI) refuses to build while the site still has sample codes or a placeholder
