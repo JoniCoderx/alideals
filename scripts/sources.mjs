@@ -1,6 +1,6 @@
 // Coupon data sources: local JSON, Google Sheets CSV, Reddit community (r/AliExpressCode).
 
-const UA = 'web:kodhayom-coupon-bot:1.0 (coupon aggregator)';
+const UA = `web:kodhayom-coupon-bot:1.1 (by /u/${process.env.REDDIT_USERNAME || 'kodhayom'})`;
 
 /* ---------------- CSV (Google Sheets "Publish to web" -> CSV) ---------------- */
 export function parseCSV(text) {
@@ -28,25 +28,40 @@ export function parseCSV(text) {
   return rows.slice(1).map((r) => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? '').trim()])));
 }
 
+export function sheetRowToCoupon(r) {
+  const type = (r.type || 'code').toLowerCase() === 'deal' ? 'deal' : 'code';
+  const featured = r.featured ? /^(1|true|yes|כן)$/i.test(r.featured) : undefined;
+  return compact({
+    id: r.id,
+    code: (r.code || '').toUpperCase().replace(/\s+/g, ''),
+    title: r.title,
+    text: r.text,
+    badge: r.badge,
+    discount: num(r.discount),
+    minOrder: num(r.min_order ?? r.minorder),
+    currency: r.currency ? r.currency.toUpperCase() : undefined,
+    expires: r.expires,
+    starts: r.starts,
+    verified: r.verified,
+    type,
+    link: r.link,
+    note: r.note,
+    featured,
+    sample: false, // anything in the sheet is real data
+    source: 'sheet',
+  });
+}
+
 export async function fetchSheetCoupons(url) {
   const res = await fetch(url, { headers: { 'User-Agent': UA } });
   if (!res.ok) throw new Error(`Sheet HTTP ${res.status}`);
-  return parseCSV(await res.text()).map((r) => ({
-    id: r.id || undefined,
-    code: r.code,
-    title: r.title,
-    discount: num(r.discount),
-    minOrder: num(r.min_order ?? r.minorder),
-    currency: r.currency || 'USD',
-    expires: r.expires || '',
-    starts: r.starts || '',
-    type: r.type || 'code',
-    link: r.link || '',
-    note: r.note || '',
-    featured: /^(1|true|yes|כן)$/i.test(r.featured || ''),
-    tier: r.tier || '',
-    source: 'sheet',
-  })).filter((c) => c.code || c.type === 'deal');
+  const text = await res.text();
+  if (/^\s*<(!doctype|html)/i.test(text)) throw new Error('Sheet URL returned HTML – use File → Share → Publish to web → CSV');
+  return parseCSV(text).map(sheetRowToCoupon).filter((c) => c.code || c.type === 'deal');
+}
+
+function compact(o) {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== ''));
 }
 
 /* ---------------- Reddit: r/AliExpressCode ---------------- */

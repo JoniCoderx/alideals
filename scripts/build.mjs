@@ -1,14 +1,19 @@
 // Static site generator for קוד היום. Zero dependencies.
 // Reads config/site.json + data/coupons.json + data/generated.json → writes dist/
+//
+// BUILD_STRICT=1 (set in CI) refuses to build while the site still has sample codes or a placeholder
+// affiliate link, so placeholder data can never go live.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { faq } from '../src/content/faq.mjs';
 import { guides } from '../src/content/guides.mjs';
+import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
 const TZ = 'Asia/Jerusalem';
+const COMMUNITY_MAX_AGE_DAYS = 21;
 
 const site = await readJSON('config/site.json');
 const manual = await readJSON('data/coupons.json');
@@ -17,47 +22,47 @@ const gen = await readJSON('data/generated.json', {});
 const now = new Date();
 const today = ymd(now);
 const monthYear = new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric', timeZone: TZ }).format(now);
-const updatedHe = new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: TZ }).format(new Date(gen.updatedAt ?? now));
 
 /* ------------------------------------------------------------------ */
 /* Data model                                                          */
 /* ------------------------------------------------------------------ */
+const DEFAULT_LINK = site.affiliate.defaultLink;
 const links = gen.links || {};
 const resolveLink = (item) =>
-  item.link || (item.landing && links[item.landing]) || site.affiliate.defaultLink;
+  safeLink(item.link, '') || safeLink(item.landing && links[item.landing], '') || DEFAULT_LINK;
 
-export function mergeCoupons(manualList, sheetList, dateStr) {
-  const byKey = new Map();
-  for (const c of [...manualList, ...(sheetList || [])]) {
-    const key = c.id || `${c.code}-${c.discount}-${c.minOrder}`;
-    byKey.set(key, { ...(byKey.get(key) || {}), ...c, id: slug(key) });
-  }
-  const all = [...byKey.values()].filter((c) => c.type !== 'deal');
-  const active = all.filter((c) => !c.expires || c.expires >= dateStr).filter((c) => !c.starts || c.starts <= dateStr);
-  const expired = all.filter((c) => c.expires && c.expires < dateStr);
-  active.sort((a, b) => (a.minOrder ?? 0) - (b.minOrder ?? 0) || (b.discount ?? 0) - (a.discount ?? 0));
-  return { active, expired };
-}
-
-const { active: coupons, expired } = mergeCoupons(manual.coupons, gen.sheetCoupons, today);
-const deals = [...manual.deals, ...(gen.sheetCoupons || []).filter((c) => c.type === 'deal')].map((d) => ({ ...d, id: slug(d.id || d.title) }));
+const sheet = gen.sheetCoupons || [];
+const { active: coupons, expired, invalid } = mergeCoupons(manual.coupons, sheet.filter((c) => c.type !== 'deal'), today);
+const deals = mergeDeals(manual.deals, sheet.filter((c) => c.type === 'deal'));
 const knownCodes = new Set(coupons.map((c) => c.code));
-const community = (gen.community || []).filter((c) => !knownCodes.has(c.code)).map((c) => ({ ...c, id: slug(`r-${c.code}-${c.discount}`) }));
+const community = (gen.community || [])
+  .filter((c) => c.foundAt && daysBetween(c.foundAt, today) <= COMMUNITY_MAX_AGE_DAYS)
+  .filter((c) => !knownCodes.has(c.code))
+  .map((c) => ({ ...c, id: slug(`r-${c.code}-${c.discount}`) }));
 const realCodes = coupons.filter((c) => !c.sample);
-const maxDiscount = Math.max(0, ...(realCodes.length ? realCodes : coupons).map((c) => c.discount || 0));
+const maxDiscount = Math.max(0, ...realCodes.map((c) => c.discount || 0));
+const featuredCoupons = coupons.filter((c) => c.featured && c.code).slice(0, 3);
 const activeEvent = (manual.events || []).find((e) => e.start <= addDays(today, 7) && e.end >= today);
 
-if (!realCodes.length) console.warn('⚠  All coupons are samples – edit data/coupons.json or connect a Google Sheet.');
-if (/REPLACE/.test(site.affiliate.defaultLink)) console.warn('⚠  affiliate.defaultLink is still a placeholder in config/site.json');
+// "Updated" = the last time coupon data really changed: manual edit date or a successful fetch.
+const dataUpdated = [normDate(manual.updated), gen.updatedAt ? ymd(new Date(gen.updatedAt)) : null].filter(Boolean).sort().pop() || today;
+const updatedHe = heLong(dataUpdated);
+
+const placeholderLink = !safeLink(DEFAULT_LINK) || /REPLACE/i.test(DEFAULT_LINK);
+const SAMPLE_MODE = !realCodes.length || placeholderLink;
+for (const i of invalid) console.warn(`⚠  coupon "${i.id}" skipped: invalid ${i.field}${i.value ? ` (${i.value})` : ''}`);
+if (!realCodes.length) console.warn('⚠  No real coupon codes yet (all are sample) – edit data/coupons.json or connect a Google Sheet.');
+if (placeholderLink) console.warn('⚠  affiliate.defaultLink in config/site.json is not a valid AliExpress affiliate link yet.');
+if (SAMPLE_MODE && process.env.BUILD_STRICT === '1') {
+  console.error('✗ BUILD_STRICT: refusing to publish sample data. Add real codes + your Portals link (see README).');
+  process.exit(1);
+}
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-function slug(s) {
-  return String(s).toLowerCase().replace(/[^a-z0-9\u0590-\u05ff]+/g, '-').replace(/^-|-$/g, '');
 }
 function ymd(d) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(d);
@@ -70,12 +75,14 @@ function addDays(dateStr, n) {
 function heDate(dateStr) {
   return new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(dateStr + 'T12:00:00Z'));
 }
-function daysLeft(dateStr) {
-  return Math.round((new Date(dateStr + 'T23:59:59Z') - new Date(today + 'T00:00:00Z')) / 86400000);
+function heLong(dateStr) {
+  return new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(dateStr + 'T12:00:00Z'));
 }
 const money = (n, cur = 'USD') => (cur === 'ILS' ? `₪${n}` : `$${n}`);
 const abs = (p) => site.url.replace(/\/$/, '') + p;
-const jsonLd = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
+const scriptJSON = (v) => JSON.stringify(v).replace(/[<\u2028\u2029]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+const jsonLd = (obj) => `<script type="application/ld+json">${scriptJSON(obj)}</script>`;
+const OUT = 'target="_blank" rel="nofollow sponsored noopener"';
 async function readJSON(rel, fallback) {
   try { return JSON.parse(await fs.readFile(path.join(ROOT, rel), 'utf8')); }
   catch (e) { if (fallback !== undefined) return fallback; throw e; }
@@ -89,48 +96,55 @@ async function write(rel, content) {
 /* ------------------------------------------------------------------ */
 /* Components                                                          */
 /* ------------------------------------------------------------------ */
+const logo = (id) => `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff6a2b"/><stop offset="1" stop-color="#e8113a"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#${id})"/><path d="M11 14.5c0-1.4 1.1-2.5 2.5-2.5h13c1.4 0 2.5 1.1 2.5 2.5v2.2a3.3 3.3 0 0 0 0 6.6v2.2c0 1.4-1.1 2.5-2.5 2.5h-13a2.5 2.5 0 0 1-2.5-2.5v-2.2a3.3 3.3 0 0 0 0-6.6z" fill="#fff"/><path d="m17 23.5 6-7" stroke="#ff3d2e" stroke-width="2.2" stroke-linecap="round"/><circle cx="17.3" cy="17" r="1.6" fill="#ff3d2e"/><circle cx="22.7" cy="23" r="1.6" fill="#ff3d2e"/></svg>`;
 const ICON = {
-  logo: `<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="url(#lg)"/><path d="M11 14.5c0-1.4 1.1-2.5 2.5-2.5h13c1.4 0 2.5 1.1 2.5 2.5v2.2a3.3 3.3 0 0 0 0 6.6v2.2c0 1.4-1.1 2.5-2.5 2.5h-13a2.5 2.5 0 0 1-2.5-2.5v-2.2a3.3 3.3 0 0 0 0-6.6z" fill="#fff"/><path d="m17 23.5 6-7" stroke="#ff3d2e" stroke-width="2.2" stroke-linecap="round"/><circle cx="17.3" cy="17" r="1.6" fill="#ff3d2e"/><circle cx="22.7" cy="23" r="1.6" fill="#ff3d2e"/><defs><linearGradient id="lg" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff6a2b"/><stop offset="1" stop-color="#e8113a"/></linearGradient></defs></svg>`,
   check: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   clock: `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 6v4.3l2.8 1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   copy: `<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 4.5H5.5a1 1 0 0 0-1 1V13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   arrow: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 5 7 10l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 };
 
+const couponTitle = (c) => c.title || `${money(c.discount, c.currency)} הנחה בקנייה מעל ${money(c.minOrder, c.currency)}`;
+
+function revealAttrs(c, title = couponTitle(c)) {
+  return `data-reveal="${c.id}" data-code="${esc(c.code)}" data-title="${esc(title)}"`;
+}
+
 function couponCard(c, { compact = false } = {}) {
   const cur = c.currency || 'USD';
-  const dl = c.expires ? daysLeft(c.expires) : null;
-  const urgency = !c.sample && dl !== null && dl <= 3 ? `<span class="tag tag-hot">${ICON.clock} נגמר ${dl <= 0 ? 'היום' : dl === 1 ? 'מחר' : `בעוד ${dl} ימים`}</span>` : '';
-  const title = c.title || `${money(c.discount, cur)} הנחה בקנייה מעל ${money(c.minOrder, cur)}`;
+  const dl = c.expires ? daysBetween(today, c.expires) : null;
+  const urgency = !c.sample && dl !== null && dl <= 3
+    ? `<span class="tag tag-hot">${ICON.clock} ${dl <= 0 ? 'נגמר היום' : dl === 1 ? 'נגמר מחר' : `נגמר בעוד ${dl} ימים`}</span>` : '';
+  const title = couponTitle(c);
   const hidden = c.sample || !c.code;
   const masked = hidden ? '' : '•'.repeat(Math.max(4, c.code.length - 2)) + `<b>${esc(c.code.slice(-2))}</b>`;
   const isCommunity = c.source === 'community';
+  let status = '';
+  if (isCommunity) status = `<span class="tag tag-muted">מהקהילה · לא נבדק${c.foundAt ? ` · ${heDate(c.foundAt)}` : ''}</span>`;
+  else if (c.sample) status = `<span class="tag tag-muted">דוגמה</span>`;
+  else if (c.verified) status = `<span class="tag tag-ok">${ICON.check} נבדק ${heDate(c.verified)}</span>`;
   return `
-<article class="coupon${c.featured ? ' is-featured' : ''}${isCommunity ? ' is-community' : ''}" id="c-${c.id}" data-id="${c.id}">
-  <div class="coupon-value">
+<article class="coupon${c.featured ? ' is-featured' : ''}${isCommunity ? ' is-community' : ''}" id="c-${c.id}" data-min="${c.minOrder ?? 0}"${c.expires ? ` data-expires="${c.expires}"` : ''}>
+  <div class="coupon-value" aria-hidden="true">
     <span class="v-amount">${money(c.discount, cur)}</span>
     <span class="v-label">הנחה</span>
   </div>
   <div class="coupon-body">
     <h3 class="coupon-title">${esc(title)}</h3>
     <div class="coupon-meta">
-      ${isCommunity
-        ? `<span class="tag tag-muted">מהקהילה · לא אומת</span>`
-        : c.sample ? `<span class="tag">דרך מרכז הקופונים</span>`
-        : c.verified ? `<span class="tag tag-ok">${ICON.check} נבדק ${heDate(c.verified)}</span>`
-        : `<span class="tag tag-ok">${ICON.check} עודכן ${esc(updatedHe)}</span>`}
+      ${status}
       ${c.expires && !c.sample ? `<span class="tag">בתוקף עד ${heDate(c.expires)}</span>` : ''}
       ${urgency}
-      ${c.featured ? '<span class="tag tag-star">הכי משתלם</span>' : ''}
+      ${c.featured && !c.sample ? '<span class="tag tag-star">מומלץ</span>' : ''}
     </div>
     ${c.note && !compact ? `<p class="coupon-note">${esc(c.note)}</p>` : ''}
   </div>
   <div class="coupon-cta">
     ${hidden
-      ? `<a class="btn btn-primary" href="/go/${c.id}/" target="_blank" rel="nofollow sponsored noopener" data-go="${c.id}">לקבלת הקופון ${ICON.arrow}</a>`
-      : `<button class="btn btn-reveal" type="button" data-reveal="${c.id}" data-code="${esc(c.code)}" data-title="${esc(title)}">
+      ? `<a class="btn btn-primary" href="/go/${c.id}/" ${OUT} data-go="${c.id}">למרכז הקופונים ${ICON.arrow}</a>`
+      : `<button class="btn btn-reveal" type="button" ${revealAttrs(c, title)} aria-label="הצג קוד: ${esc(title)}">
           <span class="reveal-mask" aria-hidden="true">${masked}</span>
-          <span class="reveal-label">הצג קוד</span>
+          <span class="reveal-label" aria-hidden="true">הצג קוד</span>
         </button>`}
   </div>
 </article>`;
@@ -142,38 +156,45 @@ function dealCard(d) {
   ${d.badge ? `<span class="tag tag-star">${esc(d.badge)}</span>` : ''}
   <h3>${esc(d.title)}</h3>
   <p>${esc(d.text || '')}</p>
-  <a class="btn btn-ghost" href="/go/${d.id}/" target="_blank" rel="nofollow sponsored noopener" data-go="${d.id}">למבצע ${ICON.arrow}</a>
+  <a class="btn btn-ghost" href="/go/${d.id}/" ${OUT} data-go="${d.id}">למבצע ${ICON.arrow}</a>
 </article>`;
 }
 
 function productCard(p) {
+  const link = safeLink(p.link, '');
+  const img = safeLink(p.image, '');
+  if (!link || !img) return '';
   const price = p.price != null ? `₪${p.price.toFixed(2)}` : '';
   const orig = p.originalPrice && p.originalPrice > (p.price || 0) ? `<s>₪${p.originalPrice.toFixed(2)}</s>` : '';
+  const off = parseInt(String(p.discount || ''), 10);
   return `
-<a class="product" href="${esc(p.link)}" target="_blank" rel="nofollow sponsored noopener" data-product="${esc(p.id)}">
-  <div class="product-img"><img src="${esc(p.image)}_350x350.jpg" alt="${esc(p.title)}" loading="lazy" decoding="async" width="350" height="350"></div>
-  ${p.discount ? `<span class="product-off">-${esc(String(p.discount).replace('%', ''))}%</span>` : ''}
+<a class="product" href="${esc(link)}" ${OUT} data-product="${esc(p.id)}">
+  <div class="product-img"><img src="${esc(img)}_350x350.jpg" alt="${esc(p.title)}" loading="lazy" decoding="async" width="350" height="350"></div>
+  ${off > 0 && off < 100 ? `<span class="product-off">-${off}%</span>` : ''}
   <div class="product-info">
     <h3>${esc(p.title)}</h3>
     <div class="product-price"><strong>${price}</strong>${orig}</div>
-    <div class="product-sub">${p.sold ? `${p.sold.toLocaleString('he-IL')} נמכרו` : ''}${p.rating ? ` · ${esc(p.rating)} שביעות רצון` : ''}</div>
+    <div class="product-sub">${p.sold ? `${Number(p.sold).toLocaleString('he-IL')} נמכרו` : ''}${p.rating ? ` · ${esc(p.rating)} שביעות רצון` : ''}</div>
   </div>
 </a>`;
 }
 
 function tierTable(list) {
-  const rows = list.filter((c) => c.minOrder != null);
-  if (!rows.length) return '';
+  const tiers = groupTiers(list.filter((c) => c.minOrder != null));
+  if (!tiers.length) return '';
   return `
 <div class="table-wrap">
 <table class="tiers">
-  <caption>מדרגות קודי ההנחה של אליאקספרס – ${esc(monthYear)}</caption>
-  <thead><tr><th>סכום בעגלה</th><th>הנחה</th><th>קוד</th></tr></thead>
+  <caption>מדרגות קודי ההנחה של אליאקספרס, ${esc(monthYear)}</caption>
+  <thead><tr><th scope="col">סכום בעגלה</th><th scope="col">הנחה</th><th scope="col">קוד</th></tr></thead>
   <tbody>
-  ${rows.map((c, i) => {
-    const next = rows[i + 1];
-    const range = next ? `${money(c.minOrder)} עד ${money(+(next.minOrder - 0.01).toFixed(2))}` : `${money(c.minOrder)} ומעלה`;
-    return `<tr><td>${range}</td><td><strong>${money(c.discount)}</strong></td><td>${c.sample ? `<a href="/go/${c.id}/" target="_blank" rel="nofollow sponsored noopener" data-go="${c.id}">לקבלת הקוד</a>` : `<button class="code-chip" type="button" data-reveal="${c.id}" data-code="${esc(c.code)}" data-title="${esc(`${money(c.discount)} הנחה מעל ${money(c.minOrder)}`)}">${esc(c.code)}</button>`}</td></tr>`;
+  ${tiers.map((t, i) => {
+    const next = tiers.slice(i + 1).find((n) => n.currency === t.currency);
+    const range = next ? `${money(t.minOrder, t.currency)} עד ${money(+(next.minOrder - 0.01).toFixed(2), t.currency)}` : `${money(t.minOrder, t.currency)} ומעלה`;
+    const cell = t.items.map((c) => c.sample || !c.code
+      ? `<a href="/go/${c.id}/" ${OUT} data-go="${c.id}">למרכז הקופונים</a>`
+      : `<button class="code-chip" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)} aria-label="העתק קוד ${esc(c.code)}">${esc(c.code)}</button>`).join(' ');
+    return `<tr><td>${range}</td><td><strong>${money(t.discount, t.currency)}</strong></td><td>${cell}</td></tr>`;
   }).join('')}
   </tbody>
 </table>
@@ -188,15 +209,29 @@ function breadcrumbs(items) {
   };
 }
 
+function topbar() {
+  if (!activeEvent) return '';
+  const live = activeEvent.start <= today;
+  const short = activeEvent.name.split(' –')[0];
+  const days = daysBetween(today, activeEvent.start);
+  const text = live
+    ? `🔥 ${esc(activeEvent.name)}: המבצע פעיל עכשיו, הקודים כאן`
+    : `⏳ ${esc(short)} מתחיל ${days === 1 ? 'מחר' : `בעוד ${days} ימים`}. כך מתכוננים`;
+  return `<div class="topbar"><a href="/sale/${activeEvent.slug}/">${text} ←</a></div>`;
+}
+
 /* ------------------------------------------------------------------ */
 /* Layout                                                              */
 /* ------------------------------------------------------------------ */
+const BUILD_ID = Date.now().toString(36);
+
 function layout({ title, description, pathname, body, ld = [], noindex = false, ogType = 'website' }) {
   const canonical = abs(pathname);
   const ga = site.analytics?.ga4Id;
+  const robots = noindex || SAMPLE_MODE ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1';
   const nav = [
     ['/', 'קודי קופון'],
-    ['/deals/', 'דילים חמים'],
+    ['/deals/', 'דילים'],
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
     ['/guides/', 'מדריכים'],
   ];
@@ -208,7 +243,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${canonical}">
-${noindex ? '<meta name="robots" content="noindex,nofollow">' : '<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">'}
+<meta name="robots" content="${robots}">
 <meta property="og:type" content="${ogType}">
 <meta property="og:locale" content="${site.locale}">
 <meta property="og:site_name" content="${esc(site.name)}">
@@ -216,6 +251,8 @@ ${noindex ? '<meta name="robots" content="noindex,nofollow">' : '<meta name="rob
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${canonical}">
 <meta property="og:image" content="${abs('/assets/og.png')}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ff3d2e">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -224,15 +261,16 @@ ${noindex ? '<meta name="robots" content="noindex,nofollow">' : '<meta name="rob
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=${BUILD_ID}">
-${ga ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga)}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(ga)}');</script>` : ''}
+${ga ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga)}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',${scriptJSON(ga)});</script>` : ''}
 ${ld.map(jsonLd).join('\n')}
 </head>
 <body>
 <a class="skip" href="#main">דלג לתוכן</a>
-${activeEvent ? `<div class="topbar"><a href="/sale/${activeEvent.slug}/">🔥 ${esc(activeEvent.name)} – כל הקודים של המבצע כבר כאן ←</a></div>` : ''}
+${SAMPLE_MODE ? '<div class="preview-bar" role="note">תצוגה מקדימה עם נתוני דוגמה. האתר לא יעלה לאוויר עד שיוזנו קודים אמיתיים וקישור שותפים.</div>' : ''}
+${topbar()}
 <header class="site-header">
   <div class="wrap header-row">
-    <a class="brand" href="/" aria-label="${esc(site.name)} – דף הבית">${ICON.logo}<span>${esc(site.name)}</span></a>
+    <a class="brand" href="/" aria-label="${esc(site.name)}, דף הבית">${logo('lg-h')}<span>${esc(site.name)}</span></a>
     <nav class="main-nav" aria-label="ניווט ראשי">
       ${nav.map(([href, label]) => `<a href="${href}"${href === pathname ? ' aria-current="page"' : ''}>${esc(label)}</a>`).join('')}
     </nav>
@@ -244,18 +282,18 @@ ${body}
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div>
-      <a class="brand brand-footer" href="/">${ICON.logo}<span>${esc(site.name)}</span></a>
-      <p>${esc(site.tagline)}. האתר אינו קשור רשמית לאליאקספרס או לקבוצת עליבאבא.</p>
+      <a class="brand brand-footer" href="/">${logo('lg-f')}<span>${esc(site.name)}</span></a>
+      <p>${esc(site.tagline)}. האתר עצמאי ואינו קשור לאליאקספרס או לקבוצת עליבאבא.</p>
     </div>
     <div>
       <h2>קופונים</h2>
       <a href="/">קוד קופון אליאקספרס</a>
-      <a href="/deals/">דילים חמים</a>
+      <a href="/deals/">דילים מאליאקספרס</a>
       ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ל${esc(e.name.split(' –')[0])}</a>`).join('')}
     </div>
     <div>
       <h2>מדריכים</h2>
-      ${guides.slice(0, 5).map((g) => `<a href="/guides/${g.slug}/">${esc(g.title.split(' –')[0])}</a>`).join('')}
+      ${guides.slice(0, 5).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
     </div>
     <div>
       <h2>האתר</h2>
@@ -263,28 +301,27 @@ ${body}
       <a href="/disclosure/">גילוי נאות</a>
       <a href="/privacy/">פרטיות</a>
       ${site.social.telegram ? `<a href="${esc(site.social.telegram)}" rel="noopener">ערוץ טלגרם</a>` : ''}
-      ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">קבוצת וואטסאפ</a>` : ''}
+      ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">ערוץ וואטסאפ</a>` : ''}
     </div>
   </div>
-  <div class="wrap footer-legal">© ${now.getFullYear()} ${esc(site.name)} · חלק מהקישורים הם קישורי שותפים. <a href="/disclosure/">פרטים</a></div>
+  <div class="wrap footer-legal">© ${now.getFullYear()} ${esc(site.name)} · חלק מהקישורים באתר הם קישורי שותפים. <a href="/disclosure/">פרטים</a></div>
 </footer>
 <dialog class="modal" id="code-modal" aria-labelledby="modal-title">
-  <form method="dialog"><button class="modal-x" aria-label="סגור">×</button></form>
-  <p class="modal-kicker">הקוד הועתק ✓</p>
+  <form method="dialog"><button class="modal-x" aria-label="סגירה">×</button></form>
+  <p class="modal-kicker" id="modal-kicker">הקוד הועתק ✓</p>
   <h2 id="modal-title"></h2>
-  <div class="modal-code"><code id="modal-code"></code><button class="btn btn-primary" type="button" id="modal-copy">${ICON.copy} העתק</button></div>
+  <div class="modal-code"><code id="modal-code"></code><button class="btn btn-primary" type="button" id="modal-copy">${ICON.copy}<span>העתקה</span></button></div>
   <ol class="modal-steps">
-    <li>אליאקספרס נפתחה בלשונית חדשה</li>
-    <li>הוסיפו מוצרים לעגלה ועברו לתשלום</li>
-    <li>הדביקו את הקוד בשדה <b>"קוד מבצע"</b></li>
+    <li id="modal-step1">אליאקספרס נפתחה בלשונית חדשה</li>
+    <li>מוסיפים מוצרים לעגלה ועוברים לתשלום</li>
+    <li>מדביקים את הקוד בשדה <b>"קוד מבצע"</b></li>
   </ol>
-  <a class="btn btn-ghost btn-block" id="modal-go" href="#" target="_blank" rel="nofollow sponsored noopener">לא נפתח? לחצו למעבר לאליאקספרס</a>
+  <a class="btn btn-ghost btn-block" id="modal-go" href="/go/home/" ${OUT}>מעבר לאליאקספרס</a>
 </dialog>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
 </html>`;
 }
-const BUILD_ID = Date.now().toString(36);
 
 /* ------------------------------------------------------------------ */
 /* Pages                                                               */
@@ -292,7 +329,7 @@ const BUILD_ID = Date.now().toString(36);
 const orgLd = {
   '@context': 'https://schema.org', '@type': 'Organization', name: site.name, alternateName: site.nameEn,
   url: site.url, logo: abs('/assets/apple-touch-icon.png'),
-  sameAs: Object.values(site.social).filter(Boolean),
+  ...(Object.values(site.social).some(Boolean) ? { sameAs: Object.values(site.social).filter(Boolean) } : {}),
 };
 const websiteLd = { '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, alternateName: site.nameEn, url: site.url, inLanguage: 'he-IL' };
 const faqLd = (items) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
@@ -304,17 +341,17 @@ function faqBlock(items) {
 </div></section>`;
 }
 
-function allProducts() {
-  return Object.values(gen.deals || {}).flat();
-}
+const allProducts = () => Object.values(gen.deals || {}).flat().filter((p) => safeLink(p.link) && safeLink(p.image));
+const catItems = (slugName) => (gen.deals?.[slugName] || []).filter((p) => safeLink(p.link) && safeLink(p.image));
 
 function homePage() {
   const pathname = '/';
-  const title = `קוד קופון אליאקספרס ${monthYear} – עד $${maxDiscount} הנחה | ${site.name}`;
+  const title = realCodes.length
+    ? `קוד קופון אליאקספרס ${monthYear}: עד $${maxDiscount} הנחה | ${site.name}`
+    : `קוד קופון אליאקספרס ${monthYear}: כל הקודים לישראל | ${site.name}`;
   const description = realCodes.length
-    ? `${realCodes.length} קודי קופון פעילים לאליאקספרס בישראל, עד $${maxDiscount} הנחה. מתעדכן אוטומטית כל כמה שעות, עודכן לאחרונה ב-${updatedHe}. מעתיקים, מדביקים וחוסכים.`
-    : `קודי הקופון וההנחות של אליאקספרס לישראלים, מסודרים לפי סכום ההזמנה. מתעדכן אוטומטית כל כמה שעות, עודכן לאחרונה ב-${updatedHe}.`;
-  const featured = coupons.filter((c) => c.featured).slice(0, 3);
+    ? `${realCodes.length} קודי קופון פעילים לאליאקספרס לקונים מישראל, עד $${maxDiscount} הנחה, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`
+    : `קודי הקופון וההנחות של אליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const bc = breadcrumbs([{ name: 'קוד קופון אליאקספרס', url: '/' }]);
 
@@ -323,17 +360,17 @@ function homePage() {
   <div class="wrap">
     ${bc.html}
     <h1>קוד קופון אליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
-    <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים לישראל · עד <strong>$${maxDiscount}</strong> הנחה` : 'קודי ההנחה של אליאקספרס לישראל, לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
+    <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים · עד <strong>$${maxDiscount}</strong> הנחה` : 'כל קודי ההנחה, מסודרים לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
     <ul class="trust">
-      <li>${ICON.check} מתעדכן אוטומטית כמה פעמים ביום</li>
-      <li>${ICON.check} קודים שפג תוקפם יורדים מיד</li>
+      <li>${ICON.check} קודים שפג תוקפם יורדים מהרשימה</li>
+      <li>${ICON.check} מסודר לפי סכום העגלה</li>
       <li>${ICON.check} חינם, בלי הרשמה</li>
     </ul>
-    ${featured.length ? `<div class="featured-row">${featured.map((c) => `
-      <button class="featured" type="button" ${c.sample ? `data-go-btn="${c.id}"` : `data-reveal="${c.id}" data-code="${esc(c.code)}" data-title="${esc(`${money(c.discount)} הנחה מעל ${money(c.minOrder)}`)}"`}>
-        <span class="f-amount">${money(c.discount)}</span>
-        <span class="f-min">מעל ${money(c.minOrder)}</span>
-        <span class="f-cta">${c.sample ? 'לקבלת הקוד' : 'הצג קוד'}</span>
+    ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c) => `
+      <button class="featured" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>
+        <span class="f-amount">${money(c.discount, c.currency)}</span>
+        <span class="f-min">מעל ${money(c.minOrder, c.currency)}</span>
+        <span class="f-cta">הצג קוד</span>
       </button>`).join('')}</div>` : ''}
   </div>
 </section>
@@ -343,40 +380,41 @@ function homePage() {
     <div>
       <div class="section-head">
         <h2 class="section-title">כל קודי ההנחה הפעילים</h2>
-        <div class="filters" role="group" aria-label="סינון לפי סכום">
-          <button type="button" class="chip is-on" data-filter="all">הכל</button>
-          <button type="button" class="chip" data-filter="0-50">עד $50</button>
-          <button type="button" class="chip" data-filter="50-150">$50 עד $150</button>
-          <button type="button" class="chip" data-filter="150-99999">$150+</button>
+        <div class="filters" role="group" aria-label="סינון לפי סכום ההזמנה">
+          <button type="button" class="chip is-on" aria-pressed="true" data-filter="all">הכל</button>
+          <button type="button" class="chip" aria-pressed="false" data-filter="0-50">עד $50</button>
+          <button type="button" class="chip" aria-pressed="false" data-filter="50-150">$50 עד $150</button>
+          <button type="button" class="chip" aria-pressed="false" data-filter="150-99999">מעל $150</button>
         </div>
       </div>
       <div class="coupon-list" id="coupon-list">
-        ${coupons.map((c) => couponCard(c).replace('<article ', `<article data-min="${c.minOrder ?? 0}" `)).join('')}
+        ${coupons.map((c) => couponCard(c)).join('')}
       </div>
+      <p class="empty-filter muted" id="empty-filter" hidden>אין קודים בטווח הזה. נסו טווח אחר.</p>
 
       ${community.length ? `
       <div class="section-head" id="community"><h2 class="section-title">קודים חדשים מהקהילה</h2></div>
-      <p class="muted">קודים שנאספו אוטומטית מקהילות קונים ברשת בימים האחרונים. עוד לא נבדקו על ידינו – שווה לנסות אם הקודים למעלה לא נכנסו.</p>
+      <p class="muted">קודים שקונים פרסמו בפורומים ברשת בשבועות האחרונים. לא בדקנו אותם, אז שווה לנסות רק אם הקודים למעלה לא נכנסו.</p>
       <div class="coupon-list">${community.slice(0, 12).map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
 
       <h2 class="section-title" id="tiers">איזה קוד מתאים לסכום שלי?</h2>
       ${tierTable(coupons)}
-      <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם אתם קרובים למדרגה הבאה – לרוב משתלם להוסיף עוד מוצר קטן.</p>
+      <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
 
       <h2 class="section-title">עוד דרכים לחסוך באליאקספרס</h2>
       <div class="deal-grid">${deals.map(dealCard).join('')}</div>
     </div>
 
-    <aside class="sidebar">
+    <aside class="sidebar" aria-label="איך זה עובד">
       <div class="side-card side-sticky">
         <h2>איך זה עובד?</h2>
         <ol class="steps">
-          <li><span><b>לוחצים "הצג קוד"</b> הקוד מועתק אוטומטית</span></li>
+          <li><span><b>לוחצים "הצג קוד"</b> הקוד מועתק</span></li>
           <li><span><b>אליאקספרס נפתחת</b> בלשונית חדשה</span></li>
           <li><span><b>מדביקים בתשלום</b> בשדה "קוד מבצע"</span></li>
         </ol>
-        <a class="btn btn-primary btn-block" href="/go/coupon-center/" target="_blank" rel="nofollow sponsored noopener" data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>
-        ${site.social.telegram || site.social.whatsapp ? `<div class="side-alert"><b>רוצים את הקודים ראשונים?</b><p>הצטרפו לערוץ ונעדכן ברגע שיוצאת סדרה חדשה.</p>${site.social.telegram ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.telegram)}" rel="noopener">טלגרם</a>` : ''}${site.social.whatsapp ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.whatsapp)}" rel="noopener">וואטסאפ</a>` : ''}</div>` : ''}
+        <a class="btn btn-primary btn-block" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>
+        ${site.social.telegram || site.social.whatsapp ? `<div class="side-alert"><b>רוצים לקבל קודים חדשים?</b><p>הצטרפו לערוץ ונשלח הודעה כשיוצאת סדרת קודים חדשה.</p>${site.social.telegram ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.telegram)}" rel="noopener">טלגרם</a>` : ''}${site.social.whatsapp ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.whatsapp)}" rel="noopener">וואטסאפ</a>` : ''}</div>` : ''}
       </div>
     </aside>
   </div>
@@ -385,8 +423,9 @@ function homePage() {
 ${hotProducts.length ? `
 <section class="section section-alt">
   <div class="wrap">
-    <div class="section-head"><h2 class="section-title">הדילים הכי נמכרים לישראל עכשיו</h2><a class="more" href="/deals/">לכל הדילים ←</a></div>
+    <div class="section-head"><h2 class="section-title">הנמכרים ביותר עם משלוח לישראל</h2><a class="more" href="/deals/">לכל הדילים ←</a></div>
     <div class="product-grid">${hotProducts.map(productCard).join('')}</div>
+    <p class="muted">המחירים בשקלים כפי שהתקבלו מאליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות.</p>
   </div>
 </section>` : ''}
 
@@ -397,118 +436,112 @@ ${hotProducts.length ? `
       <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"הצג קוד"</b>. הקוד מועתק ואליאקספרס נפתחת.</li>
       <li>מוסיפים מוצרים לעגלה ועוברים לתשלום.</li>
       <li>בשורה <b>"קוד מבצע"</b> מדביקים את הקוד ולוחצים "החל".</li>
-      <li>בודקים שהסכום ירד – ומשלמים.</li>
+      <li>בודקים שהסכום ירד, ורק אז משלמים.</li>
     </ol>
-    <p>למדריך המלא עם צילומי מסך וטיפים: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון באליאקספרס</a>.</p>
+    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון באליאקספרס</a>.</p>
 
     <h2>למה הקוד לא נכנס?</h2>
     <ul>
-      <li><b>הסכום נמוך מהמינימום</b> – הוא נבדק אחרי הנחות חנות. בחרו מדרגה נמוכה יותר.</li>
-      <li><b>הקוד כבר נוצל בחשבון</b> – כל קוד תקף פעם אחת למשתמש.</li>
-      <li><b>המכסה נגמרה</b> – בימי מבצע הקודים נגמרים מהר. נסו את הקוד החלופי או קוד מהקהילה.</li>
-      <li><b>מוצרים שלא משתתפים</b> – חלק מהקטגוריות (למשל מוצרים דיגיטליים) לא נכללות.</li>
+      <li><b>הסכום נמוך מהמינימום.</b> הוא נבדק אחרי הנחות החנות, אז כדאי לבחור מדרגה נמוכה יותר.</li>
+      <li><b>הקוד כבר נוצל בחשבון.</b> בדרך כלל כל קוד תקף פעם אחת למשתמש.</li>
+      <li><b>המכסה נגמרה.</b> בימי מבצע קודים נגמרים מהר. נסו קוד אחר מאותה מדרגה.</li>
+      <li><b>המוצרים לא משתתפים.</b> יש קטגוריות שלא נכללות במבצע.</li>
     </ul>
 
     <h2>מתי יוצאים הקודים הכי שווים?</h2>
-    <p>הקודים הגבוהים ביותר יוצאים במבצעים הגדולים: יום ההולדת של אליאקספרס במרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים המלא</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p>
+    <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של אליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p>
   </div>
 </section>
 
 ${faqBlock(faq)}
 
-${expired.length ? `<section class="section"><div class="wrap narrow"><details class="expired"><summary>קודים שפג תוקפם (${expired.length})</summary><ul>${expired.slice(0, 20).map((c) => `<li><s>${esc(c.code)}</s> – ${money(c.discount)} מעל ${money(c.minOrder)} (עד ${heDate(c.expires)})</li>`).join('')}</ul></details></div></section>` : ''}
+${expired.length ? `<section class="section"><div class="wrap narrow"><details class="expired"><summary>קודים שפג תוקפם (${expired.length})</summary><ul>${expired.slice(0, 20).map((c) => `<li><s>${esc(c.code)}</s>: ${money(c.discount, c.currency)} מעל ${money(c.minOrder, c.currency)} (עד ${heDate(c.expires)})</li>`).join('')}</ul></details></div></section>` : ''}
 
-<section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשאתם קונים דרכם אנחנו עשויים לקבל עמלה מאליאקספרס – בלי שום תוספת למחיר שלכם. זה מה שמאפשר לנו להחזיק את האתר חינמי ומעודכן.</p></div></section>`;
+<section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מאליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
-  const offersLd = {
-    '@context': 'https://schema.org', '@type': 'ItemList', name: `קודי קופון אליאקספרס ${monthYear}`,
-    itemListElement: coupons.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: `${money(c.discount)} הנחה מעל ${money(c.minOrder)}`, url: abs(`/#c-${c.id}`) })),
-  };
-  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, bc.ld, faqLd(faq), offersLd] });
+  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, bc.ld, faqLd(faq)] });
 }
 
 function dealsIndexPage() {
   const pathname = '/deals/';
-  const bc = breadcrumbs([{ name: 'דילים חמים', url: pathname }]);
-  const cats = site.dealCategories.map((c) => ({ ...c, items: gen.deals?.[c.slug] || [] }));
+  const bc = breadcrumbs([{ name: 'דילים', url: pathname }]);
+  const cats = site.dealCategories.map((c) => ({ ...c, items: catItems(c.slug) }));
+  const any = cats.some((c) => c.items.length);
   const body = `
 <section class="hero hero-sm"><div class="wrap">${bc.html}
-  <h1>דילים חמים מאליאקספרס לישראל <span class="hl">${esc(monthYear)}</span></h1>
-  <p class="lead">המוצרים הכי נמכרים עם משלוח לישראל, מחירים בשקלים – מתעדכן אוטומטית. שלבו עם <a href="/">קוד קופון</a> לחיסכון כפול.</p>
+  <h1>דילים מאליאקספרס עם משלוח לישראל</h1>
+  <p class="lead">המוצרים הנמכרים ביותר לפי קטגוריה, במחירים בשקלים. אפשר לשלב עם <a href="/">קוד קופון</a>.</p>
 </div></section>
 <section class="section"><div class="wrap">
-  <div class="cat-grid">${cats.map((c) => `<a class="cat" href="/deals/${c.slug}/"><b>${esc(c.name)}</b><span>${c.items.length ? `${c.items.length} דילים` : 'לדילים'}</span></a>`).join('')}</div>
+  ${any ? `<h2 class="section-title">קטגוריות</h2><div class="cat-grid">${cats.filter((c) => c.items.length).map((c) => `<a class="cat" href="/deals/${c.slug}/"><b>${esc(c.name)}</b><span>${c.items.length} מוצרים</span></a>`).join('')}</div>` : ''}
   ${cats.filter((c) => c.items.length).map((c) => `
     <div class="section-head"><h2 class="section-title">${esc(c.name)}</h2><a class="more" href="/deals/${c.slug}/">עוד ←</a></div>
     <div class="product-grid">${c.items.slice(0, 4).map(productCard).join('')}</div>`).join('')}
-  ${cats.every((c) => !c.items.length) ? `<div class="empty"><p>הדילים נטענים אוטומטית מאליאקספרס. בינתיים – כל המבצעים מחכים לכם באתר.</p><a class="btn btn-primary" href="/go/home/" target="_blank" rel="nofollow sponsored noopener" data-go="home">למבצעים באליאקספרס ${ICON.arrow}</a></div>` : ''}
+  ${any ? `<p class="muted">המחירים כפי שהתקבלו מאליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות.</p>` : `<div class="empty"><h2>הדילים יופיעו כאן בקרוב</h2><p>בינתיים אפשר לראות את כל המבצעים ישירות באליאקספרס.</p><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home">למבצעים באליאקספרס ${ICON.arrow}</a></div>`}
 </div></section>`;
   return layout({
-    title: `דילים חמים מאליאקספרס לישראל ${monthYear} | ${site.name}`,
-    description: 'המוצרים הכי נמכרים באליאקספרס עם משלוח לישראל ומחירים בשקלים, לפי קטגוריות. מתעדכן אוטומטית כל כמה שעות.',
-    pathname, body, ld: [bc.ld],
+    title: `דילים מאליאקספרס לישראל ${monthYear} | ${site.name}`,
+    description: 'המוצרים הנמכרים ביותר באליאקספרס עם משלוח לישראל ומחירים בשקלים, לפי קטגוריות.',
+    pathname, body, ld: [bc.ld], noindex: !any,
   });
 }
 
 function dealCategoryPage(cat) {
   const pathname = `/deals/${cat.slug}/`;
-  const items = gen.deals?.[cat.slug] || [];
-  const bc = breadcrumbs([{ name: 'דילים חמים', url: '/deals/' }, { name: cat.name, url: pathname }]);
-  const top = coupons.filter((c) => c.featured).slice(0, 2);
+  const items = catItems(cat.slug);
+  const bc = breadcrumbs([{ name: 'דילים', url: '/deals/' }, { name: cat.name, url: pathname }]);
+  const top = featuredCoupons.slice(0, 2);
   const body = `
 <section class="hero hero-sm"><div class="wrap">${bc.html}
-  <h1>קופון אליאקספרס ל${esc(cat.name)} <span class="hl">${esc(monthYear)}</span></h1>
-  <p class="lead">${items.length ? `${items.length} מוצרים נבחרים` : 'מוצרים נבחרים'} ב${esc(cat.name)} עם משלוח לישראל + קודי הנחה שעובדים עליהם.</p>
+  <h1>דילים מאליאקספרס: ${esc(cat.name)}</h1>
+  <p class="lead">המוצרים הנמכרים ביותר ב${esc(cat.name)} עם משלוח לישראל, יחד עם קודי ההנחה העדכניים.</p>
 </div></section>
 <section class="section"><div class="wrap">
-  ${top.length ? `<div class="coupon-list coupon-list-inline">${top.map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
-  ${items.length ? `<div class="product-grid">${items.map(productCard).join('')}</div>` : `<div class="empty"><p>הדילים בקטגוריה מתעדכנים אוטומטית.</p><a class="btn btn-primary" href="/go/home/" target="_blank" rel="nofollow sponsored noopener" data-go="home">לחיפוש באליאקספרס ${ICON.arrow}</a></div>`}
-  <p class="muted">המחירים בשקלים כפי שהתקבלו מאליאקספרס בעדכון האחרון (${esc(updatedHe)}) ועשויים להשתנות. <a href="/">לכל קודי הקופון ←</a></p>
+  ${top.length ? `<h2 class="section-title">קודי הנחה שאפשר לשלב</h2><div class="coupon-list coupon-list-inline">${top.map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
+  <h2 class="section-title">הנמכרים ביותר</h2>
+  ${items.length ? `<div class="product-grid">${items.map(productCard).join('')}</div>` : `<div class="empty"><p>אין כרגע מוצרים בקטגוריה.</p><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home">לחיפוש באליאקספרס ${ICON.arrow}</a></div>`}
+  <p class="muted">המחירים כפי שהתקבלו מאליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות. <a href="/">לכל קודי הקופון ←</a></p>
 </div></section>`;
-  const ld = [bc.ld];
-  if (items.length) ld.push({ '@context': 'https://schema.org', '@type': 'ItemList', itemListElement: items.slice(0, 20).map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.title })) });
   return layout({
-    title: `קופון אליאקספרס ל${cat.name} ${monthYear} – דילים לישראל | ${site.name}`,
-    description: `דילים חמים ב${cat.name} מאליאקספרס עם משלוח לישראל ומחירים בשקלים, יחד עם קודי הקופון העדכניים. מתעדכן אוטומטית.`,
-    pathname, body, ld,
+    title: `דילים מאליאקספרס ב${cat.name} עם משלוח לישראל | ${site.name}`,
+    description: `המוצרים הנמכרים ביותר ב${cat.name} מאליאקספרס עם משלוח לישראל ומחירים בשקלים, יחד עם קודי הקופון העדכניים.`,
+    pathname, body, ld: [bc.ld], noindex: !items.length,
   });
 }
 
 function eventPage(ev) {
   const pathname = `/sale/${ev.slug}/`;
-  const bc = breadcrumbs([{ name: `קופונים ל${ev.name.split(' –')[0]}`, url: pathname }]);
+  const short = ev.name.split(' –')[0];
+  const bc = breadcrumbs([{ name: `קופונים ל${short}`, url: pathname }]);
   const live = ev.start <= today && ev.end >= today;
   const upcoming = ev.start > today;
   const year = ev.start.slice(0, 4);
   const evCoupons = coupons.filter((c) => !c.event || c.event === ev.slug);
   const body = `
 <section class="hero"><div class="wrap">${bc.html}
-  <h1>קודי קופון אליאקספרס ל${esc(ev.name)} ${year}</h1>
-  <p class="lead">${live ? `המבצע פעיל עכשיו – עד ${heDate(ev.end)}.` : upcoming ? `המבצע מתחיל ב-${heDate(ev.start)}. הקודים יעלו לכאן אוטומטית ברגע שייצאו.` : `המבצע הסתיים. הנה הקודים הפעילים כרגע.`}</p>
-  ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00"></div>` : ''}
+  <h1>קוד קופון אליאקספרס ל${esc(ev.name)} ${year}</h1>
+  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. נעדכן כאן את הקודים כשאליאקספרס תפרסם אותם. בינתיים, אלה הקודים הפעילים.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
+  ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
 <section class="section"><div class="wrap narrow">
+  <h2 class="section-title">${live ? 'קודי המבצע' : 'הקודים הפעילים כרגע'}</h2>
   <div class="coupon-list">${evCoupons.map((c) => couponCard(c)).join('')}</div>
+  <h2 class="section-title">טבלת מדרגות</h2>
   ${tierTable(evCoupons)}
   <div class="prose">
-    <h2>איך להתכונן ל${esc(ev.name.split(' –')[0])}</h2>
+    <h2>איך מתכוננים ל${esc(short)}</h2>
     <ol>
-      <li>הוסיפו לעגלה את המוצרים שאתם רוצים כבר עכשיו – כך תראו את ההנחה האמיתית.</li>
-      <li>אספו קופונים ממרכז הקופונים ברגע שהם נפתחים.</li>
-      <li>בשעת הפתיחה חזרו לעמוד הזה – הקודים מתעדכנים כאן אוטומטית.</li>
+      <li>מוסיפים לעגלה כבר עכשיו את המוצרים שרוצים. ככה רואים מה המחיר לפני המבצע ומה ההנחה האמיתית.</li>
+      <li>אוספים קופונים ממרכז הקופונים של אליאקספרס כשהם נפתחים.</li>
+      <li>בפתיחת המבצע חוזרים לעמוד הזה, בוחרים קוד לפי סכום העגלה ומשלמים.</li>
     </ol>
-    <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך לשלב הנחות</a></p>
+    <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a></p>
   </div>
 </div></section>`;
-  const ld = [bc.ld, {
-    '@context': 'https://schema.org', '@type': 'Event', name: `${ev.name} באליאקספרס ${year}`, startDate: ev.start, endDate: ev.end,
-    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', eventStatus: 'https://schema.org/EventScheduled',
-    location: { '@type': 'VirtualLocation', url: site.affiliate.homeUrl }, organizer: { '@type': 'Organization', name: 'AliExpress', url: 'https://www.aliexpress.com' },
-  }];
   return layout({
-    title: `קוד קופון אליאקספרס ${ev.name.split(' –')[0]} ${year} – כל הקודים | ${site.name}`,
-    description: `כל קודי הקופון של אליאקספרס ל${ev.name} ${year} לישראלים, לפי מדרגות. מתעדכן אוטומטית ברגע שהקודים יוצאים.`,
-    pathname, body, ld,
+    title: `קוד קופון אליאקספרס ל${short} ${year} | ${site.name}`,
+    description: `קודי הקופון של אליאקספרס ל${ev.name} ${year} לקונים מישראל, לפי מדרגות, וטיפים להתכונן למבצע.`,
+    pathname, body, ld: [bc.ld],
   });
 }
 
@@ -516,28 +549,29 @@ function guidesIndexPage() {
   const pathname = '/guides/';
   const bc = breadcrumbs([{ name: 'מדריכים', url: pathname }]);
   const body = `
-<section class="hero hero-sm"><div class="wrap">${bc.html}<h1>מדריכים לקנייה חכמה באליאקספרס</h1><p class="lead">כל מה שצריך לדעת כדי לשלם פחות ולקבל יותר.</p></div></section>
+<section class="hero hero-sm"><div class="wrap">${bc.html}<h1>מדריכים לקנייה חכמה באליאקספרס</h1><p class="lead">מה שכדאי לדעת כדי לשלם פחות.</p></div></section>
 <section class="section"><div class="wrap"><div class="guide-grid">${guides.map((g) => `<a class="guide-card" href="/guides/${g.slug}/"><h2>${esc(g.title)}</h2><p>${esc(g.description)}</p><span>לקריאה ←</span></a>`).join('')}</div></div></section>`;
   return layout({ title: `מדריכים לאליאקספרס בעברית | ${site.name}`, description: 'מדריכים בעברית לקנייה באליאקספרס: שימוש בקודי קופון, שילוב הנחות, מכס ומע"מ, Choice ולוח המבצעים.', pathname, body, ld: [bc.ld] });
 }
 
 function guidePage(g) {
   const pathname = `/guides/${g.slug}/`;
-  const bc = breadcrumbs([{ name: 'מדריכים', url: '/guides/' }, { name: g.title.split(' –')[0], url: pathname }]);
-  const top = coupons.filter((c) => c.featured).slice(0, 2);
+  const bc = breadcrumbs([{ name: 'מדריכים', url: '/guides/' }, { name: g.short || g.title, url: pathname }]);
+  const top = featuredCoupons.slice(0, 2);
   const others = guides.filter((x) => x.slug !== g.slug).slice(0, 3);
   const body = `
-<section class="hero hero-sm"><div class="wrap narrow">${bc.html}<h1>${esc(g.title)}</h1><p class="byline">צוות ${esc(site.name)} · עודכן ${esc(updatedHe)}</p></div></section>
+<section class="hero hero-sm"><div class="wrap narrow">${bc.html}<h1>${esc(g.title)}</h1><p class="byline">${esc(site.name)} · עודכן ${esc(heLong(g.updated))}</p></div></section>
 <section class="section"><div class="wrap narrow">
   <article class="prose">${g.body}</article>
-  ${top.length ? `<h2 class="section-title">הקודים הכי משתלמים כרגע</h2><div class="coupon-list">${top.map((c) => couponCard(c, { compact: true })).join('')}</div><p><a href="/">לכל קודי הקופון ←</a></p>` : ''}
+  ${top.length ? `<h2 class="section-title">הקודים המומלצים כרגע</h2><div class="coupon-list">${top.map((c) => couponCard(c, { compact: true })).join('')}</div><p><a href="/">לכל קודי הקופון ←</a></p>` : ''}
   <h2 class="section-title">עוד מדריכים</h2>
   <div class="guide-grid">${others.map((o) => `<a class="guide-card" href="/guides/${o.slug}/"><h3>${esc(o.title)}</h3><span>לקריאה ←</span></a>`).join('')}</div>
 </div></section>`;
   const ld = [bc.ld, {
     '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.description, inLanguage: 'he-IL',
-    dateModified: new Date(gen.updatedAt ?? now).toISOString(), author: { '@type': 'Organization', name: site.name, url: site.url },
-    publisher: orgLd, mainEntityOfPage: abs(pathname),
+    datePublished: g.published, dateModified: g.updated, author: { '@type': 'Organization', name: site.name, url: site.url },
+    publisher: { '@type': 'Organization', name: site.name, logo: { '@type': 'ImageObject', url: abs('/assets/apple-touch-icon.png') } },
+    image: abs('/assets/og.png'), mainEntityOfPage: abs(pathname),
   }];
   return layout({ title: `${g.title} | ${site.name}`, description: g.description, pathname, body, ld, ogType: 'article' });
 }
@@ -550,14 +584,15 @@ function staticPage(pathname, h1, html, description) {
   });
 }
 
-function goPage(id, target) {
-  // Interstitial redirect: noindex, fast meta refresh + JS. Every outbound affiliate click flows through /go/<id>/.
+function goPage(target) {
+  // Interstitial redirect: noindex. Every outbound affiliate click flows through /go/<id>/.
+  const t = safeLink(target, DEFAULT_LINK);
   return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
-<meta name="referrer" content="no-referrer-when-downgrade"><title>מעבירים אתכם לאליאקספרס…</title>
-<meta http-equiv="refresh" content="0;url=${esc(target)}"><link rel="canonical" href="${abs('/')}">
-<style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#fff7f4;color:#222}a{color:#e8113a}</style>
-<script>location.replace(${JSON.stringify(target)});</script></head>
-<body><p>מעבירים אתכם לאליאקספרס… <a href="${esc(target)}" rel="nofollow sponsored">לחצו כאן אם לא הועברתם</a></p></body></html>`;
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>מעבר לאליאקספרס…</title>
+<meta http-equiv="refresh" content="0;url=${esc(t)}">
+<style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#fffaf7;color:#1b1b24;text-align:center;padding:16px}a{color:#c20c33}</style>
+<script>location.replace(${scriptJSON(t)});</script></head>
+<body><p>מעבירים אתכם לאליאקספרס…<br><a href="${esc(t)}" rel="nofollow sponsored">לחצו כאן אם המעבר לא קרה</a></p></body></html>`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -567,46 +602,52 @@ await fs.rm(DIST, { recursive: true, force: true });
 await fs.mkdir(DIST, { recursive: true });
 await fs.cp(path.join(ROOT, 'src/assets'), path.join(DIST, 'assets'), { recursive: true });
 
-const urls = [];
-const page = async (p, html, priority = '0.7') => { await write(p === '/' ? 'index.html' : `${p.replace(/^\//, '')}index.html`, html); urls.push([p, priority]); };
+const sitemap = [];
+const page = async (p, html, { lastmod, index = true } = {}) => {
+  await write(p === '/' ? 'index.html' : `${p.replace(/^\//, '')}index.html`, html);
+  if (index) sitemap.push([p, lastmod]);
+};
 
-await page('/', homePage(), '1.0');
-await page('/deals/', dealsIndexPage(), '0.8');
-for (const c of site.dealCategories) await page(`/deals/${c.slug}/`, dealCategoryPage(c), '0.7');
-for (const e of manual.events || []) await page(`/sale/${e.slug}/`, eventPage(e), e === activeEvent ? '0.9' : '0.6');
-await page('/guides/', guidesIndexPage(), '0.6');
-for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), '0.6');
+await page('/', homePage(), { lastmod: dataUpdated });
+await page('/deals/', dealsIndexPage(), { index: allProducts().length > 0, lastmod: allProducts().length ? dataUpdated : undefined });
+for (const c of site.dealCategories) {
+  const has = catItems(c.slug).length > 0;
+  await page(`/deals/${c.slug}/`, dealCategoryPage(c), { index: has, lastmod: has ? dataUpdated : undefined });
+}
+for (const e of manual.events || []) await page(`/sale/${e.slug}/`, eventPage(e), { lastmod: dataUpdated });
+await page('/guides/', guidesIndexPage(), { lastmod: guides.map((g) => g.updated).sort().pop() });
+for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), { lastmod: g.updated });
 await page('/about/', staticPage('/about/', 'אודות', `
-<p><b>${esc(site.name)}</b> נולד מתוך תסכול פשוט: חיפשנו קוד קופון לאליאקספרס ומצאנו רשימות ישנות, קודים שלא עובדים ואתרים עמוסים בפרסומות.</p>
-<p>אז בנינו מערכת שמושכת את הקודים והמבצעים העדכניים כמה פעמים ביום, מסירה אוטומטית קודים שפג תוקפם, ומסדרת הכל לפי סכום ההזמנה – כדי שתמצאו את הקוד הנכון בעשר שניות.</p>
-<p>יש לכם קוד שעבד ולא מופיע אצלנו? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מי אנחנו ואיך ${site.name} עובד.`));
+<p><b>${esc(site.name)}</b> הוא אתר עצמאי שמרכז את קודי הקופון של אליאקספרס לקונים מישראל, במקום אחד ובעברית.</p>
+<p>הקודים נאספים ממקורות רשמיים של אליאקספרס ומתוכנית השותפים שלה ומוזנים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
+<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name} ואיך האתר עובד.`));
 await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
-<p>${esc(site.name)} משתתף בתוכנית השותפים של אליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כאשר אתם לוחצים עליהם ומבצעים רכישה, אנו עשויים לקבל עמלה מאליאקספרס.</p>
-<p>העמלה לא מייקרת את המחיר שלכם בשום צורה, ואינה משפיעה על סדר הצגת הקודים – הם מסודרים לפי סכום ההזמנה וגובה ההנחה.</p>
+<p>${esc(site.name)} משתתף בתוכנית השותפים של אליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מאליאקספרס.</p>
+<p>העמלה לא מייקרת את המחיר שלכם, ולא משפיעה על סדר הקודים. הם מסודרים לפי סכום ההזמנה.</p>
 <p>האתר אינו קשור, מאושר או מופעל ע"י AliExpress או Alibaba Group. כל הסימנים המסחריים שייכים לבעליהם.</p>
-<p>הקודים מוצגים כפי שהם ואנו לא יכולים להבטיח שכל קוד יעבוד בכל הזמנה – תנאי הקודים נקבעים ע"י אליאקספרס.</p>`, 'גילוי נאות על קישורי שותפים באתר.'), '0.3');
+<p>התנאים של כל קוד נקבעים ע"י אליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות על קישורי השותפים באתר.'));
 await page('/privacy/', staticPage('/privacy/', 'מדיניות פרטיות', `
-<p>האתר אינו דורש הרשמה ואינו אוסף פרטים מזהים.</p>
-<p>אנו עשויים להשתמש בכלי אנליטיקה (כגון Google Analytics) לצורך מדידת שימוש אנונימית, ובעוגיות של אליאקספרס לצורך שיוך רכישות לתוכנית השותפים לאחר מעבר לאתר שלה.</p>
-<p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר.'), '0.3');
+<p>האתר לא דורש הרשמה ולא אוסף פרטים מזהים.</p>
+${site.analytics?.ga4Id ? '<p>אנחנו משתמשים ב-Google Analytics כדי להבין באופן אנונימי איך משתמשים באתר.</p>' : ''}
+<p>כשעוברים מהאתר לאליאקספרס, אליאקספרס עשויה לשמור עוגייה כדי לשייך את הרכישה לתוכנית השותפים. המדיניות של אליאקספרס חלה באתר שלה.</p>
+<p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר.'));
 
 // Outbound redirect pages
 const goTargets = new Map([
-  ['home', links[site.affiliate.homeUrl] || site.affiliate.defaultLink],
-  ['coupon-center', links[site.affiliate.couponCenterUrl] || site.affiliate.defaultLink],
+  ['home', safeLink(links[site.affiliate.homeUrl], '') || DEFAULT_LINK],
+  ['coupon-center', safeLink(links[site.affiliate.couponCenterUrl], '') || DEFAULT_LINK],
 ]);
-for (const c of [...coupons, ...expired, ...community]) goTargets.set(c.id, c.source === 'community' ? site.affiliate.defaultLink : resolveLink(c));
-for (const d of deals) goTargets.set(d.id, d.id === 'coupon-center' && !d.link ? goTargets.get('coupon-center') : resolveLink(d));
-for (const [id, target] of goTargets) await write(`go/${id}/index.html`, goPage(id, target));
-await write('assets/links.json', JSON.stringify(Object.fromEntries(goTargets)));
+for (const c of [...coupons, ...expired]) goTargets.set(c.id, resolveLink(c));
+for (const c of community) goTargets.set(c.id, DEFAULT_LINK);
+for (const d of deals) goTargets.set(d.id, d.id === 'coupon-center' && !safeLink(d.link) ? goTargets.get('coupon-center') : resolveLink(d));
+for (const [id, target] of goTargets) await write(`go/${id}/index.html`, goPage(target));
 
 await write('404.html', layout({
   title: `הדף לא נמצא | ${site.name}`, description: 'הדף לא נמצא', pathname: '/404.html', noindex: true,
-  body: `<section class="hero"><div class="wrap narrow"><h1>אופס, הדף לא נמצא</h1><p class="lead">אבל הקודים כן 🙂</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
+  body: `<section class="hero"><div class="wrap narrow"><h1>הדף לא נמצא</h1><p class="lead">אבל הקודים כאן.</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
 }));
-await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([p, pr]) => `  <url><loc>${abs(p)}</loc><lastmod>${today}</lastmod><priority>${pr}</priority></url>`).join('\n')}\n</urlset>\n`);
-await write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /go/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
-await write('CNAME', site.domain + '\n');
+await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
+await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 await write('.nojekyll', '');
 
-console.log(`✓ built ${urls.length} pages + ${goTargets.size} redirects → dist/  (${coupons.length} coupons, ${community.length} community, ${allProducts().length} products)`);
+console.log(`✓ built ${sitemap.length} indexable pages + ${goTargets.size} redirects → dist/  (${realCodes.length} real codes, ${coupons.length - realCodes.length} sample, ${community.length} community, ${allProducts().length} products)${SAMPLE_MODE ? '  [PREVIEW – noindex]' : ''}`);

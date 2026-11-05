@@ -7,7 +7,8 @@ const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json', '.xml': 'application/xml', '.txt': 'text/plain' };
 const port = Number(process.env.PORT) || 8080;
 http.createServer(async (req, res) => {
-  let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  let p;
+  try { p = decodeURIComponent(new URL(req.url, 'http://x').pathname); } catch { res.writeHead(400).end('Bad request'); return; }
   if (p.endsWith('/')) p += 'index.html';
   const file = path.join(DIST, path.normalize(p).replace(/^(\.\.[/\\])+/, ''));
   try {

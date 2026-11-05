@@ -4,13 +4,14 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 */3 * * *'   # every 3 hours
+    - cron: '17 */3 * * *'   # every 3 hours (UTC)
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write   # used by the keep-alive step below
 
 concurrency:
   group: pages
@@ -45,6 +46,7 @@ jobs:
           COUPONS_SHEET_CSV_URL: ${{ secrets.COUPONS_SHEET_CSV_URL }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
         run: npm run fetch
 
       - name: Save data
@@ -53,13 +55,24 @@ jobs:
           path: data/generated.json
           key: generated-${{ github.run_id }}
 
+      # BUILD_STRICT refuses to publish while sample codes or a placeholder affiliate link remain.
       - name: Build site
+        env:
+          BUILD_STRICT: '1'
         run: npm run build
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+      # GitHub disables scheduled workflows after 60 days without repo activity.
+      # Re-enabling via the API resets that timer, so auto-updates never silently stop.
+      - name: Keep schedule alive
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/deploy.yml/enable" || true
 
   deploy:
     needs: build

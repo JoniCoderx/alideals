@@ -1,9 +1,12 @@
 {
+  "fetchedAt": "2026-11-05T14:09:28.900Z",
   "updatedAt": null,
   "sheetCoupons": [],
   "community": [],
   "deals": {},
   "promos": [],
   "links": {},
-  "log": []
+  "log": [
+    "• AliExpress API keys not set – skipping products (site uses affiliate.defaultLink)"
+  ]
 }

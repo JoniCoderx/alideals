@@ -16,7 +16,9 @@ const outFile = path.join(ROOT, 'data/generated.json');
 const previous = await readJSON(outFile, {});
 
 const out = {
-  updatedAt: new Date().toISOString(),
+  fetchedAt: new Date().toISOString(),
+  // Only moves forward when at least one source actually returned data.
+  updatedAt: previous.updatedAt ?? null,
   sheetCoupons: previous.sheetCoupons ?? [],
   community: previous.community ?? [],
   deals: previous.deals ?? {},
@@ -25,24 +27,26 @@ const out = {
   log: [],
 };
 const log = (m) => { console.log(m); out.log.push(m); };
+let ok = 0;
+const success = () => { ok++; };
 
 // 1) Google Sheet
 if (env.COUPONS_SHEET_CSV_URL) {
   try {
     out.sheetCoupons = await fetchSheetCoupons(env.COUPONS_SHEET_CSV_URL);
-    log(`✓ sheet: ${out.sheetCoupons.length} coupons`);
+    log(`✓ sheet: ${out.sheetCoupons.length} coupons`); success();
   } catch (e) { log(`✗ sheet: ${e.message} (keeping previous)`); }
 }
 
 // 2) Reddit community codes
-if (env.REDDIT_DISABLED !== '1') {
+if (env.REDDIT_CLIENT_ID && env.REDDIT_CLIENT_SECRET && env.REDDIT_DISABLED !== '1') {
   try {
     out.community = await fetchRedditCoupons({
       subreddit: env.REDDIT_SUBREDDIT || 'AliExpressCode',
       clientId: env.REDDIT_CLIENT_ID,
       clientSecret: env.REDDIT_CLIENT_SECRET,
     });
-    log(`✓ reddit: ${out.community.length} community codes`);
+    log(`✓ reddit: ${out.community.length} community codes`); success();
   } catch (e) { log(`✗ reddit: ${e.message} (keeping previous)`); }
 }
 
@@ -60,7 +64,7 @@ if (env.ALI_APP_KEY && env.ALI_APP_SECRET) {
         .sort((a, b) => b.sold - a.sold)
         .slice(0, 24);
       if (uniq.length) out.deals[cat.slug] = uniq;
-      log(`✓ deals/${cat.slug}: ${uniq.length}`);
+      log(`✓ deals/${cat.slug}: ${uniq.length}`); if (uniq.length) success();
     } catch (e) { log(`✗ deals/${cat.slug}: ${e.message}`); }
   }
 
@@ -86,6 +90,8 @@ if (env.ALI_APP_KEY && env.ALI_APP_SECRET) {
   log('• AliExpress API keys not set – skipping products (site uses affiliate.defaultLink)');
 }
 
+if (ok) out.updatedAt = out.fetchedAt;
+if (process.env.FETCH_STRICT === '1' && out.log.some((l) => l.startsWith('✗'))) process.exitCode = 1;
 await fs.writeFile(outFile, JSON.stringify(out, null, 2) + '\n');
 console.log(`→ wrote ${path.relative(ROOT, outFile)}`);
 
