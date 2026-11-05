@@ -43,8 +43,8 @@ const { active: coupons, expired } = mergeCoupons(manual.coupons, gen.sheetCoupo
 const deals = [...manual.deals, ...(gen.sheetCoupons || []).filter((c) => c.type === 'deal')].map((d) => ({ ...d, id: slug(d.id || d.title) }));
 const knownCodes = new Set(coupons.map((c) => c.code));
 const community = (gen.community || []).filter((c) => !knownCodes.has(c.code)).map((c) => ({ ...c, id: slug(`r-${c.code}-${c.discount}`) }));
-const maxDiscount = Math.max(0, ...coupons.map((c) => c.discount || 0));
 const realCodes = coupons.filter((c) => !c.sample);
+const maxDiscount = Math.max(0, ...(realCodes.length ? realCodes : coupons).map((c) => c.discount || 0));
 const activeEvent = (manual.events || []).find((e) => e.start <= addDays(today, 7) && e.end >= today);
 
 if (!realCodes.length) console.warn('⚠  All coupons are samples – edit data/coupons.json or connect a Google Sheet.');
@@ -100,7 +100,7 @@ const ICON = {
 function couponCard(c, { compact = false } = {}) {
   const cur = c.currency || 'USD';
   const dl = c.expires ? daysLeft(c.expires) : null;
-  const urgency = dl !== null && dl <= 3 ? `<span class="tag tag-hot">${ICON.clock} נגמר ${dl <= 0 ? 'היום' : dl === 1 ? 'מחר' : `בעוד ${dl} ימים`}</span>` : '';
+  const urgency = !c.sample && dl !== null && dl <= 3 ? `<span class="tag tag-hot">${ICON.clock} נגמר ${dl <= 0 ? 'היום' : dl === 1 ? 'מחר' : `בעוד ${dl} ימים`}</span>` : '';
   const title = c.title || `${money(c.discount, cur)} הנחה בקנייה מעל ${money(c.minOrder, cur)}`;
   const hidden = c.sample || !c.code;
   const masked = hidden ? '' : '•'.repeat(Math.max(4, c.code.length - 2)) + `<b>${esc(c.code.slice(-2))}</b>`;
@@ -116,8 +116,10 @@ function couponCard(c, { compact = false } = {}) {
     <div class="coupon-meta">
       ${isCommunity
         ? `<span class="tag tag-muted">מהקהילה · לא אומת</span>`
-        : `<span class="tag tag-ok">${ICON.check} נבדק ${esc(updatedHe)}</span>`}
-      ${c.expires ? `<span class="tag">בתוקף עד ${heDate(c.expires)}</span>` : ''}
+        : c.sample ? `<span class="tag">דרך מרכז הקופונים</span>`
+        : c.verified ? `<span class="tag tag-ok">${ICON.check} נבדק ${heDate(c.verified)}</span>`
+        : `<span class="tag tag-ok">${ICON.check} עודכן ${esc(updatedHe)}</span>`}
+      ${c.expires && !c.sample ? `<span class="tag">בתוקף עד ${heDate(c.expires)}</span>` : ''}
       ${urgency}
       ${c.featured ? '<span class="tag tag-star">הכי משתלם</span>' : ''}
     </div>
@@ -309,7 +311,9 @@ function allProducts() {
 function homePage() {
   const pathname = '/';
   const title = `קוד קופון אליאקספרס ${monthYear} – עד $${maxDiscount} הנחה | ${site.name}`;
-  const description = `${coupons.length} קודי קופון פעילים לאליאקספרס בישראל, עד $${maxDiscount} הנחה. מתעדכן אוטומטית כל כמה שעות – נבדק לאחרונה ב-${updatedHe}. העתיקו, הדביקו וחסכו.`;
+  const description = realCodes.length
+    ? `${realCodes.length} קודי קופון פעילים לאליאקספרס בישראל, עד $${maxDiscount} הנחה. מתעדכן אוטומטית כל כמה שעות, עודכן לאחרונה ב-${updatedHe}. מעתיקים, מדביקים וחוסכים.`
+    : `קודי הקופון וההנחות של אליאקספרס לישראלים, מסודרים לפי סכום ההזמנה. מתעדכן אוטומטית כל כמה שעות, עודכן לאחרונה ב-${updatedHe}.`;
   const featured = coupons.filter((c) => c.featured).slice(0, 3);
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const bc = breadcrumbs([{ name: 'קוד קופון אליאקספרס', url: '/' }]);
@@ -319,7 +323,7 @@ function homePage() {
   <div class="wrap">
     ${bc.html}
     <h1>קוד קופון אליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
-    <p class="lead">${coupons.length} קודים פעילים לישראל · עד <strong>$${maxDiscount}</strong> הנחה · עודכן ב-${esc(updatedHe)}</p>
+    <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים לישראל · עד <strong>$${maxDiscount}</strong> הנחה` : 'קודי ההנחה של אליאקספרס לישראל, לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
     <ul class="trust">
       <li>${ICON.check} מתעדכן אוטומטית כמה פעמים ביום</li>
       <li>${ICON.check} קודים שפג תוקפם יורדים מיד</li>
