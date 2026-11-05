@@ -58,6 +58,11 @@ jobs:
           REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
         run: npm run fetch
 
+      # Colour emoji font for the Telegram post images (rendered with headless Chrome).
+      - name: Emoji font
+        continue-on-error: true
+        run: sudo apt-get install -y -qq fonts-noto-color-emoji >/dev/null
+
       # Posts new codes / "ends tomorrow" reminders to the Telegram channel (skips if not configured).
       - name: Telegram channel
         continue-on-error: true

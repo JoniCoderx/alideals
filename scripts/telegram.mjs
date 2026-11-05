@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mergeCoupons, safeLink, daysBetween } from './lib.mjs';
 import { renderCard } from './telegram-card.mjs';
+import { telegramPosts } from '../src/content/telegram-posts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Telegram audience spells it with ע – the site covers both spellings for SEO.
@@ -113,6 +114,67 @@ export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, r
   return { messages, posted: next };
 }
 
+/**
+ * Pure: picks at most one "regular" post (tip / promotion / feature / countdown / weekly) for the current time slot.
+ * Slots (Israel time): noon 11:00–13:59, evening 19:00–21:59. Returns { message|null, regular } (new state).
+ */
+export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, minGapDays = 10 }) {
+  const slot = hour >= 11 && hour < 14 ? 'noon' : hour >= 19 && hour < 22 ? 'evening' : null;
+  const state = { lastSlot: regular.lastSlot || '', history: { ...(regular.history || {}) } };
+  if (!slot || state.lastSlot === `${today}|${slot}`) return { message: null, regular: state };
+  const host = new URL(siteUrl).host;
+  const link = (p, campaign) => {
+    const [pathPart, hash] = p.split('#');
+    return `${siteUrl}${pathPart}?utm_source=telegram&utm_medium=social&utm_campaign=${campaign}${hash ? `#${hash}` : ''}`;
+  };
+  const done = (id, message) => { state.lastSlot = `${today}|${slot}`; state.history[id] = today; return { message, regular: state }; };
+  const real = coupons.filter((c) => c.code && !c.sample);
+
+  // 1) Countdown before a sale (3 days and 1 day before), evening slot.
+  if (slot === 'evening') {
+    for (const ev of events) {
+      const d = daysBetween(today, ev.start);
+      const id = `cd|${ev.slug}|${ev.start}|${d}`;
+      if ((d === 3 || d === 1) && !state.history[id]) {
+        const short = ev.name.split(' –')[0];
+        return done(id, {
+          kind: 'countdown',
+          card: { kind: 'countdown', bigNumber: d, bigLabel: d === 1 ? 'יום אחד!' : 'ימים', title: `עד ${short} בעליאקספרס`, points: ['מוסיפים מוצרים לעגלה כבר עכשיו', 'אוספים קופונים ממרכז הקופונים', 'הקודים יגיעו לכאן ברגע שייצאו'], site: host },
+          text: `⏳ <b>${d === 1 ? 'מחר' : `בעוד ${d} ימים`}: ${esc(ev.name)} בעליאקספרס!</b>\n\nמי שמתכונן מראש חוסך יותר. מוסיפים לעגלה עכשיו, כדי לראות כמה המחיר באמת יורד. הקודים של המבצע יפורסמו כאן ברגע שייצאו 🔔`,
+          buttons: [[{ text: '📅 עמוד המבצע', url: link(`/sale/${ev.slug}/`, `countdown-${ev.slug}`) }], [{ text: '🎟️ למרכז הקופונים', url: link('/go/coupon-center/', `countdown-${ev.slug}`) }]],
+        });
+      }
+    }
+  }
+
+  // 2) Weekly best code – Friday noon.
+  const weekKey = `weekly|${today.slice(0, 4)}-${Math.ceil(daysBetween(`${today.slice(0, 4)}-01-01`, today) / 7)}`;
+  if (slot === 'noon' && weekday === 5 && real.length && !state.history[weekKey]) {
+    const top = [...real].sort((a, b) => b.discount - a.discount).slice(0, 3);
+    const mid = [...real].sort((a, b) => a.minOrder - b.minOrder)[Math.floor(real.length / 2)];
+    return done(weekKey, {
+      kind: 'weekly',
+      card: { kind: 'weekly', title: 'הקודים הכי שווים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
+      text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לרוב העגלות הקוד המשתלם הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
+      buttons: [[{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'weekly') }], [{ text: '🛒 לעליאקספרס', url: link(`/go/${top[0].id}/`, 'weekly') }]],
+    });
+  }
+
+  // 3) Evergreen rotation: the post shown least recently (never-shown first), respecting the gap.
+  const candidates = library
+    .map((p, i) => ({ p, i, last: state.history[p.id] || '' }))
+    .filter(({ last }) => !last || daysBetween(last, today) >= minGapDays)
+    .sort((a, b) => a.last.localeCompare(b.last) || a.i - b.i);
+  if (!candidates.length) return { message: null, regular: state };
+  const post = candidates[0].p;
+  return done(post.id, {
+    kind: post.type,
+    card: { kind: post.type, emoji: post.emoji, title: post.title, points: post.points, site: host },
+    text: `${post.emoji} <b>${esc(post.title)}</b>\n\n${esc(post.text)}`,
+    buttons: post.buttons.map(([label, p]) => [{ text: label, url: link(p, post.id) }]),
+  });
+}
+
 async function api(token, method, body) {
   const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, { method: 'POST', body });
   const j = await res.json();
@@ -175,13 +237,20 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     }
     process.exit(0);
   }
+  // Regular content (tips / promotions / features): only when no code post goes out in this run.
+  const tz = (o) => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', ...o }).format(new Date()));
+  const hour = process.env.FORCE_HOUR ? Number(process.env.FORCE_HOUR) : tz({ hour: 'numeric', hour12: false });
+  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const reg = planRegular({ today, hour, weekday, regular: gen.telegram?.regular, events: manual.events || [], coupons: active, siteUrl: site.url });
+  if (!messages.length && reg.message) messages.push(reg.message);
+
   let sent = 0;
   for (const m of messages) {
     try { const how = await send(token, chat, m); console.log(`  ✓ ${m.kind} (${how})`); sent++; }
     catch (e) { console.error(`✗ ${e.message}`); process.exitCode = 1; break; }
   }
   if (sent === messages.length) {
-    gen.telegram = { posted, lastRun: new Date().toISOString() };
+    gen.telegram = { posted, regular: messages.includes(reg.message) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
     await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n');
   }
   console.log(`✓ telegram → ${chat}: ${sent}/${messages.length} posts`);

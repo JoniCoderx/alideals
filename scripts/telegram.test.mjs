@@ -48,3 +48,37 @@ test('repost re-sends current codes even if already posted', () => {
   const { posted } = planPosts({ ...base, coupons: codes, today: '2026-11-05' });
   assert.equal(planPosts({ ...base, coupons: codes, posted, today: '2026-11-05', repost: true }).messages.length, 1);
 });
+
+import { planRegular } from './telegram.mjs';
+
+const lib = [
+  { id: 'a', type: 'tip', emoji: '💡', title: 'A', points: [], text: 't', buttons: [['x', '/']] },
+  { id: 'b', type: 'deal', emoji: '🎁', title: 'B', points: [], text: 't', buttons: [['y', '/go/coins/']] },
+];
+const reg = { siteUrl: 'https://yeshdeal.com', library: lib, minGapDays: 2 };
+
+test('regular posts only inside a slot, once per slot', () => {
+  assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 9, weekday: 4 }).message, null);
+  const r1 = planRegular({ ...reg, today: '2026-11-06', hour: 12, weekday: 4 });
+  assert.equal(r1.message.card.title, 'A');
+  assert.match(r1.message.buttons[0][0].url, /utm_campaign=a/);
+  assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 13, weekday: 4, regular: r1.regular }).message, null);
+  const r2 = planRegular({ ...reg, today: '2026-11-06', hour: 20, weekday: 4, regular: r1.regular });
+  assert.equal(r2.message.card.title, 'B');
+  assert.equal(planRegular({ ...reg, today: '2026-11-07', hour: 12, weekday: 5, regular: r2.regular }).message, null, 'gap respected');
+  assert.equal(planRegular({ ...reg, today: '2026-11-08', hour: 12, weekday: 6, regular: r2.regular }).message.card.title, 'A');
+});
+
+test('countdown wins the evening slot 3 days and 1 day before a sale', () => {
+  const events = [{ slug: 'black-friday', name: 'בלאק פריידי', start: '2026-11-24' }];
+  const r = planRegular({ ...reg, today: '2026-11-21', hour: 20, weekday: 6, events });
+  assert.equal(r.message.kind, 'countdown');
+  assert.equal(r.message.card.bigNumber, 3);
+  assert.equal(planRegular({ ...reg, today: '2026-11-22', hour: 20, weekday: 0, events, regular: r.regular }).message.kind, 'tip');
+});
+
+test('weekly best code on Friday noon', () => {
+  const r = planRegular({ ...reg, today: '2026-11-06', hour: 12, weekday: 5, coupons: codes });
+  assert.equal(r.message.kind, 'weekly');
+  assert.match(r.message.text, /ILAFF20/);
+});

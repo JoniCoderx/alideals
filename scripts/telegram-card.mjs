@@ -17,13 +17,56 @@ const THEMES = {
   new: { bg: 'linear-gradient(150deg,#ff7a2f 0%,#e5122f 70%,#b80d2a 100%)', badge: '🔥 קודים חדשים' },
   event: { bg: 'linear-gradient(150deg,#ff7a2f 0%,#e5122f 55%,#7a0b3a 100%)', badge: '🎉 המבצע התחיל' },
   ending: { bg: 'linear-gradient(150deg,#2a1218 0%,#7a0b1f 60%,#e5122f 100%)', badge: '⏰ נגמר מחר' },
+  weekly: { bg: 'linear-gradient(150deg,#ffb400 0%,#ff7a2f 45%,#e5122f 100%)', badge: '🏆 הקוד של השבוע' },
 };
+
+// Text cards (tips / promotions / features / countdown): light, dark or brand themes for variety in the feed.
+const TEXT_THEMES = {
+  tip: { bg: 'radial-gradient(900px 600px at 100% 0%,#ffd9c7,transparent 60%),#fffaf7', fg: '#1b1b24', sub: '#4a4a58', accent: '#c8102e', chip: '#fff1ec', badge: '💡 טיפ', brandFill: 'url(#bg1)', brandMark: '#fff', url: ['#c8102e', '#fff'] },
+  deal: { bg: 'linear-gradient(150deg,#ff7a2f 0%,#e5122f 70%,#b80d2a 100%)', fg: '#fff', sub: 'rgba(255,255,255,.92)', accent: '#fff', chip: 'rgba(255,255,255,.16)', badge: '🎁 הטבה', brandFill: '#fff', brandMark: '#e5122f', url: ['#fff', '#c8102e'] },
+  feature: { bg: 'radial-gradient(800px 600px at 0% 100%,rgba(229,18,47,.35),transparent 60%),#16151b', fg: '#fff', sub: '#cfc9c6', accent: '#ff7a6e', chip: 'rgba(255,255,255,.08)', badge: '✨ באתר', brandFill: 'url(#bg1)', brandMark: '#fff', url: ['#fff', '#16151b'] },
+  countdown: { bg: 'linear-gradient(150deg,#16151b 0%,#7a0b3a 55%,#e5122f 100%)', fg: '#fff', sub: 'rgba(255,255,255,.9)', accent: '#ffb400', chip: 'rgba(255,255,255,.12)', badge: '⏳ ספירה לאחור', brandFill: '#fff', brandMark: '#e5122f', url: ['#fff', '#7a0b3a'] },
+};
+
+export function textCardBody({ kind, emoji, title, points = [], bigNumber, bigLabel, site, name }) {
+  const t = TEXT_THEMES[kind] || TEXT_THEMES.tip;
+  const brand = `<svg viewBox="0 0 64 64" width="72" height="72"><defs><linearGradient id="bg1" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#ff7a2f"/><stop offset="1" stop-color="#e5122f"/></linearGradient></defs><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="${t.brandFill}"/><path d="M22 39 42 19" stroke="${t.brandMark}" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="${t.brandMark}"/><circle cx="41" cy="37" r="5" fill="${t.brandMark}"/></svg>`;
+  const css = `body{background:${t.bg};color:${t.fg};padding:60px 64px 52px;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px;font-size:48px;font-weight:800;letter-spacing:-1px}
+.badge{background:${t.chip};border:2px solid ${kind === 'tip' ? '#f3d2c7' : 'rgba(255,255,255,.3)'};border-radius:999px;padding:12px 26px;font-size:32px;font-weight:700}
+.main{flex:1;display:flex;flex-direction:column;justify-content:center}
+.emoji{font-size:150px;line-height:1;margin-bottom:22px}
+.big{font-size:300px;font-weight:800;line-height:.9;color:${t.accent};letter-spacing:-8px}
+.biglabel{font-size:56px;font-weight:800;margin-top:6px}
+h1{font-size:${title.length > 26 ? 72 : 84}px;font-weight:800;line-height:1.08;letter-spacing:-1.5px}
+ul{list-style:none;padding:0;margin-top:34px;display:grid;gap:16px}
+li{display:flex;align-items:center;gap:18px;font-size:40px;color:${t.sub};font-weight:500}
+li b{flex:none;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:${t.accent};color:${kind === 'tip' ? '#fff' : kind === 'countdown' ? '#16151b' : '#c8102e'};font-size:32px}
+.foot{display:flex;justify-content:flex-start;align-items:center}
+.url{background:${t.url[0]};color:${t.url[1]};border-radius:999px;padding:14px 32px;font-size:34px;font-weight:800}`;
+  const html = `<div class="top"><div class="brand">${brand}<span>${esc(name)}<span style="color:${kind === 'tip' ? '#e5122f' : 'inherit'}">!</span></span></div><div class="badge">${esc(t.badge)}</div></div>
+<div class="main">
+  ${bigNumber != null ? `<div class="big">${esc(bigNumber)}</div><div class="biglabel">${esc(bigLabel || '')}</div><h1 style="margin-top:26px">${esc(title)}</h1>` : `<div class="emoji">${emoji || '💡'}</div><h1>${esc(title)}</h1>`}
+  ${points.length ? `<ul>${points.slice(0, 4).map((p, i) => `<li><b>${i + 1}</b><span>${esc(p)}</span></li>`).join('')}</ul>` : ''}
+</div>
+<div class="foot"><span class="url">${esc(site)}</span></div>`;
+  return { css, html };
+}
 
 export async function cardHTML({ kind, title, subtitle, codes, footer, site = 'yeshdeal.com', name = 'יש דיל' }) {
   const font = async (f) => (await fs.readFile(path.join(ROOT, 'src/assets/fonts', f))).toString('base64');
   const [he, la] = await Promise.all([font('rubik-hebrew.woff2'), font('rubik-latin.woff2')]);
+  if (TEXT_THEMES[kind]) {
+    const { css, html } = textCardBody({ kind, emoji: arguments[0].emoji, title, points: arguments[0].points, bigNumber: arguments[0].bigNumber, bigLabel: arguments[0].bigLabel, site, name });
+    return `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><style>
+@font-face{font-family:R;src:url(data:font/woff2;base64,${he}) format('woff2');font-weight:400 800;unicode-range:U+0590-05FF,U+20AA}
+@font-face{font-family:R;src:url(data:font/woff2;base64,${la}) format('woff2');font-weight:400 800}
+*{box-sizing:border-box;margin:0}html,body{width:1080px;height:1080px;overflow:hidden}body{font-family:R,'Noto Color Emoji',sans-serif}
+${css}</style></head><body>${html}</body></html>`;
+  }
   const t = THEMES[kind] || THEMES.new;
-  const list = codes.slice(0, 10);
+  const list = (codes || []).slice(0, 10);
   const big = list.length <= 4;
   const brandSize = 50;
   return `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><style>
