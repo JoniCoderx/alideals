@@ -12,8 +12,8 @@
     "ga4Id": ""
   },
   "affiliate": {
-    "_comment": "defaultLink = הקישור הכללי שלך מ-AliExpress Portals (s.click.aliexpress.com/e/...). כל לחיצה על קופון שאין לו קישור משלו תגיע לכאן.",
-    "defaultLink": "https://s.click.aliexpress.com/e/_REPLACE_WITH_YOUR_LINK",
+    "_comment": "defaultLink = קישור השותפים הכללי מ-AliExpress Portals (s.click.aliexpress.com/e/...). זמני: קישור רגיל לאליאקספרס עד אישור Portals – להחליף מיד אחרי האישור.",
+    "defaultLink": "https://he.aliexpress.com/",
     "couponCenterUrl": "https://www.aliexpress.com/p/coupon-pages/center.html",
     "homeUrl": "https://he.aliexpress.com/"
   },

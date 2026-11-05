@@ -3,70 +3,107 @@
   "updated": "2026-11-05",
   "coupons": [
     {
-      "id": "t2",
-      "code": "IL02",
+      "id": "ilaff02",
+      "code": "ILAFF02",
       "discount": 2,
       "minOrder": 15,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     },
     {
-      "id": "t4",
-      "code": "IL04",
-      "discount": 4,
+      "id": "ilaff05",
+      "code": "ILAFF05",
+      "discount": 5,
       "minOrder": 29,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     },
     {
-      "id": "t7",
-      "code": "IL07",
-      "discount": 7,
-      "minOrder": 49,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true,
-      "featured": true
+      "id": "ilaff08",
+      "code": "ILAFF08",
+      "discount": 8,
+      "minOrder": 45,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "featured": true,
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     },
     {
-      "id": "t12",
-      "code": "IL12",
+      "id": "ilaff12",
+      "code": "ILAFF12",
       "discount": 12,
-      "minOrder": 89,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true,
-      "featured": true
+      "minOrder": 65,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     },
     {
-      "id": "t20",
-      "code": "IL20",
+      "id": "ilaff16",
+      "code": "ILAFF16",
+      "discount": 16,
+      "minOrder": 85,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
+    },
+    {
+      "id": "ilaff20",
+      "code": "ILAFF20",
       "discount": 20,
-      "minOrder": 149,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true,
-      "featured": true
+      "minOrder": 119,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "featured": true,
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     },
     {
-      "id": "t30",
-      "code": "IL30",
-      "discount": 30,
-      "minOrder": 219,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true
+      "id": "ilaff37",
+      "code": "ILAFF37",
+      "discount": 37,
+      "minOrder": 215,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "featured": true,
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     },
     {
-      "id": "t45",
-      "code": "IL45",
-      "discount": 45,
-      "minOrder": 329,
-      "expires": "2026-11-30",
-      "tier": "A",
-      "sample": true
+      "id": "ilaff60",
+      "code": "ILAFF60",
+      "discount": 60,
+      "minOrder": 349,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
+    },
+    {
+      "id": "superil1",
+      "code": "SUPERIL1",
+      "discount": 110,
+      "minOrder": 550,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
+    },
+    {
+      "id": "superil2",
+      "code": "SUPERIL2",
+      "discount": 160,
+      "minOrder": 800,
+      "starts": "2026-11-01",
+      "expires": "2026-11-18",
+      "event": "11-11",
+      "note": "קוד מבצע 11.11 לישראל. בתוקף עד 18.11 בשעה 23:00."
     }
   ],
   "deals": [
@@ -107,8 +144,8 @@
     {
       "slug": "11-11",
       "name": "11.11 – יום הרווקים",
-      "start": "2026-11-11",
-      "end": "2026-11-13"
+      "start": "2026-11-01",
+      "end": "2026-11-18"
     },
     {
       "slug": "black-friday",
