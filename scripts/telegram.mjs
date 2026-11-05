@@ -1,21 +1,27 @@
-// Telegram channel bot: posts new coupon codes and "ends tomorrow" reminders.
+// Telegram channel bot: posts new coupon codes, "sale started" and "ends tomorrow" posts, each with a branded image.
 // Runs in CI on every build; idempotent thanks to state kept in data/generated.json (telegram.posted).
-//   TELEGRAM_BOT_TOKEN  – from @BotFather
-//   TELEGRAM_CHANNEL    – @channelusername (the bot must be an admin with "Post messages")
+//   TELEGRAM_BOT_TOKEN  – from @BotFather (GitHub secret)
+//   TELEGRAM_CHANNEL    – optional; defaults to social.telegram in config/site.json (https://t.me/name → @name)
+//   TELEGRAM_REPOST=1   – re-post all current codes once (manual run), e.g. after a design change
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mergeCoupons, safeLink, daysBetween } from './lib.mjs';
+import { renderCard } from './telegram-card.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Telegram audience spells it with ע – the site covers both spellings for SEO.
+const STORE = 'עליאקספרס';
 
 const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const money = (n, cur = 'USD') => (cur === 'ILS' ? `₪${n}` : `$${n}`);
-const heDate = (d) => { const [y, m, dd] = d.split('-'); return `${Number(dd)}.${Number(m)}`; };
+const heDate = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}.${Number(m)}`; };
 const keyOf = (c) => `${c.code}|${c.expires || ''}`;
+const line = (c) => `• <b>${money(c.discount, c.currency)}</b> הנחה מעל ${money(c.minOrder, c.currency)}: <code>${esc(c.code)}</code>`;
+const compactLines = (arr) => arr.filter((l, i, a) => l !== '' || (i > 0 && a[i - 1] !== '')).join('\n').trim();
 
 /** Pure: decides what to post. Returns { messages, posted } (posted = new state). */
-export function planPosts({ coupons, posted = {}, today, siteUrl, siteName, utm = 'utm_source=telegram&utm_medium=social' }) {
+export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, repost = false, utm = 'utm_source=telegram&utm_medium=social' }) {
   const real = coupons.filter((c) => c.code && !c.sample).sort((a, b) => a.minOrder - b.minOrder);
   const next = { ...posted };
   const messages = [];
@@ -23,99 +29,153 @@ export function planPosts({ coupons, posted = {}, today, siteUrl, siteName, utm 
     const [pathPart, hash] = p.split('#');
     return `${siteUrl}${pathPart}${pathPart.includes('?') ? '&' : '?'}${utm}${hash ? `#${hash}` : ''}`;
   };
+  const best = (arr) => [...arr].sort((a, b) => b.discount - a.discount)[0];
+  const host = new URL(siteUrl).host;
 
-  // 1) New codes → one batch message
-  const fresh = real.filter((c) => !posted[keyOf(c)]);
+  // 1) New codes (or a forced re-post) → one batch post
+  const fresh = repost ? real : real.filter((c) => !posted[keyOf(c)]);
   if (fresh.length) {
-    const lines = fresh.map((c) => `• <b>${money(c.discount, c.currency)}</b> הנחה מעל ${money(c.minOrder, c.currency)}: <code>${esc(c.code)}</code>`);
     const until = [...new Set(fresh.map((c) => c.expires).filter(Boolean))];
-    const best = [...fresh].sort((a, b) => b.discount - a.discount)[0];
+    const top = best(fresh);
     messages.push({
       kind: 'new',
-      text: [
-        `🔥 <b>${fresh.length > 1 ? 'קודי קופון חדשים לאליאקספרס' : 'קוד קופון חדש לאליאקספרס'}</b>`,
+      card: {
+        kind: 'new',
+        title: fresh.length > 1 ? `קודי קופון ל${STORE}` : `קוד קופון ל${STORE}`,
+        subtitle: `עד ${money(top.discount, top.currency)} הנחה · לישראל`,
+        codes: fresh,
+        footer: until.length === 1 ? `בתוקף עד ${heDate(until[0])}` : '',
+        site: host,
+      },
+      text: compactLines([
+        `🔥 <b>${fresh.length > 1 ? `קודי קופון חדשים ל${STORE}` : `קוד קופון חדש ל${STORE}`}</b>`,
         '',
-        ...lines,
+        ...fresh.map(line),
         '',
         until.length === 1 ? `⏳ בתוקף עד ${heDate(until[0])}` : '',
-        '👆 לוחצים על הקוד כדי להעתיק, ומדביקים בשדה "קוד מבצע" בתשלום.',
-      ].filter((l, i, a) => l !== '' || a[i - 1] !== '').join('\n').trim(),
+        '👆 לחיצה על הקוד מעתיקה אותו. מדביקים בשדה "קוד מבצע" בתשלום.',
+      ]),
       buttons: [
-        [{ text: '🛒 לאליאקספרס', url: link(`/go/${best.id}/`) }],
+        [{ text: `🛒 ל${STORE}`, url: link(`/go/${top.id}/`) }],
         [{ text: '🧮 איזה קוד מתאים לעגלה שלי?', url: link('/#calc') }],
       ],
     });
-    for (const c of fresh) next[keyOf(c)] = { posted: today };
+    for (const c of fresh) next[keyOf(c)] = { ...(next[keyOf(c)] || {}), posted: today };
   }
 
-  // 2) Ending tomorrow → one reminder per expiry date
+  // 2) Sale starts today → one post per event (only if it has active codes and wasn't covered by a "new" post today)
+  for (const ev of events) {
+    const k = `event|${ev.slug}|${ev.start}`;
+    if (ev.start !== today || next[k]) continue;
+    const evCodes = real.filter((c) => c.event === ev.slug);
+    next[k] = { posted: today };
+    if (!evCodes.length || fresh.some((c) => c.event === ev.slug)) continue;
+    const top = best(evCodes);
+    messages.push({
+      kind: 'event',
+      card: { kind: 'event', title: `${ev.name.split(' –')[0]} התחיל!`, subtitle: `עד ${money(top.discount, top.currency)} הנחה ב${STORE}`, codes: evCodes, footer: ev.end ? `עד ${heDate(ev.end)}` : '', site: host },
+      text: compactLines([
+        `🎉 <b>${esc(ev.name)} ב${STORE} התחיל!</b>`,
+        '',
+        ...evCodes.map(line),
+        '',
+        ev.end ? `⏳ המבצע עד ${heDate(ev.end)}. הקודים הגבוהים נגמרים ראשונים.` : '',
+      ]),
+      buttons: [[{ text: '🔥 לכל הקודים', url: link(`/sale/${ev.slug}/`) }], [{ text: `🛒 ל${STORE}`, url: link(`/go/${top.id}/`) }]],
+    });
+  }
+
+  // 3) Ending tomorrow → one reminder per expiry date
   const ending = real.filter((c) => c.expires && daysBetween(today, c.expires) === 1 && !next[keyOf(c)]?.reminded);
   if (ending.length) {
-    const top = [...ending].sort((a, b) => b.discount - a.discount).slice(0, 4);
+    const top4 = [...ending].sort((a, b) => b.discount - a.discount).slice(0, 4);
     messages.push({
       kind: 'ending',
-      text: [
-        `⏰ <b>נגמר מחר!</b> ${ending.length} קודים לאליאקספרס פגים מחר (${heDate(ending[0].expires)}).`,
+      card: { kind: 'ending', title: 'נגמר מחר!', subtitle: `${ending.length} קודים ל${STORE} פגים ב-${heDate(ending[0].expires)}`, codes: top4, footer: 'מי שמתכנן להזמין, עכשיו הזמן', site: host },
+      text: compactLines([
+        `⏰ <b>נגמר מחר!</b> ${ending.length} קודים ל${STORE} פגים מחר (${heDate(ending[0].expires)}).`,
         '',
-        ...top.map((c) => `• ${money(c.discount, c.currency)} מעל ${money(c.minOrder, c.currency)}: <code>${esc(c.code)}</code>`),
+        ...top4.map(line),
         '',
         'מי שמתכנן להזמין, עכשיו הזמן.',
-      ].join('\n'),
+      ]),
       buttons: [[{ text: '🔥 לכל הקודים', url: link('/') }]],
     });
     for (const c of ending) next[keyOf(c)] = { ...(next[keyOf(c)] || { posted: today }), reminded: today };
   }
 
-  // Forget codes that expired long ago so state stays small.
-  for (const [k, v] of Object.entries(next)) {
-    const exp = k.split('|')[1];
-    if (exp && daysBetween(exp, today) > 30) delete next[k];
+  // Forget entries that expired long ago so state stays small.
+  for (const k of Object.keys(next)) {
+    const parts = k.split('|');
+    const date = parts[0] === 'event' ? parts[2] : parts[1];
+    if (date && daysBetween(date, today) > 30) delete next[k];
   }
   return { messages, posted: next };
 }
 
-async function send(token, chat, msg) {
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chat,
-      text: msg.text,
-      parse_mode: 'HTML',
-      disable_web_page_preview: true,
-      reply_markup: { inline_keyboard: msg.buttons },
-    }),
-  });
+async function api(token, method, body) {
+  const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, { method: 'POST', body });
   const j = await res.json();
-  if (!j.ok) throw new Error(`Telegram: ${j.error_code} ${j.description}`);
+  if (!j.ok) throw new Error(`Telegram ${method}: ${j.error_code} ${j.description}`);
+  return j;
+}
+
+async function send(token, chat, msg) {
+  const markup = JSON.stringify({ inline_keyboard: msg.buttons });
+  const png = msg.card && msg.text.length <= 1024 ? await renderCard(msg.card).catch(() => null) : null;
+  if (png) {
+    const fd = new FormData();
+    fd.set('chat_id', chat);
+    fd.set('caption', msg.text);
+    fd.set('parse_mode', 'HTML');
+    fd.set('reply_markup', markup);
+    fd.set('photo', new Blob([png], { type: 'image/png' }), `${msg.kind}.png`);
+    await api(token, 'sendPhoto', fd);
+    return 'photo';
+  }
+  await api(token, 'sendMessage', new URLSearchParams({ chat_id: chat, text: msg.text, parse_mode: 'HTML', disable_web_page_preview: 'true', reply_markup: markup }));
+  return 'text';
 }
 
 // ---- CLI ----
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const site = JSON.parse(await fs.readFile(path.join(ROOT, 'config/site.json'), 'utf8'));
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  // Channel: TELEGRAM_CHANNEL secret, or derived from social.telegram (https://t.me/name → @name).
   const fromSite = (site.social?.telegram || '').match(/t\.me\/([A-Za-z0-9_]{4,})/);
   const chat = (process.env.TELEGRAM_CHANNEL || '').trim() || (fromSite ? `@${fromSite[1]}` : '');
   const dry = process.argv.includes('--dry');
-  if (!dry && (!token || !chat)) { console.log(`• Telegram not configured (token: ${token ? 'yes' : 'no'}, channel: ${chat || 'none'}) – skipping`); process.exit(0); }
+  const previewDir = (process.argv.find((a) => a.startsWith('--preview=')) || '').split('=')[1];
+  if (!dry && !previewDir && (!token || !chat)) { console.log(`• Telegram not configured (token: ${token ? 'yes' : 'no'}, channel: ${chat || 'none'}) – skipping`); process.exit(0); }
+
   const manual = JSON.parse(await fs.readFile(path.join(ROOT, 'data/coupons.json'), 'utf8'));
   const genFile = path.join(ROOT, 'data/generated.json');
   const gen = JSON.parse(await fs.readFile(genFile, 'utf8').catch(() => '{}'));
   if (!safeLink(site.affiliate.defaultLink) || /REPLACE/.test(site.affiliate.defaultLink)) { console.log('• no valid link yet – skipping'); process.exit(0); }
 
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+  const today = process.env.TODAY || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
   const { active } = mergeCoupons(manual.coupons, (gen.sheetCoupons || []).filter((c) => c.type !== 'deal'), today);
-  const { messages, posted } = planPosts({ coupons: active, posted: gen.telegram?.posted || {}, today, siteUrl: site.url, siteName: site.name });
+  const repost = process.env.TELEGRAM_REPOST === '1' || process.env.TELEGRAM_REPOST === 'true';
+  const { messages, posted } = planPosts({ coupons: active, events: manual.events || [], posted: gen.telegram?.posted || {}, today, siteUrl: site.url, repost: repost || !!previewDir });
 
-  if (dry) { for (const m of messages) console.log(`--- ${m.kind}\n${m.text}\n${JSON.stringify(m.buttons)}`); process.exit(0); }
+  if (dry || previewDir) {
+    for (const m of messages) {
+      console.log(`--- ${m.kind} (${m.text.length} chars)\n${m.text}\n${JSON.stringify(m.buttons)}`);
+      if (previewDir) {
+        const png = await renderCard(m.card);
+        if (png) { await fs.mkdir(previewDir, { recursive: true }); await fs.writeFile(path.join(previewDir, `${m.kind}.png`), png); console.log(`  image → ${previewDir}/${m.kind}.png`); }
+        else console.log('  (no Chrome – image skipped)');
+      }
+    }
+    process.exit(0);
+  }
   let sent = 0;
   for (const m of messages) {
-    try { await send(token, chat, m); sent++; } catch (e) { console.error(`✗ ${e.message}`); process.exitCode = 1; break; }
+    try { const how = await send(token, chat, m); console.log(`  ✓ ${m.kind} (${how})`); sent++; }
+    catch (e) { console.error(`✗ ${e.message}`); process.exitCode = 1; break; }
   }
   if (sent === messages.length) {
     gen.telegram = { posted, lastRun: new Date().toISOString() };
     await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n');
   }
-  console.log(`✓ telegram → ${chat}: ${sent}/${messages.length} messages sent`);
+  console.log(`✓ telegram → ${chat}: ${sent}/${messages.length} posts`);
 }

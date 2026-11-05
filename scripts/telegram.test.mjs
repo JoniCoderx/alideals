@@ -33,3 +33,18 @@ test('escapes HTML in codes', () => {
   const r = planPosts({ ...base, coupons: [{ id: 'x', code: 'A<b>', discount: 2, minOrder: 10 }], today: '2026-11-05' });
   assert.match(r.messages[0].text, /A&lt;b&gt;/);
 });
+
+test('posts "sale started" once on the start day when codes were already announced', () => {
+  const evCodes = codes.map((c) => ({ ...c, event: '11-11' }));
+  const events = [{ slug: '11-11', name: '11.11 – יום הרווקים', start: '2026-11-11', end: '2026-11-18' }];
+  const { posted } = planPosts({ ...base, coupons: evCodes, events, today: '2026-11-05' });
+  const r = planPosts({ ...base, coupons: evCodes, events, posted, today: '2026-11-11' });
+  assert.deepEqual(r.messages.map((m) => m.kind), ['event']);
+  assert.match(r.messages[0].text, /התחיל/);
+  assert.equal(planPosts({ ...base, coupons: evCodes, events, posted: r.posted, today: '2026-11-11' }).messages.length, 0);
+});
+
+test('repost re-sends current codes even if already posted', () => {
+  const { posted } = planPosts({ ...base, coupons: codes, today: '2026-11-05' });
+  assert.equal(planPosts({ ...base, coupons: codes, posted, today: '2026-11-05', repost: true }).messages.length, 1);
+});
