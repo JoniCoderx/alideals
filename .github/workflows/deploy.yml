@@ -11,6 +11,10 @@ on:
         description: 'Re-post all current codes to Telegram (with image)'
         type: boolean
         default: false
+      cancel_deployment:
+        description: 'Commit SHA of a stuck Pages deployment to cancel first (optional)'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -95,6 +99,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Clears a Pages deployment stuck "in progress" (otherwise every new deploy is refused).
+      - name: Cancel stuck deployment
+        if: inputs.cancel_deployment != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/deployments/${{ inputs.cancel_deployment }}/cancel" || true
       - id: deployment
         uses: actions/deploy-pages@v4
 
