@@ -92,12 +92,13 @@ async function send(token, chat, msg) {
 
 // ---- CLI ----
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chat = process.env.TELEGRAM_CHANNEL;
-  const dry = process.argv.includes('--dry');
-  if (!dry && (!token || !chat)) { console.log('• Telegram not configured – skipping'); process.exit(0); }
-
   const site = JSON.parse(await fs.readFile(path.join(ROOT, 'config/site.json'), 'utf8'));
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  // Channel: TELEGRAM_CHANNEL secret, or derived from social.telegram (https://t.me/name → @name).
+  const fromSite = (site.social?.telegram || '').match(/t\.me\/([A-Za-z0-9_]{4,})/);
+  const chat = (process.env.TELEGRAM_CHANNEL || '').trim() || (fromSite ? `@${fromSite[1]}` : '');
+  const dry = process.argv.includes('--dry');
+  if (!dry && (!token || !chat)) { console.log(`• Telegram not configured (token: ${token ? 'yes' : 'no'}, channel: ${chat || 'none'}) – skipping`); process.exit(0); }
   const manual = JSON.parse(await fs.readFile(path.join(ROOT, 'data/coupons.json'), 'utf8'));
   const genFile = path.join(ROOT, 'data/generated.json');
   const gen = JSON.parse(await fs.readFile(genFile, 'utf8').catch(() => '{}'));
@@ -116,5 +117,5 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     gen.telegram = { posted, lastRun: new Date().toISOString() };
     await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n');
   }
-  console.log(`✓ telegram: ${sent}/${messages.length} messages sent`);
+  console.log(`✓ telegram → ${chat}: ${sent}/${messages.length} messages sent`);
 }
