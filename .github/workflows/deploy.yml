@@ -104,7 +104,12 @@ jobs:
         if: inputs.cancel_deployment != ''
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh api -X POST "repos/${{ github.repository }}/pages/deployments/${{ inputs.cancel_deployment }}/cancel" || true
+        continue-on-error: true
+        run: |
+          echo "status before:"; gh api "repos/${{ github.repository }}/pages/deployments/${{ inputs.cancel_deployment }}" || true
+          gh api -X POST "repos/${{ github.repository }}/pages/deployments/${{ inputs.cancel_deployment }}/cancel" -i 2>&1 | head -5
+          sleep 10
+          echo "status after:"; gh api "repos/${{ github.repository }}/pages/deployments/${{ inputs.cancel_deployment }}" || true
       - id: deployment
         uses: actions/deploy-pages@v4
 
