@@ -239,7 +239,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
   const robots = noindex || SAMPLE_MODE ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1';
   const nav = [
     ['/', 'קודי קופון'],
-    ['/deals/', 'דילים'],
+    ...(allProducts().length ? [['/deals/', 'דילים']] : []),
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
     ['/guides/', 'מדריכים'],
   ];
@@ -302,7 +302,7 @@ ${body}
     <div>
       <h2>קופונים</h2>
       <a href="/">קוד קופון אליאקספרס</a>
-      <a href="/deals/">דילים מאליאקספרס</a>
+      ${allProducts().length ? '<a href="/deals/">דילים מאליאקספרס</a>' : ''}
       <a href="/new-user/">קופון למשתמש חדש</a>
       ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ${esc(le(e.name.split(' –')[0]))}</a>`).join('')}
     </div>
@@ -424,6 +424,7 @@ function homePage() {
           <button type="button" class="chip" aria-pressed="false" data-filter="150-99999">מעל $150</button>
         </div>
       </div>
+      ${manual.listNote ? `<p class="list-note">${esc(manual.listNote)}</p>` : ''}
       <div class="coupon-list" id="coupon-list">
         ${coupons.map((c) => couponCard(c)).join('')}
       </div>
@@ -697,7 +698,7 @@ await page('/guides/', guidesIndexPage(), { lastmod: guides.map((g) => g.updated
 for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), { lastmod: g.updated });
 await page('/about/', staticPage('/about/', 'אודות', `
 <p><b>${esc(site.name)}</b> הוא אתר עצמאי שמרכז את קודי הקופון של אליאקספרס לקונים מישראל, במקום אחד ובעברית.</p>
-<p>הקודים נאספים ממקורות רשמיים של אליאקספרס ומתוכנית השותפים שלה ומוזנים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
+<p>הקודים נאספים ממקורות פומביים ומתוכנית השותפים של אליאקספרס, ונבדקים מול יותר ממקור אחד לפני שהם עולים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
 <p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name}, מאיפה מגיעים קודי הקופון לאליאקספרס שמופיעים באתר, ואיך פונים אלינו עם קוד חדש או קוד שלא עובד.`));
 await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
 <p>${esc(site.name)} משתתף בתוכנית השותפים של אליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מאליאקספרס.</p>

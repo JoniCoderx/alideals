@@ -235,6 +235,7 @@ h1,h2,h3{line-height:1.25;margin:0 0 .5em}
   .footer-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:620px){
+  .site-header{position:static}
   .header-row{height:auto;flex-wrap:wrap;gap:4px 12px;padding-top:8px;padding-bottom:6px}
   .main-nav{width:calc(100% + 32px);margin:0 -16px;padding:0 12px}
   .brand{font-size:1.3rem}
@@ -259,3 +260,4 @@ h1,h2,h3{line-height:1.25;margin:0 0 .5em}
 main p a:not(.btn),main li a:not(.btn),.disclosure a{text-decoration:underline;text-underline-offset:2px}
 .crumbs a{text-decoration:none!important}
 .footer-legal a{text-decoration:underline;text-underline-offset:2px}
+.list-note{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:var(--hot-soft);color:var(--hot);font-weight:600;font-size:.95rem}
