@@ -1,6 +1,6 @@
 // Coupon data sources: local JSON, Google Sheets CSV, Reddit community (r/AliExpressCode).
 
-const UA = 'web:alikod-coupon-bot:1.0 (coupon aggregator)';
+const UA = 'web:kodhayom-coupon-bot:1.0 (coupon aggregator)';
 
 /* ---------------- CSV (Google Sheets "Publish to web" -> CSV) ---------------- */
 export function parseCSV(text) {

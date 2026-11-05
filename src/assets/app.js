@@ -1,4 +1,4 @@
-// אליקוד – reveal codes, copy, open affiliate link, filters, countdown. No dependencies.
+// קוד היום – reveal codes, copy, open affiliate link, filters, countdown. No dependencies.
 (function () {
   'use strict';
   var modal = document.getElementById('code-modal');

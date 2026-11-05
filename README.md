@@ -1,8 +1,8 @@
-# אליקוד · AliKod
+# קוד היום · KodHayom
 
 אתר קופונים לאליאקספרס לישראלים. הוא מתעדכן לבד כל 3 שעות, וכל לחיצה על קופון עוברת דרך קישור השותפים שלכם.
 
-**השם:** אליקוד (AliKod), דומיין מומלץ: `alikod.co.il`.
+**השם:** קוד היום (KodHayom), דומיין מומלץ: `kodhayom.co.il`.
 "אלי" + "קוד" יושב בדיוק על מילות החיפוש "קוד קופון אליאקספרס". השם קצר, קל לאיות בעברית ובאנגלית, ונשמע כמו מותג ולא כמו דומיין ספאם.
 
 ## איך זה עובד
@@ -42,7 +42,7 @@ r/AliExpressCode (Reddit)    ┘     (קודים מהקהילה, מסומנים 
    | `ALI_APP_KEY`, `ALI_APP_SECRET`, `ALI_TRACKING_ID` | מ-[AliExpress Open Platform](https://openservice.aliexpress.com) (Affiliate API). נותן דילים חמים בשקלים ולינקי שותפים אוטומטיים |
    | `COUPONS_SHEET_CSV_URL` | גוגל שיטס ← קובץ ← שיתוף ← פרסום באינטרנט ← CSV. העמודות מופיעות ב-`data/sheet-template.csv` |
    | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` | אפליקציה מסוג script ב-[reddit.com/prefs/apps](https://www.reddit.com/prefs/apps). שואב קודים חדשים מ-r/AliExpressCode |
-5. **דומיין:** קנו `alikod.co.il` והפנו רשומת CNAME אל `<user>.github.io`. הקובץ `CNAME` נוצר אוטומטית מתוך `config/site.json`.
+5. **דומיין:** קנו `kodhayom.co.il` והפנו רשומת CNAME אל `<user>.github.io`. הקובץ `CNAME` נוצר אוטומטית מתוך `config/site.json`.
 6. **אנליטיקס:** שימו את מזהה GA4 ב-`analytics.ga4Id`. האירועים `coupon_reveal`, `outbound_click` ו-`product_click` נשלחים אוטומטית.
 
 ## פיתוח מקומי

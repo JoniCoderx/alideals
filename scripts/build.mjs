@@ -1,4 +1,4 @@
-// Static site generator for אליקוד. Zero dependencies.
+// Static site generator for קוד היום. Zero dependencies.
 // Reads config/site.json + data/coupons.json + data/generated.json → writes dist/
 import fs from 'node:fs/promises';
 import path from 'node:path';
