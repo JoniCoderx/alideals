@@ -1,4 +1,4 @@
-// Category coupon pages: /coupon/<slug>/ – "קופון אליאקספרס ל<קטגוריה>".
+// Category coupon pages: /coupon/<slug>/ – "קופון עליאקספרס ל<קטגוריה>".
 // Every page has its own buying advice and FAQ (no copy-paste pages – Google treats those as doorways).
 // Claims stay general and checkable; anything AliExpress can change is phrased as "בדרך כלל" / "בודקים בעמוד המוצר".
 export const categories = [

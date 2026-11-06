@@ -312,3 +312,26 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .soon-inline{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:14px;padding:14px;border-radius:14px;background:var(--hot-soft);color:var(--ink)}
 .soon-inline b{color:var(--hot)}
 @media (prefers-reduced-motion:reduce){.soon-badge{animation:none}}
+/* hero CTAs + Telegram button */
+.eyebrow{margin:0 0 6px;font-weight:600;color:var(--brand-2);font-size:.98rem}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 6px}
+.btn-tg{background:#229ED9;color:#fff;box-shadow:0 6px 18px rgba(34,158,217,.28)}
+.btn-tg:hover{background:#1b8cc2}
+.tg-ico{width:20px;height:20px;flex:none}
+.foot-tg{display:inline-flex!important;align-items:center;gap:6px}
+.foot-tg .tg-ico,.ft-note .tg-ico{width:16px;height:16px;color:#229ED9;vertical-align:-3px}
+.soon-cta.btn-tg{box-shadow:none}
+/* finder teaser */
+.finder-promo{padding-top:4px}
+.finder-tease{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px 28px;align-items:center;padding:24px 24px 20px;border-radius:22px;color:#fff;background:radial-gradient(600px 300px at 100% 0%,rgba(255,122,47,.5),transparent 60%),radial-gradient(500px 300px at 0% 100%,rgba(229,18,47,.45),transparent 60%),#16151b}
+.ft-badge{display:inline-block;background:#ffb400;color:#16151b;font-weight:800;font-size:.82rem;padding:4px 12px;border-radius:999px}
+.finder-tease h2{margin:10px 0 6px;font-size:1.55rem;line-height:1.25}
+.finder-tease p{margin:0;opacity:.88}
+.ft-mock{display:flex;flex-direction:column;gap:10px;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px}
+.ft-input{background:#fff;color:#6b6b78;border-radius:12px;padding:13px 14px;font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ft-go{background:var(--grad);color:#fff;font-weight:800;text-align:center;border-radius:12px;padding:12px}
+.ft-mock:hover .ft-go{filter:brightness(1.08)}
+.ft-note{grid-column:1/-1;font-size:.92rem}
+.ft-note a{color:#7fd0f5;font-weight:700;text-decoration:none}
+@media (max-width:760px){.finder-tease{grid-template-columns:minmax(0,1fr);padding:20px 16px}.finder-tease h2{font-size:1.3rem}}
+@media (max-width:620px){.hero-cta .btn-primary{display:none}.hero-cta .btn-tg{width:100%}}

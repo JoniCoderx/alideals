@@ -111,7 +111,9 @@ const ICON = {
   clock: `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 6v4.3l2.8 1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   copy: `<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 4.5H5.5a1 1 0 0 0-1 1V13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   arrow: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 5 7 10l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  telegram: `<svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.94 4.3a1.1 1.1 0 0 0-1.5-1.17L2.7 10.1c-.95.38-.9 1.74.07 2.05l4.47 1.4 1.7 5.36c.25.8 1.26 1.04 1.85.45l2.52-2.5 4.53 3.33c.68.5 1.65.12 1.82-.7l2.28-15.2Zm-4.2 3.06-7.6 6.9a.6.6 0 0 0-.19.36l-.33 2.45c-.03.2-.31.22-.37.03l-1.14-3.6a.6.6 0 0 1 .26-.69l9.05-5.6c.2-.13.43.14.32.15Z"/></svg>`,
 };
+const tgBtn = (label, cls = '') => site.social.telegram ? `<a class="btn btn-tg ${cls}" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">${ICON.telegram}<span>${label}</span></a>` : '';
 
 const couponTitle = (c) => c.title || `${money(c.discount, c.currency)} הנחה בקנייה מעל ${money(c.minOrder, c.currency)}`;
 
@@ -194,7 +196,7 @@ function tierTable(list) {
   return `
 <div class="table-wrap">
 <table class="tiers">
-  <caption>מדרגות קודי ההנחה של אליאקספרס, ${esc(monthYear)}</caption>
+  <caption>מדרגות קודי ההנחה של עליאקספרס, ${esc(monthYear)}</caption>
   <thead><tr><th scope="col">סכום בעגלה</th><th scope="col">הנחה</th><th scope="col">קוד</th></tr></thead>
   <tbody>
   ${tiers.map((t, i) => {
@@ -269,7 +271,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <meta property="og:image" content="${abs('/assets/og-v2.jpg')}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="${esc(site.name)}: קוד קופון אליאקספרס לישראל">
+<meta property="og:image:alt" content="${esc(site.name)}: קוד קופון עליאקספרס לישראל">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ff3d2e">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -304,12 +306,12 @@ ${body}
   <div class="wrap footer-grid">
     <div>
       <a class="brand brand-footer" href="/">${logo('lg-f')}</a>
-      <p>${esc(site.tagline)}. האתר עצמאי ואינו קשור לאליאקספרס או לקבוצת עליבאבא.</p>
+      <p>${esc(site.tagline)}. האתר עצמאי ואינו קשור לעליאקספרס או לקבוצת עליבאבא.</p>
     </div>
     <div>
       <h2>קופונים</h2>
-      <a href="/">קוד קופון אליאקספרס</a>
-      ${allProducts().length ? '<a href="/deals/">דילים מאליאקספרס</a>' : ''}
+      <a href="/">קוד קופון עליאקספרס</a>
+      ${allProducts().length ? '<a href="/deals/">דילים מעליאקספרס</a>' : ''}
       <a href="/new-user/">קופון למשתמש חדש</a>
       <a href="/coupon/">קופונים לפי קטגוריה</a>
       ${categories.slice(0, 6).map((c) => `<a href="/coupon/${c.slug}/">קופון ל${esc(c.short)}</a>`).join('')}
@@ -325,7 +327,7 @@ ${body}
       <a href="/about/">אודות</a>
       <a href="/disclosure/">גילוי נאות</a>
       <a href="/privacy/">פרטיות</a>
-      ${site.social.telegram ? `<a href="${esc(site.social.telegram)}" rel="noopener">ערוץ טלגרם</a>` : ''}
+      ${site.social.telegram ? `<a class="foot-tg" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">${ICON.telegram} ערוץ טלגרם</a>` : ''}
       ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">ערוץ וואטסאפ</a>` : ''}
     </div>
   </div>
@@ -337,11 +339,11 @@ ${body}
   <h2 id="modal-title">הקוד שלכם</h2>
   <div class="modal-code"><code id="modal-code"></code><button class="btn btn-primary" type="button" id="modal-copy">${ICON.copy}<span>העתקה</span></button></div>
   <ol class="modal-steps">
-    <li>נכנסים לאליאקספרס (האפליקציה תיפתח לבד)</li>
+    <li>נכנסים לעליאקספרס (האפליקציה תיפתח לבד)</li>
     <li>מוסיפים מוצרים לעגלה ועוברים לתשלום</li>
     <li>מדביקים את הקוד בשדה <b>"קוד מבצע"</b></li>
   </ol>
-  <div class="modal-countdown" id="modal-countdown" role="status"><span>פותחים את אליאקספרס בעוד <b id="modal-count">2</b>…</span><i id="modal-bar"></i></div>
+  <div class="modal-countdown" id="modal-countdown" role="status"><span>פותחים את עליאקספרס בעוד <b id="modal-count">2</b>…</span><i id="modal-bar"></i></div>
   <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>לא נפתח? לחצו כאן</a></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
@@ -384,7 +386,7 @@ function calcWidget() {
 
 function faqBlock(items) {
   return `<section class="section" id="faq"><div class="wrap narrow">
-  <h2 class="section-title">שאלות נפוצות על קופונים לאליאקספרס</h2>
+  <h2 class="section-title">שאלות נפוצות על קופונים לעליאקספרס</h2>
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
 }
@@ -395,23 +397,28 @@ const catItems = (slugName) => (gen.deals?.[slugName] || []).filter((p) => safeL
 function homePage() {
   const pathname = '/';
   const title = realCodes.length
-    ? `קוד קופון אליאקספרס (עלי אקספרס) ${monthYear}: עד $${maxDiscount} הנחה | ${site.name}`
-    : `קוד קופון אליאקספרס ${monthYear}: כל הקודים לישראל | ${site.name}`;
+    ? `קוד קופון עליאקספרס (עלי אקספרס) ${monthYear}: עד $${maxDiscount} הנחה | ${site.name}`
+    : `קוד קופון עליאקספרס ${monthYear}: כל הקודים לישראל | ${site.name}`;
   const description = realCodes.length
-    ? `${realCodes.length} קודי קופון פעילים לאליאקספרס (קופונים לעלי אקספרס) לקונים מישראל, עד $${maxDiscount} הנחה, לפי סכום ההזמנה. עודכן ב-${updatedHe}.`
-    : `קודי הקופון וההנחות של אליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
+    ? `${realCodes.length} קודי קופון פעילים לעליאקספרס (קופונים לעלי אקספרס) לקונים מישראל, עד $${maxDiscount} הנחה, לפי סכום ההזמנה. עודכן ב-${updatedHe}.`
+    : `קודי הקופון וההנחות של עליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const body = `
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-text">
-      <h1>קוד קופון אליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
+      <p class="eyebrow">🇮🇱 כל הקודים של עלי אקספרס לישראל, במקום אחד</p>
+      <h1>קוד קופון עליאקספרס <span class="hl">${esc(monthYear)}</span></h1>
       <p class="lead">${realCodes.length ? `${realCodes.length} קודים פעילים · עד <strong>$${maxDiscount}</strong> הנחה` : 'כל קודי ההנחה, מסודרים לפי סכום ההזמנה'} · עודכן ב-${esc(updatedHe)}</p>
       <ul class="trust">
         <li>${ICON.check} קודים שפג תוקפם יורדים מהרשימה</li>
         <li>${ICON.check} מסודר לפי סכום העגלה</li>
         <li>${ICON.check} חינם, בלי הרשמה</li>
       </ul>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#codes">לכל הקודים ↓</a>
+        ${tgBtn('קודים חדשים בטלגרם')}
+      </div>
     </div>
     ${calcWidget()}
     ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c) => `
@@ -423,6 +430,15 @@ function homePage() {
   </div>
 </section>
 
+${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div class="finder-tease">
+  <div class="ft-text">
+    <span class="ft-badge">🔥 חדש · עולה בקרוב</span>
+    <h2>מוצא הזול: אותו מוצר, במחיר הכי נמוך בעליאקספרס</h2>
+    <p>מדביקים קישור למוצר, ותוך שניות מקבלים את אותו מוצר אצל המוכרים הזולים ביותר. בלי לחפש ובלי להשוות לבד.</p>
+  </div>
+  <a class="ft-mock" href="/finder/" aria-label="למוצא הזול"><span class="ft-input">🔗 הדביקו קישור למוצר מעלי אקספרס…</span><span class="ft-go">מצא לי זול יותר</span></a>
+  ${site.social.telegram ? `<p class="ft-note">רוצים לדעת ראשונים כשזה עולה? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">${ICON.telegram} הצטרפו לטלגרם</a></p>` : ''}
+</div></div></section>` : ''}
 ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🔎 חדש: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר במחיר הכי נמוך בעליאקספרס</span><i>נסו עכשיו ←</i></a></div></section>` : ''}
 <section class="section" id="codes">
   <div class="wrap layout-2">
@@ -451,7 +467,7 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
       ${tierTable(coupons)}
       <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
 
-      <h2 class="section-title">עוד דרכים לחסוך באליאקספרס</h2>
+      <h2 class="section-title">עוד דרכים לחסוך בעליאקספרס</h2>
       <div class="deal-grid">${deals.map(dealCard).join('')}</div>
     </div>
 
@@ -460,11 +476,11 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
         <h2>איך זה עובד?</h2>
         <ol class="steps">
           <li><span><b>לוחצים "העתק קוד"</b> הקוד מועתק</span></li>
-          <li><span><b>אליאקספרס נפתחת</b> בלשונית חדשה</span></li>
+          <li><span><b>עליאקספרס נפתחת</b> בלשונית חדשה</span></li>
           <li><span><b>מדביקים בתשלום</b> בשדה "קוד מבצע"</span></li>
         </ol>
         <a class="btn btn-primary btn-block" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>
-        ${site.social.telegram || site.social.whatsapp ? `<div class="side-alert"><b>רוצים לקבל קודים חדשים?</b><p>הצטרפו לערוץ ונשלח הודעה כשיוצאת סדרת קודים חדשה.</p>${site.social.telegram ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.telegram)}" rel="noopener">טלגרם</a>` : ''}${site.social.whatsapp ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.whatsapp)}" rel="noopener">וואטסאפ</a>` : ''}</div>` : ''}
+        ${site.social.telegram || site.social.whatsapp ? `<div class="side-alert"><b>רוצים לקבל קודים חדשים?</b><p>הצטרפו לערוץ ונשלח הודעה כשיוצאת סדרת קודים חדשה.</p>${tgBtn('הצטרפו לערוץ הטלגרם', 'btn-block')}${site.social.whatsapp ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.whatsapp)}" rel="noopener">וואטסאפ</a>` : ''}</div>` : ''}
       </div>
     </aside>
   </div>
@@ -475,20 +491,20 @@ ${hotProducts.length ? `
   <div class="wrap">
     <div class="section-head"><h2 class="section-title">הנמכרים ביותר עם משלוח לישראל</h2><a class="more" href="/deals/">לכל הדילים ←</a></div>
     <div class="product-grid">${hotProducts.map(productCard).join('')}</div>
-    <p class="muted">המחירים בשקלים כפי שהתקבלו מאליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות.</p>
+    <p class="muted">המחירים בשקלים כפי שהתקבלו מעליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות.</p>
   </div>
 </section>` : ''}
 
 <section class="section">
   <div class="wrap narrow prose">
-    <h2>איך משתמשים בקוד קופון של אליאקספרס</h2>
+    <h2>איך משתמשים בקוד קופון של עליאקספרס</h2>
     <ol>
-      <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"העתק קוד"</b>. הקוד מועתק ואליאקספרס נפתחת.</li>
+      <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"העתק קוד"</b>. הקוד מועתק ועליאקספרס נפתחת.</li>
       <li>מוסיפים מוצרים לעגלה ועוברים לתשלום.</li>
       <li>בשורה <b>"קוד מבצע"</b> מדביקים את הקוד ולוחצים "החל".</li>
       <li>בודקים שהסכום ירד, ורק אז משלמים.</li>
     </ol>
-    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון באליאקספרס</a>. מזמינים בפעם הראשונה? ראו <a href="/new-user/">קופון אליאקספרס למשתמש חדש</a>.</p>
+    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון בעליאקספרס</a>. מזמינים בפעם הראשונה? ראו <a href="/new-user/">קופון עליאקספרס למשתמש חדש</a>.</p>
 
     <h2>למה הקוד לא נכנס?</h2>
     <ul>
@@ -499,14 +515,14 @@ ${hotProducts.length ? `
     </ul>
 
     <h2>מתי יוצאים הקודים הכי שווים?</h2>
-    <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של אליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p>
+    <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של עליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p>
 
     <h2>מדריכים פופולריים</h2>
     <ul>
-      <li><a href="/guides/first-time-aliexpress/">איך קונים באליאקספרס בפעם הראשונה</a></li>
-      <li><a href="/guides/is-aliexpress-safe/">האם אליאקספרס בטוח?</a></li>
+      <li><a href="/guides/first-time-aliexpress/">איך קונים בעליאקספרס בפעם הראשונה</a></li>
+      <li><a href="/guides/is-aliexpress-safe/">האם עליאקספרס בטוח?</a></li>
       <li><a href="/guides/aliexpress-shipping-israel/">כמה זמן לוקח משלוח לישראל</a></li>
-      <li><a href="/guides/aliexpress-vs-temu/">אליאקספרס או טמו: מה עדיף?</a></li>
+      <li><a href="/guides/aliexpress-vs-temu/">עליאקספרס או טמו: מה עדיף?</a></li>
       <li><a href="/guides/aliexpress-dispute/">איך פותחים מחלוקת ומקבלים החזר</a></li>
     </ul>
   </div>
@@ -520,7 +536,7 @@ ${!FINDER_API ? `<section class="section"><div class="wrap">
       <div class="soon-card"><b>🔥 דילים בשקלים</b><span>המוצרים הנמכרים ביותר עם משלוח לישראל, לפי קטגוריות, מתעדכן לבד כמה פעמים ביום.</span><i>בקרוב</i></div>
       ${site.social.telegram ? `<a class="soon-card is-live" href="${esc(site.social.telegram)}" rel="noopener"><b>💬 קהילת יש דיל!</b><span>קודים חדשים ברגע שהם יוצאים, תזכורת לפני שקוד נגמר, וטיפים. בטלגרם, בחינם.</span><i>כבר פעיל · הצטרפו</i></a>` : ''}
     </div>
-    ${site.social.telegram ? `<a class="btn btn-primary soon-cta" href="${esc(site.social.telegram)}" rel="noopener">רוצים להיות הראשונים לדעת? הצטרפו לטלגרם</a>` : ''}
+    ${tgBtn('רוצים להיות הראשונים לדעת? הצטרפו לטלגרם', 'soon-cta')}
   </div>
 </div></section>` : ''}
 
@@ -533,8 +549,8 @@ ${faqBlock(faq)}
 
 ${expired.length ? `<section class="section"><div class="wrap narrow"><details class="expired"><summary>קודים שפג תוקפם (${expired.length})</summary><ul>${expired.slice(0, 20).map((c) => `<li><s>${esc(c.code)}</s>: ${money(c.discount, c.currency)} מעל ${money(c.minOrder, c.currency)} (עד ${heDate(c.expires)})</li>`).join('')}</ul></details></div></section>` : ''}
 
-${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה באליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
-<section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מאליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
+${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה בעליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
+<section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מעליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
   return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)] });
 }
@@ -546,7 +562,7 @@ function dealsIndexPage() {
   const any = cats.some((c) => c.items.length);
   const body = `
 <section class="hero hero-sm"><div class="wrap">${bc.html}
-  <h1>דילים מאליאקספרס עם משלוח לישראל</h1>
+  <h1>דילים מעליאקספרס עם משלוח לישראל</h1>
   <p class="lead">המוצרים הנמכרים ביותר לפי קטגוריה, במחירים בשקלים. אפשר לשלב עם <a href="/">קוד קופון</a>.</p>
 </div></section>
 <section class="section"><div class="wrap">
@@ -554,11 +570,11 @@ function dealsIndexPage() {
   ${cats.filter((c) => c.items.length).map((c) => `
     <div class="section-head"><h2 class="section-title">${esc(c.name)}</h2><a class="more" href="/deals/${c.slug}/">עוד ←</a></div>
     <div class="product-grid">${c.items.slice(0, 4).map(productCard).join('')}</div>`).join('')}
-  ${any ? `<p class="muted">המחירים כפי שהתקבלו מאליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות.</p>` : `<div class="empty"><h2>הדילים יופיעו כאן בקרוב</h2><p>בינתיים אפשר לראות את כל המבצעים ישירות באליאקספרס.</p><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home">למבצעים באליאקספרס ${ICON.arrow}</a></div>`}
+  ${any ? `<p class="muted">המחירים כפי שהתקבלו מעליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות.</p>` : `<div class="empty"><h2>הדילים יופיעו כאן בקרוב</h2><p>בינתיים אפשר לראות את כל המבצעים ישירות בעליאקספרס.</p><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home">למבצעים בעליאקספרס ${ICON.arrow}</a></div>`}
 </div></section>`;
   return layout({
-    title: `דילים מאליאקספרס לישראל ${monthYear} | ${site.name}`,
-    description: 'המוצרים הנמכרים ביותר באליאקספרס עם משלוח לישראל ומחירים בשקלים, לפי קטגוריות.',
+    title: `דילים מעליאקספרס לישראל ${monthYear} | ${site.name}`,
+    description: 'המוצרים הנמכרים ביותר בעליאקספרס עם משלוח לישראל ומחירים בשקלים, לפי קטגוריות.',
     pathname, body, ld: [bc.ld], noindex: !any,
   });
 }
@@ -570,18 +586,18 @@ function dealCategoryPage(cat) {
   const top = featuredCoupons.slice(0, 2);
   const body = `
 <section class="hero hero-sm"><div class="wrap">${bc.html}
-  <h1>דילים מאליאקספרס: ${esc(cat.name)}</h1>
+  <h1>דילים מעליאקספרס: ${esc(cat.name)}</h1>
   <p class="lead">המוצרים הנמכרים ביותר ב${esc(cat.name)} עם משלוח לישראל, יחד עם קודי ההנחה העדכניים.</p>
 </div></section>
 <section class="section"><div class="wrap">
   ${top.length ? `<h2 class="section-title">קודי הנחה שאפשר לשלב</h2><div class="coupon-list coupon-list-inline">${top.map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
   <h2 class="section-title">הנמכרים ביותר</h2>
-  ${items.length ? `<div class="product-grid">${items.map(productCard).join('')}</div>` : `<div class="empty"><p>אין כרגע מוצרים בקטגוריה.</p><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home">לחיפוש באליאקספרס ${ICON.arrow}</a></div>`}
-  <p class="muted">המחירים כפי שהתקבלו מאליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות. <a href="/">לכל קודי הקופון ←</a></p>
+  ${items.length ? `<div class="product-grid">${items.map(productCard).join('')}</div>` : `<div class="empty"><p>אין כרגע מוצרים בקטגוריה.</p><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home">לחיפוש בעליאקספרס ${ICON.arrow}</a></div>`}
+  <p class="muted">המחירים כפי שהתקבלו מעליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות. <a href="/">לכל קודי הקופון ←</a></p>
 </div></section>`;
   return layout({
-    title: `דילים מאליאקספרס ב${cat.name} עם משלוח לישראל | ${site.name}`,
-    description: `המוצרים הנמכרים ביותר ב${cat.name} מאליאקספרס עם משלוח לישראל ומחירים בשקלים, יחד עם קודי הקופון העדכניים.`,
+    title: `דילים מעליאקספרס ב${cat.name} עם משלוח לישראל | ${site.name}`,
+    description: `המוצרים הנמכרים ביותר ב${cat.name} מעליאקספרס עם משלוח לישראל ומחירים בשקלים, יחד עם קודי הקופון העדכניים.`,
     pathname, body, ld: [bc.ld], noindex: !items.length,
   });
 }
@@ -599,8 +615,8 @@ function eventPage(ev) {
   const faqItems = content.faq || [];
   const body = `
 <section class="hero"><div class="wrap narrow">${bc.html}
-  <h1>קוד קופון אליאקספרס ${esc(le(ev.name))} ${year}</h1>
-  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשאליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
+  <h1>קוד קופון עליאקספרס ${esc(le(ev.name))} ${year}</h1>
+  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשעליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
   ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
 <section class="section"><div class="wrap narrow">
@@ -612,7 +628,7 @@ function eventPage(ev) {
     <h2>איך מתכוננים ${esc(le(short))}</h2>
     <ol>
       <li>מוסיפים לעגלה כבר עכשיו את המוצרים שרוצים. ככה רואים מה המחיר לפני המבצע ומה ההנחה האמיתית.</li>
-      <li>אוספים קופונים ממרכז הקופונים של אליאקספרס כשהם נפתחים, ומטבעות באפליקציה.</li>
+      <li>אוספים קופונים ממרכז הקופונים של עליאקספרס כשהם נפתחים, ומטבעות באפליקציה.</li>
       <li>בפתיחת המבצע חוזרים לעמוד הזה, בוחרים קוד לפי סכום העגלה ב<a href="/#calc">מחשבון</a> ומשלמים מהר, לפני שהמכסה נגמרת.</li>
     </ol>
     <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a> · <a href="/guides/how-to-use-aliexpress-coupon/">איך מפעילים קוד</a></p>
@@ -620,8 +636,8 @@ function eventPage(ev) {
   ${faqItems.length ? `<h2 class="section-title">שאלות נפוצות על ${esc(short)}</h2><div class="faq">${faqItems.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>` : ''}
 </div></section>`;
   return layout({
-    title: `קוד קופון אליאקספרס ${le(short)} ${year} | ${site.name}`,
-    description: `קודי הקופון של אליאקספרס ${le(ev.name)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
+    title: `קוד קופון עליאקספרס ${le(short)} ${year} | ${site.name}`,
+    description: `קודי הקופון של עליאקספרס ${le(ev.name)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
     pathname, body, ld: faqItems.length ? [bc.ld, faqLd(faqItems)] : [bc.ld],
   });
 }
@@ -648,7 +664,7 @@ function finderPage() {
       <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>מצאו לי זול יותר</button>
     </div>
     <p class="muted finder-help">באפליקציה: עמוד המוצר ← שיתוף ← העתקת קישור. עובד גם עם קישורים מקוצרים.</p>
-    ${FINDER_API ? '' : `<div class="soon-inline"><b>🚀 מוצא הזול עולה ממש בקרוב</b><span>אנחנו בשלבי בדיקה אחרונים. רוצים לדעת ראשונים כשזה עולה?</span>${site.social.telegram ? `<a class="btn btn-primary" href="${esc(site.social.telegram)}" rel="noopener">הצטרפו לטלגרם</a>` : ''}<a href="/">בינתיים: כל קודי הקופון ←</a></div>`}
+    ${FINDER_API ? '' : `<div class="soon-inline"><b>🚀 מוצא הזול עולה ממש בקרוב</b><span>אנחנו בשלבי בדיקה אחרונים. רוצים לדעת ראשונים כשזה עולה?</span>${tgBtn('הצטרפו לטלגרם')}<a href="/">בינתיים: כל קודי הקופון ←</a></div>`}
   </form>
 </div></section>
 <section class="section"><div class="wrap narrow">
@@ -674,15 +690,15 @@ function categoryHubPage() {
   const bc = breadcrumbs([{ name: 'קופונים לפי קטגוריה', url: pathname }]);
   const body = `
 <section class="hero hero-sm"><div class="wrap">${bc.html}
-  <h1>קופונים לאליאקספרס לפי קטגוריה</h1>
+  <h1>קופונים לעליאקספרס לפי קטגוריה</h1>
   <p class="lead">קודי המבצע של עליאקספרס עובדים על רוב האתר. בחרו קטגוריה וקבלו את הקודים יחד עם טיפים לקנייה חכמה בתחום.</p>
 </div></section>
 <section class="section"><div class="wrap">
-  <div class="cat-grid">${categories.map((c) => `<a class="cat" href="/coupon/${c.slug}/"><b>${c.emoji} ${esc(c.name)}</b><span>קופון אליאקספרס ל${esc(c.short)}</span></a>`).join('')}</div>
+  <div class="cat-grid">${categories.map((c) => `<a class="cat" href="/coupon/${c.slug}/"><b>${c.emoji} ${esc(c.name)}</b><span>קופון עליאקספרס ל${esc(c.short)}</span></a>`).join('')}</div>
   <p class="muted"><a href="/">לכל קודי הקופון ←</a></p>
 </div></section>`;
   return layout({
-    title: `קופונים לאליאקספרס לפי קטגוריה ${monthYear} | ${site.name}`,
+    title: `קופונים לעליאקספרס לפי קטגוריה ${monthYear} | ${site.name}`,
     description: 'קופונים לעלי אקספרס לפי קטגוריה: בגדים, נעליים, טלפונים, אוזניות, בית, ילדים ועוד. קודי מבצע לישראל + טיפים לקנייה חכמה.',
     pathname, body, ld: [bc.ld],
   });
@@ -696,7 +712,7 @@ function categoryPage(cat) {
   const related = categories.filter((c) => c.slug !== cat.slug).slice(0, 6);
   const body = `
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
-  <h1>${cat.emoji} קופון אליאקספרס ל${esc(cat.name)}</h1>
+  <h1>${cat.emoji} קופון עליאקספרס ל${esc(cat.name)}</h1>
   <p class="lead">קופונים לעלי אקספרס ל${esc(cat.name)}, ${esc(monthYear)}${realCodes.length ? ` · עד <strong>$${maxDiscount}</strong> הנחה` : ''}</p>
 </div></section>
 <section class="section"><div class="wrap narrow">
@@ -718,8 +734,8 @@ function categoryPage(cat) {
   <div class="cat-grid">${related.map((c) => `<a class="cat" href="/coupon/${c.slug}/"><b>${c.emoji} ${esc(c.name)}</b><span>קופון ל${esc(c.short)}</span></a>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `קופון אליאקספרס ל${cat.short} ${monthYear}: קודים וטיפים | ${site.name}`,
-    description: `קופונים לעלי אקספרס ל${cat.name}: קודי המבצע הפעילים לישראל לפי סכום העגלה, וטיפים לקנייה חכמה של ${cat.name} באליאקספרס.`,
+    title: `קופון עליאקספרס ל${cat.short} ${monthYear}: קודים וטיפים | ${site.name}`,
+    description: `קופונים לעלי אקספרס ל${cat.name}: קודי המבצע הפעילים לישראל לפי סכום העגלה, וטיפים לקנייה חכמה של ${cat.name} בעליאקספרס.`,
     pathname, body, ld: [bc.ld, faqLd(faqItems)],
   });
 }
@@ -730,15 +746,15 @@ function newUserPage() {
   const nu = deals.find((d) => d.id === 'new-user');
   const firstTier = coupons.filter((c) => c.code && !c.sample).sort((a, b) => a.minOrder - b.minOrder)[0];
   const items = [
-    { q: 'מה מקבלים כמשתמש חדש באליאקספרס?', a: 'אליאקספרס נותנת למצטרפים חדשים הטבות שמשתנות מעת לעת, למשל קופון להזמנה ראשונה או מוצרים במחיר מוזל. ההטבה המדויקת מופיעה באתר אחרי ההרשמה.' },
+    { q: 'מה מקבלים כמשתמש חדש בעליאקספרס?', a: 'עליאקספרס נותנת למצטרפים חדשים הטבות שמשתנות מעת לעת, למשל קופון להזמנה ראשונה או מוצרים במחיר מוזל. ההטבה המדויקת מופיעה באתר אחרי ההרשמה.' },
     { q: 'אפשר לשלב את הטבת ההצטרפות עם קוד קופון?', a: 'בדרך כלל אפשר להשתמש בקוד מבצע אחד בכל הזמנה, ולשלב אותו עם קופונים שנאספים לחשבון. אם ההטבה היא קופון שנאסף לחשבון, לרוב אפשר להוסיף עליו קוד מבצע מהרשימה שלנו.' },
-    { q: 'מי נחשב משתמש חדש?', a: 'מי שעדיין לא ביצע הזמנה באליאקספרס. פתיחת חשבון נוסף לאותו אדם עלולה להפר את התנאים של אליאקספרס, ולכן לא כדאי.' },
+    { q: 'מי נחשב משתמש חדש?', a: 'מי שעדיין לא ביצע הזמנה בעליאקספרס. פתיחת חשבון נוסף לאותו אדם עלולה להפר את התנאים של עליאקספרס, ולכן לא כדאי.' },
   ];
   const body = `
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
-  <h1>קופון אליאקספרס למשתמש חדש</h1>
-  <p class="lead">מצטרפים לאליאקספרס בפעם הראשונה? כך מוציאים את המקסימום מההזמנה הראשונה.</p>
-  <a class="btn btn-primary" href="/go/${nu ? nu.id : 'home'}/" ${OUT} data-go="${nu ? nu.id : 'home'}">להטבות ההצטרפות באליאקספרס ${ICON.arrow}</a>
+  <h1>קופון עליאקספרס למשתמש חדש</h1>
+  <p class="lead">מצטרפים לעליאקספרס בפעם הראשונה? כך מוציאים את המקסימום מההזמנה הראשונה.</p>
+  <a class="btn btn-primary" href="/go/${nu ? nu.id : 'home'}/" ${OUT} data-go="${nu ? nu.id : 'home'}">להטבות ההצטרפות בעליאקספרס ${ICON.arrow}</a>
 </div></section>
 <section class="section"><div class="wrap narrow">
   <div class="prose">
@@ -754,8 +770,8 @@ function newUserPage() {
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `קופון אליאקספרס למשתמש חדש ${monthYear}: הטבות להזמנה ראשונה | ${site.name}`,
-    description: 'מה מקבלים בהזמנה ראשונה באליאקספרס, איך משלבים את הטבת ההצטרפות עם קוד קופון, ומה כדאי לדעת לפני שנרשמים.',
+    title: `קופון עליאקספרס למשתמש חדש ${monthYear}: הטבות להזמנה ראשונה | ${site.name}`,
+    description: 'מה מקבלים בהזמנה ראשונה בעליאקספרס, איך משלבים את הטבת ההצטרפות עם קוד קופון, ומה כדאי לדעת לפני שנרשמים.',
     pathname, body, ld: [bc.ld, faqLd(items)],
   });
 }
@@ -764,9 +780,9 @@ function guidesIndexPage() {
   const pathname = '/guides/';
   const bc = breadcrumbs([{ name: 'מדריכים', url: pathname }]);
   const body = `
-<section class="hero hero-sm"><div class="wrap">${bc.html}<h1>מדריכים לקנייה חכמה באליאקספרס</h1><p class="lead">מה שכדאי לדעת כדי לשלם פחות.</p></div></section>
+<section class="hero hero-sm"><div class="wrap">${bc.html}<h1>מדריכים לקנייה חכמה בעליאקספרס</h1><p class="lead">מה שכדאי לדעת כדי לשלם פחות.</p></div></section>
 <section class="section"><div class="wrap"><div class="guide-grid">${guides.map((g) => `<a class="guide-card" href="/guides/${g.slug}/"><h2>${esc(g.title)}</h2><p>${esc(g.description)}</p><span>לקריאה ←</span></a>`).join('')}</div></div></section>`;
-  return layout({ title: `מדריכים לאליאקספרס בעברית | ${site.name}`, description: 'מדריכים בעברית לקנייה באליאקספרס: שימוש בקודי קופון, שילוב הנחות, מכס ומע"מ, Choice ולוח המבצעים.', pathname, body, ld: [bc.ld] });
+  return layout({ title: `מדריכים לעליאקספרס בעברית | ${site.name}`, description: 'מדריכים בעברית לקנייה בעליאקספרס: שימוש בקודי קופון, שילוב הנחות, מכס ומע"מ, Choice ולוח המבצעים.', pathname, body, ld: [bc.ld] });
 }
 
 function guideFaq(body) {
@@ -813,11 +829,11 @@ function goPage(target) {
   // Interstitial redirect: noindex. Every outbound affiliate click flows through /go/<id>/.
   const t = safeLink(target, DEFAULT_LINK);
   return `<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>מעבר לאליאקספרס…</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>מעבר לעליאקספרס…</title>
 <meta http-equiv="refresh" content="0;url=${esc(t)}">
 <style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#fffaf7;color:#1b1b24;text-align:center;padding:16px}a{color:#c20c33}</style>
 <script>location.replace(${scriptJSON(t)});</script></head>
-<body><p>מעבירים אתכם לאליאקספרס…<br><a href="${esc(t)}" rel="nofollow sponsored">לחצו כאן אם המעבר לא קרה</a></p></body></html>`;
+<body><p>מעבירים אתכם לעליאקספרס…<br><a href="${esc(t)}" rel="nofollow sponsored">לחצו כאן אם המעבר לא קרה</a></p></body></html>`;
 }
 
 // Outbound targets (id → affiliate URL). Used by /go/<id>/ pages and embedded in each page so clicks
@@ -855,19 +871,19 @@ for (const e of manual.events || []) await page(`/sale/${e.slug}/`, eventPage(e)
 await page('/guides/', guidesIndexPage(), { lastmod: guides.map((g) => g.updated).sort().pop() });
 for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), { lastmod: g.updated });
 await page('/about/', staticPage('/about/', 'אודות', `
-<p><b>${esc(site.name)}</b> הוא אתר עצמאי שמרכז את קודי הקופון של אליאקספרס לקונים מישראל, במקום אחד ובעברית.</p>
-<p>הקודים נאספים ממקורות פומביים ומתוכנית השותפים של אליאקספרס, ונבדקים מול יותר ממקור אחד לפני שהם עולים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
-<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name}, מאיפה מגיעים קודי הקופון לאליאקספרס שמופיעים באתר, ואיך פונים אלינו עם קוד חדש או קוד שלא עובד.`));
+<p><b>${esc(site.name)}</b> הוא אתר עצמאי שמרכז את קודי הקופון של עליאקספרס לקונים מישראל, במקום אחד ובעברית.</p>
+<p>הקודים נאספים ממקורות פומביים ומתוכנית השותפים של עליאקספרס, ונבדקים מול יותר ממקור אחד לפני שהם עולים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
+<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name}, מאיפה מגיעים קודי הקופון לעליאקספרס שמופיעים באתר, ואיך פונים אלינו עם קוד חדש או קוד שלא עובד.`));
 await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
-<p>${esc(site.name)} משתתף בתוכנית השותפים של אליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מאליאקספרס.</p>
+<p>${esc(site.name)} משתתף בתוכנית השותפים של עליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מעליאקספרס.</p>
 <p>העמלה לא מייקרת את המחיר שלכם, ולא משפיעה על סדר הקודים. הם מסודרים לפי סכום ההזמנה.</p>
 <p>האתר אינו קשור, מאושר או מופעל ע"י AliExpress או Alibaba Group. כל הסימנים המסחריים שייכים לבעליהם.</p>
-<p>התנאים של כל קוד נקבעים ע"י אליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות: איך האתר מרוויח מקישורי השותפים של אליאקספרס, ולמה זה לא משנה את המחיר שלכם ולא את סדר הקודים.'));
+<p>התנאים של כל קוד נקבעים ע"י עליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות: איך האתר מרוויח מקישורי השותפים של עליאקספרס, ולמה זה לא משנה את המחיר שלכם ולא את סדר הקודים.'));
 await page('/privacy/', staticPage('/privacy/', 'מדיניות פרטיות', `
 <p>האתר לא דורש הרשמה ולא אוסף פרטים מזהים.</p>
 ${site.analytics?.ga4Id ? '<p>אנחנו משתמשים ב-Google Analytics כדי להבין באופן אנונימי איך משתמשים באתר.</p>' : ''}
-<p>כשעוברים מהאתר לאליאקספרס, אליאקספרס עשויה לשמור עוגייה כדי לשייך את הרכישה לתוכנית השותפים. המדיניות של אליאקספרס חלה באתר שלה.</p>
-<p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר: אילו נתונים נאספים (בלי הרשמה ובלי פרטים מזהים), ומה קורה כשעוברים לאליאקספרס.'));
+<p>כשעוברים מהאתר לעליאקספרס, עליאקספרס עשויה לשמור עוגייה כדי לשייך את הרכישה לתוכנית השותפים. המדיניות של עליאקספרס חלה באתר שלה.</p>
+<p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר: אילו נתונים נאספים (בלי הרשמה ובלי פרטים מזהים), ומה קורה כשעוברים לעליאקספרס.'));
 
 for (const [id, target] of goTargets) await write(`go/${id}/index.html`, goPage(target));
 
@@ -879,14 +895,14 @@ for (const c of categories) await page(`/coupon/${c.slug}/`, categoryPage(c), { 
 // Atom feed of active codes: lets Telegram/WhatsApp bots and feed readers pick up new codes automatically.
 await write('feed.xml', `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="he">
-  <title>${esc(site.name)}: קודי קופון לאליאקספרס</title>
+  <title>${esc(site.name)}: קודי קופון לעליאקספרס</title>
   <link href="${abs('/')}"/><link rel="self" href="${abs('/feed.xml')}"/>
   <id>${abs('/')}</id><updated>${dataUpdated}T00:00:00Z</updated>
 ${(SAMPLE_MODE ? [] : realCodes).map((c) => `  <entry><title>${esc(`${couponTitle(c)}: ${c.code}`)}</title><link href="${abs(`/#c-${c.id}`)}"/><id>${abs(`/#c-${c.id}-${c.code}`)}</id><updated>${(c.verified || dataUpdated)}T00:00:00Z</updated><summary>${esc(`קוד ${c.code}: ${couponTitle(c)}${c.expires ? `, בתוקף עד ${heDate(c.expires)}` : ''}`)}</summary></entry>`).join('\n')}
 </feed>
 `);
 await write('site.webmanifest', JSON.stringify({
-  name: `${site.name} | קודי קופון לאליאקספרס`, short_name: site.name, lang: 'he', dir: 'rtl', start_url: '/', display: 'standalone',
+  name: `${site.name} | קודי קופון לעליאקספרס`, short_name: site.name, lang: 'he', dir: 'rtl', start_url: '/', display: 'standalone',
   background_color: '#fffaf7', theme_color: '#e5122f',
   icons: [{ src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' }, { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png' }],
   share_target: { action: '/finder/', method: 'GET', params: { title: 'title', text: 'text', url: 'url' } },

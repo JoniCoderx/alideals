@@ -65,7 +65,7 @@
       left -= 1;
       if (left <= 0) {
         clearInterval(timer); timer = null;
-        var box2 = $('modal-countdown'); if (box2) box2.querySelector('span').textContent = '🚀 פותחים את אליאקספרס!';
+        var box2 = $('modal-countdown'); if (box2) box2.querySelector('span').textContent = '🚀 פותחים את עליאקספרס!';
         track('auto_open', { target_id: id }); goNow(id); return;
       }
       onTick(left);
@@ -77,7 +77,7 @@
       b.classList.add('is-revealed');
       var mask = b.querySelector('.reveal-mask');
       if (mask) mask.textContent = code;
-      if (b.classList.contains('btn-reveal')) b.setAttribute('aria-label', 'הקוד ' + code + ', לחצו להעתקה ומעבר לאליאקספרס');
+      if (b.classList.contains('btn-reveal')) b.setAttribute('aria-label', 'הקוד ' + code + ', לחצו להעתקה ומעבר לעליאקספרס');
     });
   }
 
@@ -92,7 +92,7 @@
 
     copying.then(function (copied) {
       if (!modal || typeof modal.showModal !== 'function') {
-        toast(copied ? 'הקוד ' + code + ' הועתק. פותחים את אליאקספרס…' : 'הקוד: ' + code);
+        toast(copied ? 'הקוד ' + code + ' הועתק. פותחים את עליאקספרס…' : 'הקוד: ' + code);
         setTimeout(function () { goNow(id); }, DELAY * 1000);
         return;
       }
@@ -105,7 +105,7 @@
       var share = $('modal-share');
       if (share) {
         var site = window.SITE || { url: location.origin, name: '' };
-        var msg = site.name + ' קוד קופון לאליאקספרס: ' + code + ' (' + title + ')\n' + site.url + '/#c-' + id;
+        var msg = site.name + ' קוד קופון לעליאקספרס: ' + code + ' (' + title + ')\n' + site.url + '/#c-' + id;
         share.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
         share.setAttribute('data-share', id);
       }
