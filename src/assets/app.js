@@ -41,12 +41,31 @@
   }
 
   function goUrl(id) { return '/go/' + encodeURIComponent(id) + '/'; }
+  // Direct affiliate URL (embedded by the build). Navigating straight to it in the SAME tab is what lets
+  // iOS/Android hand the link to the AliExpress app; new tabs and extra redirects usually stay in the browser.
+  function directUrl(id) { var l = (window.SITE && window.SITE.links) || {}; return l[id] || goUrl(id); }
+  function goNow(id) { location.href = directUrl(id); }
 
-  function openAffiliate(id) {
-    var w = null;
-    try { w = window.open(goUrl(id), '_blank'); } catch (e) {}
-    if (w) { try { w.opener = null; } catch (e) {} }
-    return !!w;
+  var DELAY = 2; // seconds between "code copied" and opening AliExpress
+  var timer = null;
+  function stopCountdown() {
+    if (timer) { clearInterval(timer); timer = null; }
+    var box = $('modal-countdown'); if (box) box.classList.add('is-off');
+  }
+  function startCountdown(id, onTick) {
+    stopCountdown();
+    var left = DELAY;
+    var box = $('modal-countdown');
+    if (box) {
+      box.classList.remove('is-off');
+      var bar = $('modal-bar'); if (bar) { bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; }
+    }
+    onTick(left);
+    timer = setInterval(function () {
+      left -= 1;
+      if (left <= 0) { stopCountdown(); track('auto_open', { target_id: id }); goNow(id); return; }
+      onTick(left);
+    }, 1000);
   }
 
   function markRevealed(id, code) {
@@ -62,27 +81,22 @@
     var id = btn.getAttribute('data-reveal');
     var code = btn.getAttribute('data-code');
     var title = btn.getAttribute('data-title') || '';
-    // Start the clipboard write while this page still has focus, then open the tab synchronously
-    // inside the same click so popup blockers allow it.
-    var copying = copy(code);
-    var opened = openAffiliate(id);
+    var copying = copy(code); // start while the page has focus
     markRevealed(id, code);
     try { sessionStorage.setItem('rev:' + id, code); } catch (e) {}
-    track('coupon_reveal', { coupon_id: id, coupon_code: code, tab_opened: opened });
+    track('coupon_reveal', { coupon_id: id, coupon_code: code });
 
     copying.then(function (copied) {
       if (!modal || typeof modal.showModal !== 'function') {
-        toast(copied ? 'הקוד ' + code + ' הועתק' : 'הקוד: ' + code);
-        if (!opened) location.href = goUrl(id);
+        toast(copied ? 'הקוד ' + code + ' הועתק. פותחים את אליאקספרס…' : 'הקוד: ' + code);
+        setTimeout(function () { goNow(id); }, DELAY * 1000);
         return;
       }
-      $('modal-kicker').textContent = copied ? 'הקוד הועתק ✓' : 'זה הקוד שלכם:';
+      $('modal-kicker').textContent = copied ? 'הקוד הועתק ✓' : 'זה הקוד שלכם (סמנו והעתיקו):';
       $('modal-title').textContent = title;
       $('modal-code').textContent = code;
-      $('modal-step1').textContent = opened ? 'אליאקספרס נפתחה בלשונית חדשה' : 'לוחצים על "מעבר לאליאקספרס" למטה';
       var go = $('modal-go');
-      go.href = goUrl(id);
-      go.textContent = opened ? 'לא נפתח? מעבר לאליאקספרס' : 'מעבר לאליאקספרס';
+      go.href = directUrl(id);
       go.setAttribute('data-go', id);
       var share = $('modal-share');
       if (share) {
@@ -92,6 +106,9 @@
         share.setAttribute('data-share', id);
       }
       if (!modal.open) modal.showModal();
+      // If the copy failed, don't leave the page automatically – let the user copy by hand first.
+      if (copied) startCountdown(id, function (n) { var c = $('modal-count'); if (c) c.textContent = n; });
+      else stopCountdown();
     });
   }
 
@@ -106,7 +123,12 @@
     if (cur) { setCurrency(cur.getAttribute('data-cur')); return; }
 
     var g = e.target.closest('[data-go]');
-    if (g) { track('outbound_click', { target_id: g.getAttribute('data-go') }); return; }
+    if (g) {
+      var gid = g.getAttribute('data-go');
+      track('outbound_click', { target_id: gid });
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // let "open in new tab" work
+      e.preventDefault(); stopCountdown(); goNow(gid); return;
+    }
 
     var p = e.target.closest('[data-product]');
     if (p) { track('product_click', { product_id: p.getAttribute('data-product') }); return; }
@@ -227,6 +249,11 @@
     });
   });
   if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) modal.close(); });
+  if (modal) modal.addEventListener('close', stopCountdown);
+  var stay = $('modal-stay');
+  if (stay) stay.addEventListener('click', function () { stopCountdown(); track('stay_on_site'); });
+  // Coming back with the Back button (bfcache): never resume an old countdown.
+  window.addEventListener('pageshow', function () { stopCountdown(); if (modal && modal.open) modal.close(); });
 
   // Restore codes revealed earlier in this session.
   document.querySelectorAll('[data-reveal]').forEach(function (b) {

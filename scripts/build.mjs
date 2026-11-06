@@ -85,7 +85,7 @@ const money = (n, cur = 'USD') => (cur === 'ILS' ? `₪${n}` : `$${n}`);
 const abs = (p) => site.url.replace(/\/$/, '') + p;
 const scriptJSON = (v) => JSON.stringify(v).replace(/[<\u2028\u2029]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
 const jsonLd = (obj) => `<script type="application/ld+json">${scriptJSON(obj)}</script>`;
-const OUT = 'target="_blank" rel="nofollow sponsored noopener"';
+const OUT = 'rel="nofollow sponsored"';
 async function readJSON(rel, fallback) {
   try { return JSON.parse(await fs.readFile(path.join(ROOT, rel), 'utf8')); }
   catch (e) { if (fallback !== undefined) return fallback; throw e; }
@@ -327,14 +327,15 @@ ${body}
   <h2 id="modal-title">הקוד שלכם</h2>
   <div class="modal-code"><code id="modal-code"></code><button class="btn btn-primary" type="button" id="modal-copy">${ICON.copy}<span>העתקה</span></button></div>
   <ol class="modal-steps">
-    <li id="modal-step1">אליאקספרס נפתחה בלשונית חדשה</li>
+    <li>נכנסים לאליאקספרס (האפליקציה תיפתח לבד)</li>
     <li>מוסיפים מוצרים לעגלה ועוברים לתשלום</li>
     <li>מדביקים את הקוד בשדה <b>"קוד מבצע"</b></li>
   </ol>
-  <a class="btn btn-ghost btn-block" id="modal-go" href="/go/home/" ${OUT}>מעבר לאליאקספרס</a>
+  <div class="modal-countdown" id="modal-countdown" role="status"><span>פותחים את אליאקספרס בעוד <b id="modal-count">2</b>…</span><i id="modal-bar"></i></div>
+  <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>פתיחה עכשיו</a><button type="button" id="modal-stay">להישאר באתר</button></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
-<script>window.SITE=${scriptJSON({ url: site.url, name: site.name })}</script>
+<script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
 </html>`;
@@ -674,6 +675,16 @@ function goPage(target) {
 <body><p>מעבירים אתכם לאליאקספרס…<br><a href="${esc(t)}" rel="nofollow sponsored">לחצו כאן אם המעבר לא קרה</a></p></body></html>`;
 }
 
+// Outbound targets (id → affiliate URL). Used by /go/<id>/ pages and embedded in each page so clicks
+// navigate straight to AliExpress (one hop fewer = the phone opens the AliExpress app more reliably).
+const goTargets = new Map([
+  ['home', safeLink(links[site.affiliate.homeUrl], '') || DEFAULT_LINK],
+  ['coupon-center', safeLink(links[site.affiliate.couponCenterUrl], '') || DEFAULT_LINK],
+]);
+for (const c of [...coupons, ...expired]) goTargets.set(c.id, resolveLink(c));
+for (const c of community) goTargets.set(c.id, DEFAULT_LINK);
+for (const d of deals) goTargets.set(d.id, d.id === 'coupon-center' && !safeLink(d.link) ? goTargets.get('coupon-center') : resolveLink(d));
+
 /* ------------------------------------------------------------------ */
 /* Build                                                               */
 /* ------------------------------------------------------------------ */
@@ -711,14 +722,6 @@ ${site.analytics?.ga4Id ? '<p>אנחנו משתמשים ב-Google Analytics כד
 <p>כשעוברים מהאתר לאליאקספרס, אליאקספרס עשויה לשמור עוגייה כדי לשייך את הרכישה לתוכנית השותפים. המדיניות של אליאקספרס חלה באתר שלה.</p>
 <p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר: אילו נתונים נאספים (בלי הרשמה ובלי פרטים מזהים), ומה קורה כשעוברים לאליאקספרס.'));
 
-// Outbound redirect pages
-const goTargets = new Map([
-  ['home', safeLink(links[site.affiliate.homeUrl], '') || DEFAULT_LINK],
-  ['coupon-center', safeLink(links[site.affiliate.couponCenterUrl], '') || DEFAULT_LINK],
-]);
-for (const c of [...coupons, ...expired]) goTargets.set(c.id, resolveLink(c));
-for (const c of community) goTargets.set(c.id, DEFAULT_LINK);
-for (const d of deals) goTargets.set(d.id, d.id === 'coupon-center' && !safeLink(d.link) ? goTargets.get('coupon-center') : resolveLink(d));
 for (const [id, target] of goTargets) await write(`go/${id}/index.html`, goPage(target));
 
 await page('/new-user/', newUserPage(), { lastmod: dataUpdated });
