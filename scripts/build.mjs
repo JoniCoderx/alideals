@@ -7,7 +7,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { faq } from '../src/content/faq.mjs';
-import { guides } from '../src/content/guides.mjs';
+import { guides as baseGuides } from '../src/content/guides.mjs';
+import { moreGuides } from '../src/content/guides-more.mjs';
+const guides = [...baseGuides, ...moreGuides];
 import { eventContent } from '../src/content/events.mjs';
 import { categories } from '../src/content/categories.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
@@ -314,7 +316,8 @@ ${body}
     </div>
     <div>
       <h2>מדריכים</h2>
-      ${guides.slice(0, 5).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
+      ${['first-time-aliexpress', 'how-to-use-aliexpress-coupon', 'is-aliexpress-safe', 'aliexpress-shipping-israel', 'aliexpress-vs-temu', 'aliexpress-dispute'].map((sl) => guides.find((g) => g.slug === sl)).filter(Boolean).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
+      <a href="/guides/">כל המדריכים ←</a>
     </div>
     <div>
       <h2>האתר</h2>
@@ -496,6 +499,15 @@ ${hotProducts.length ? `
 
     <h2>מתי יוצאים הקודים הכי שווים?</h2>
     <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של אליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p>
+
+    <h2>מדריכים פופולריים</h2>
+    <ul>
+      <li><a href="/guides/first-time-aliexpress/">איך קונים באליאקספרס בפעם הראשונה</a></li>
+      <li><a href="/guides/is-aliexpress-safe/">האם אליאקספרס בטוח?</a></li>
+      <li><a href="/guides/aliexpress-shipping-israel/">כמה זמן לוקח משלוח לישראל</a></li>
+      <li><a href="/guides/aliexpress-vs-temu/">אליאקספרס או טמו: מה עדיף?</a></li>
+      <li><a href="/guides/aliexpress-dispute/">איך פותחים מחלוקת ומקבלים החזר</a></li>
+    </ul>
   </div>
 </section>
 
@@ -744,11 +756,19 @@ function guidesIndexPage() {
   return layout({ title: `מדריכים לאליאקספרס בעברית | ${site.name}`, description: 'מדריכים בעברית לקנייה באליאקספרס: שימוש בקודי קופון, שילוב הנחות, מכס ומע"מ, Choice ולוח המבצעים.', pathname, body, ld: [bc.ld] });
 }
 
+function guideFaq(body) {
+  const i = body.indexOf('<h2>שאלות נפוצות</h2>');
+  if (i < 0) return [];
+  const strip = (t) => t.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  return [...body.slice(i).matchAll(/<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>/g)].map((m) => ({ q: strip(m[1]), a: strip(m[2]) }));
+}
+
 function guidePage(g) {
   const pathname = `/guides/${g.slug}/`;
   const bc = breadcrumbs([{ name: 'מדריכים', url: '/guides/' }, { name: g.short || g.title, url: pathname }]);
   const top = featuredCoupons.slice(0, 2);
-  const others = guides.filter((x) => x.slug !== g.slug).slice(0, 3);
+  const idx = guides.findIndex((x) => x.slug === g.slug);
+  const others = [1, 2, 3, 4].map((k) => guides[(idx + k) % guides.length]).filter((x) => x.slug !== g.slug);
   const body = `
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}<h1>${esc(g.title)}</h1><p class="byline">${esc(site.name)} · עודכן ${esc(heLong(g.updated))}</p></div></section>
 <section class="section"><div class="wrap narrow">
@@ -763,6 +783,8 @@ function guidePage(g) {
     publisher: { '@type': 'Organization', name: site.name, logo: { '@type': 'ImageObject', url: abs('/assets/icon-512.png') } },
     image: abs('/assets/og-v2.jpg'), mainEntityOfPage: abs(pathname),
   }];
+  const gfaq = guideFaq(g.body);
+  if (gfaq.length) ld.push(faqLd(gfaq));
   return layout({ title: `${g.title} | ${site.name}`, description: g.description, pathname, body, ld, ogType: 'article' });
 }
 
