@@ -23,7 +23,7 @@ const OG = `<div style="width:1200px;height:630px;position:relative;overflow:hid
   ${ticket('%', 'הנחה בתשלום', -10, 70, 120, 1)}${ticket('$', 'לפי סכום העגלה', 8, 250, 300, 2)}
   <div style="position:absolute;right:80px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center">
     <div style="display:flex;align-items:center;gap:18px">${bubbleOG(96, '#fff', '#e5122f')}<span style="font-size:84px;font-weight:800;letter-spacing:-2px">יש דיל!</span></div>
-    <div style="font-size:76px;font-weight:800;line-height:1.02;margin-top:30px;letter-spacing:-2px">קוד קופון<br>לאליאקספרס</div>
+    <div style="font-size:76px;font-weight:800;line-height:1.02;margin-top:30px;letter-spacing:-2px">קוד קופון<br>לעליאקספרס</div>
     <div style="font-size:36px;margin-top:20px;opacity:.95">כל הקודים לישראל, במקום אחד</div>
     <div style="margin-top:30px;display:inline-flex;align-self:flex-start;background:#fff;color:#c8102e;border-radius:999px;padding:14px 32px;font-size:34px;font-weight:800">yeshdeal.com</div>
   </div></div>`;

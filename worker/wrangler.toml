@@ -6,6 +6,12 @@ compatibility_date = "2026-10-01"
 
 [vars]
 ALLOWED_ORIGIN = "https://yeshdeal.com,https://www.yeshdeal.com"
+GH_REPO = "JoniCoderx/alideals"
+
+# Hourly "clock": GitHub's own cron skips runs under load, so the Worker dispatches the
+# deploy workflow every hour (needs the GH_DISPATCH_TOKEN secret; does nothing without it).
+[triggers]
+crons = ["7 * * * *"]
 
 # Secrets (set automatically by the workflow from GitHub secrets):
-#   ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID
+#   ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID, GH_DISPATCH_TOKEN (fine-grained PAT: Actions read/write on this repo)

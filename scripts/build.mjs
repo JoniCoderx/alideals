@@ -140,7 +140,7 @@ function couponCard(c, { compact = false } = {}) {
   if (isCommunity) status = `<span class="tag tag-muted">מהקהילה · לא נבדק${c.foundAt ? ` · ${heDate(c.foundAt)}` : ''}</span>`;
   else if (c.sample) status = `<span class="tag tag-muted">דוגמה</span>`;
   else if (c.verified) status = `<span class="tag tag-ok">${ICON.check} נבדק ${heDate(c.verified)}</span>`;
-  else if (manual.updated) status = `<span class="tag tag-ok" title="הקוד אומת מול מקורות רשמיים בתאריך הזה">${ICON.check} עודכן ${heDate(manual.updated)}</span>`;
+  else if (manual.updated) status = `<span class="tag tag-ok" title="הקוד הוצלב מול כמה מקורות בתאריך הזה">${ICON.check} עודכן ${heDate(manual.updated)}</span>`;
   const rep = reports[c.code];
   const flagged = !hidden && rep && rep.recent >= 3;
   const reportLink = !hidden && !isCommunity && BOT ? `<a class="report" href="https://t.me/${BOT}?start=r_${encodeURIComponent(c.code)}" rel="noopener" target="_blank">לא עבד לכם? דווחו</a>` : '';
@@ -356,7 +356,7 @@ ${body}
   <h2 id="modal-title">הקוד שלכם</h2>
   <div class="modal-code"><code id="modal-code"></code><button class="btn btn-primary" type="button" id="modal-copy">${ICON.copy}<span>העתקה</span></button></div>
   <ol class="modal-steps">
-    <li>נכנסים לעליאקספרס (האפליקציה תיפתח לבד)</li>
+    <li>נכנסים לעליאקספרס (אם האפליקציה מותקנת, היא אמורה להיפתח)</li>
     <li>מוסיפים מוצרים לעגלה ועוברים לתשלום</li>
     <li>מדביקים את הקוד בשדה <b>"קוד מבצע"</b></li>
   </ol>
@@ -364,7 +364,7 @@ ${body}
   <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>לא נפתח? לחצו כאן</a></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
-${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🎯 בקרוב: צייד הדילים</b><span>אתם שולחים קישור למוצר, הצייד סורק את המוכרים וחוזר עם הצעות זולות יותר.</span><a href="/finder/">להכיר את הצייד ←</a></aside>` : ''}
+${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🎯 בקרוב: צייד הדילים</b><span>אתם שולחים קישור למוצר, הצייד יסרוק את המוכרים ויחפש הצעות זולות יותר.</span><a href="/finder/">להכיר את הצייד ←</a></aside>` : ''}
 <script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
@@ -423,7 +423,7 @@ function homePage() {
   const pathname = '/';
   const title = realCodes.length
     ? `קוד קופון עליאקספרס (עלי אקספרס) ${monthYear}: עד $${maxDiscount} הנחה | ${site.name}`
-    : `קוד קופון עליאקספרס ${monthYear}: כל הקודים לישראל | ${site.name}`;
+    : `קוד קופון עליאקספרס ${monthYear}: הקודים לישראל | ${site.name}`;
   const description = realCodes.length
     ? `${realCodes.length} קודי קופון פעילים לעליאקספרס (קופונים לעלי אקספרס) לקונים מישראל, עד $${maxDiscount} הנחה, לפי סכום ההזמנה. עודכן ב-${updatedHe}.`
     : `קודי הקופון וההנחות של עליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
@@ -435,7 +435,7 @@ function homePage() {
     <div class="hero-text">
       <h1 class="h1-kicker">קודי קופון לעליאקספרס · ${esc(monthYear)}</h1>
       <p class="slogan">קונים בעליאקספרס?<br><span class="hl">יש דיל.</span></p>
-      <p class="lead">כל הקופונים וההנחות לעלי אקספרס במקום אחד. בוחרים קוד לפי העגלה, ומשלמים פחות על כל הזמנה.</p>
+      <p class="lead">קודי הקופון וההנחות לעלי אקספרס במקום אחד. בוחרים קוד לפי העגלה, ומשלמים פחות על כל הזמנה.</p>
       <p class="stats">${realCodes.length ? `<b>${realCodes.length}</b> קודים פעילים · עד <b>$${maxDiscount}</b> הנחה, כ־${Math.round(maxDiscount * USD_ILS)} שקל · ` : ''}עודכן ב-${esc(updatedHe)}</p>
       ${soonestExpiry ? `<p class="urgency" data-until="${soonestExpiry}">⏳ <span>הקודים בתוקף עד ${esc(heShort(soonestExpiry))}</span></p>` : ''}
       <ul class="trust">
@@ -450,7 +450,7 @@ function homePage() {
     </div>
     ${calcWidget()}
     ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c, i) => `
-      <button class="featured${i === 1 ? ' is-hot' : ''}" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>${i === 1 ? '<span class="f-badge">🔥 הכי פופולרי</span>' : ''}
+      <button class="featured${i === 1 ? ' is-hot' : ''}" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>${i === 1 ? '<span class="f-badge">🔥 מומלץ</span>' : ''}
         <span class="f-amount">${money(c.discount, c.currency)}</span>
         <span class="f-min">מעל ${money(c.minOrder, c.currency)}</span>
         <span class="f-cta">העתק קוד</span>
@@ -463,8 +463,8 @@ ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div cl
   <div class="ft-text">
     <span class="ft-badge">🎯 חדש · יוצא לציד בקרוב</span>
     <h2>צייד הדילים</h2>
-    <p class="hunter-tag">אתם שולחים קישור. הצייד חוזר עם דיל.</p>
-    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. מדביקים קישור, והצייד סורק את השטח ומביא לכם הצעות זולות יותר לאותו מוצר, תוך שניות.</p>
+    <p class="hunter-tag">אתם שולחים קישור. הצייד יוצא לחפש לכם דיל.</p>
+    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. תדביקו קישור, והצייד יסרוק את השטח ויחזיר לכם הצעות זולות יותר לאותו מוצר, אם יש.</p>
     <a class="btn ft-cta" href="/finder/">איך הצייד עובד ←</a>
   </div>
   <div class="ft-visual"><div class="radar" aria-hidden="true">
@@ -519,7 +519,7 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
         <h2>איך זה עובד?</h2>
         <ol class="steps">
           <li><span><b>לוחצים "העתק קוד"</b> הקוד מועתק</span></li>
-          <li><span><b>עליאקספרס נפתחת</b> בלשונית חדשה</span></li>
+          <li><span><b>עליאקספרס נפתחת</b> אוטומטית</span></li>
           <li><span><b>מדביקים בתשלום</b> בשדה "קוד מבצע"</span></li>
         </ol>
         <a class="btn btn-primary btn-block" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>
@@ -630,7 +630,7 @@ function eventPage(ev) {
   const faqItems = content.faq || [];
   const body = `
 <section class="hero"><div class="wrap narrow">${bc.html}
-  <h1>קוד קופון עליאקספרס ${esc(le(ev.name))} ${year}</h1>
+  <h1>קוד קופון עליאקספרס ${esc(le(short))} ${year}</h1>
   <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשעליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
   ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
@@ -652,7 +652,7 @@ function eventPage(ev) {
 </div></section>`;
   return layout({
     title: `קוד קופון עליאקספרס ${le(short)} ${year} | ${site.name}`,
-    description: `קודי הקופון של עליאקספרס ${le(ev.name)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
+    description: `קודי הקופון של עליאקספרס ${le(short)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
     pathname, body, ld: faqItems.length ? [bc.ld, faqLd(faqItems)] : [bc.ld],
   });
 }
@@ -665,13 +665,13 @@ function finderPage() {
   const items = [
     { q: 'איך צייד הדילים עובד?', a: 'מדביקים קישור למוצר מעליאקספרס. הצייד מזהה את המוצר, סורק מוכרים אחרים שמוכרים אותו עם משלוח לישראל, מסנן מוכרים עם דירוג נמוך או בלי מכירות, ומציג את ההצעות הזולות עם דירוג המוכר וכמות המכירות.' },
     { q: 'איך מעתיקים קישור מהאפליקציה של עליאקספרס?', a: 'בעמוד המוצר באפליקציה לוחצים על כפתור השיתוף ובוחרים "העתקת קישור". אחר כך מדביקים כאן בשדה.' },
-    { q: 'זה בטוח אותו מוצר?', a: 'הצייד משווה לפי שם המוצר והקטגוריה ומסננת מוכרים עם דירוג נמוך, אבל לפני שקונים חשוב לבדוק בעמוד המוצר שזה בדיוק מה שאתם רוצים: צבע, גרסה, מידה ומפרט.' },
+    { q: 'זה בטוח אותו מוצר?', a: 'הצייד משווה לפי שם המוצר והקטגוריה ומסנן מוכרים עם דירוג נמוך, אבל לפני שקונים חשוב לבדוק בעמוד המוצר שזה בדיוק מה שאתם רוצים: צבע, גרסה, מידה ומפרט.' },
     { q: 'זה עולה משהו?', a: 'לא. השימוש חינם. הקישורים הם קישורי שותפים, ואנחנו עשויים לקבל עמלה מעליאקספרס בלי תוספת למחיר שלכם.' },
   ];
   const body = `
 <section class="hero hero-hunter"><div class="wrap narrow">${bc.html}
   <div class="hunter-head"><div><h1>🎯 צייד הדילים</h1>
-  <p class="hunter-tag">אתם שולחים קישור. הצייד חוזר עם דיל.</p>
+  <p class="hunter-tag">אתם שולחים קישור. הצייד יוצא לחפש לכם דיל.</p>
   <p class="lead">מדביקים קישור למוצר מעליאקספרס, והצייד מחפש <strong>את אותו מוצר אצל מוכרים זולים יותר</strong>, עם משלוח לישראל. אתם משווים ובוחרים.</p></div>
   <div class="ft-visual"><div class="radar" aria-hidden="true">
     <div class="radar-sweep"></div>
@@ -692,7 +692,7 @@ function finderPage() {
   <div id="finder-out" aria-live="polite"></div>
   <div class="prose">
     <h2>למה אותו מוצר עולה אחרת?</h2>
-    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים עושה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
+    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים יעשה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
     <h2>ואחרי שמצאתם: עוד הנחה</h2>
     <p>על המחיר הזול אפשר להוסיף <a href="/#calc">קוד קופון לפי סכום העגלה</a>, קופון של החנות וקופונים ממרכז הקופונים. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>.</p>
   </div>
@@ -700,8 +700,8 @@ function finderPage() {
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `צייד הדילים: אותו מוצר בעליאקספרס אצל מוכר זול יותר | ${site.name}`,
-    description: 'צייד הדילים: מדביקים קישור למוצר מעליאקספרס, והצייד מביא הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.',
+    title: `צייד הדילים${FINDER_API ? '' : ' (בקרוב)'}: אותו מוצר בעליאקספרס אצל מוכר זול יותר | ${site.name}`,
+    description: `צייד הדילים${FINDER_API ? '' : ' (בקרוב)'}: מדביקים קישור למוצר מעליאקספרס, והצייד מחפש הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.`,
     pathname, body, ld: [bc.ld, faqLd(items)], noindex: !FINDER_API,
   });
 }
@@ -744,7 +744,7 @@ function categoryPage(cat) {
   ${coupons.length ? `<h2 class="section-title">איזה קוד מתאים לעגלה שלי?</h2>${tierTable(coupons)}
   <p class="muted">לא בטוחים? <a href="/#calc">מחשבון העגלה</a> בוחר את הקוד הכי משתלם לסכום שלכם.</p>` : ''}
   <div class="prose">
-    <h2>איך קונים ${esc(cat.name)} בעליאקספרס: ${cat.tips.length} טיפים</h2>
+    <h2>איך קונים ${esc(cat.buy || cat.name)} בעליאקספרס: ${cat.tips.length} טיפים</h2>
     <ol>${cat.tips.map(([h, t]) => `<li><b>${esc(h)}.</b> ${esc(t)}</li>`).join('')}</ol>
     <h2>איך חוסכים עוד</h2>
     <p>מעבר לקוד המבצע, אפשר לשלב קופון של החנות מעמוד המוצר, קופונים ממרכז הקופונים ומטבעות. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>, ומי שקונה בפעם הראשונה: <a href="/new-user/">קופון למשתמש חדש</a>.</p>
@@ -756,7 +756,7 @@ function categoryPage(cat) {
 </div></section>`;
   return layout({
     title: `קופון עליאקספרס ל${cat.short} ${monthYear}: קודים וטיפים | ${site.name}`,
-    description: `קופונים לעלי אקספרס ל${cat.name}: קודי המבצע הפעילים לישראל לפי סכום העגלה, וטיפים לקנייה חכמה של ${cat.name} בעליאקספרס.`,
+    description: `קופונים לעלי אקספרס ל${cat.name}: קודי המבצע הפעילים לישראל לפי סכום העגלה, וטיפים לקנייה חכמה בקטגוריית ${cat.name} בעליאקספרס.`,
     pathname, body, ld: [bc.ld, faqLd(faqItems)],
   });
 }
@@ -810,7 +810,7 @@ function existingUserPage() {
   const body = `
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
   <h1>קוד קופון עליאקספרס למשתמש קיים</h1>
-  <p class="lead">כבר הזמנתם בעלי אקספרס בעבר? גם לכם יש קודים. הנה הקודים שעובדים עכשיו בחשבונות קיימים, ועוד 4 דרכים לשלם פחות.</p>
+  <p class="lead">כבר הזמנתם בעלי אקספרס בעבר? גם לכם יש קודים. הנה הקודים הפעילים עכשיו, שבדרך כלל עובדים גם בחשבונות קיימים, ועוד 4 דרכים לשלם פחות.</p>
   <a class="btn btn-primary" href="/#codes">לכל הקודים הפעילים ↓</a>
 </div></section>
 <section class="section"><div class="wrap narrow">

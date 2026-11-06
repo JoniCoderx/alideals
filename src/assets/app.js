@@ -28,9 +28,9 @@
     var days = Math.round((Date.parse(until + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 864e5);
     var span = el.querySelector('span');
     if (days < 0) { el.hidden = true; return; }
-    if (days === 0) span.textContent = 'היום היום האחרון לקודים! ממהרים';
+    if (days === 0) span.textContent = 'היום האחרון לקודים! מהרו';
     else if (days === 1) span.textContent = 'נשאר יום אחד אחרון לקודים';
-    else if (days <= 14) span.textContent = 'נשארו ' + days + ' ימים לקודים, לפני שהם נגמרים';
+    else if (days <= 14) span.textContent = 'נשארו ' + days + ' ימים עד שהקודים פגים';
     if (days <= 3) el.classList.add('is-hot');
   });
   document.querySelectorAll('.coupon[data-expires]').forEach(function (card) {
@@ -306,7 +306,7 @@
     var run = function () {
       var v = (fin.value || '').trim();
       if (!v) { fin.focus(); return; }
-      if (!api) { status('🚀 הפיצ\'ר עולה ממש בקרוב.'); return; }
+      if (!api) { status('🎯 הצייד יוצא לדרך ממש בקרוב.'); return; }
       fgo.disabled = true;
       status('<span class="finder-spin"></span>מחפשים את אותו מוצר אצל מוכרים אחרים…');
       track('finder_search');
@@ -324,7 +324,7 @@
             html += '<h2 class="section-title">מצאנו ' + alts.length + ' אפשרויות זולות יותר 🎉</h2>';
             html += alts.map(function (a, i) { return card(a, i === 0 ? 'best' : ''); }).join('');
           } else {
-            html += '<div class="finder-status">👍 לא מצאנו את המוצר זול יותר. המחיר שבחרתם כבר טוב.</div>';
+            html += '<div class="finder-status">👍 לא מצאנו את המוצר זול יותר. כנראה שהמחיר שבחרתם כבר טוב.</div>';
           }
           html += '<h2 class="section-title">המוצר שהדבקתם</h2>' + card(j.original || {}, 'orig');
           html += '<p class="muted">מוצרים דומים לפי שם וקטגוריה. לפני שקונים, בודקים בעמוד המוצר שזה בדיוק אותו מוצר: צבע, גרסה, מידה ומפרט. אל תשכחו להוסיף <a href="/#calc">קוד קופון</a>.</p>';

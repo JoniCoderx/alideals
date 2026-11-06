@@ -97,7 +97,21 @@ function cors(env, req) {
 
 const json = (body, status, headers) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers } });
 
+/** Hourly clock: dispatch the GitHub workflow (site refresh + Telegram slot). */
+export async function dispatchWorkflow(env, fetchImpl = fetch) {
+  if (!env.GH_DISPATCH_TOKEN || !env.GH_REPO) return { skipped: true };
+  const r = await fetchImpl(`https://api.github.com/repos/${env.GH_REPO}/actions/workflows/deploy.yml/dispatches`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.GH_DISPATCH_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'yeshdeal-clock', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ref: 'main', inputs: { source: 'clock' } }),
+  });
+  return { status: r.status };
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dispatchWorkflow(env).then((r) => console.log('clock dispatch', JSON.stringify(r))).catch((e) => console.log('clock error', e.message)));
+  },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const h = cors(env, req);

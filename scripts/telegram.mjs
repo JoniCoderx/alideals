@@ -77,7 +77,7 @@ export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, r
       kind: 'event',
       card: { kind: 'event', title: `${ev.name.split(' –')[0]} התחיל!`, subtitle: `עד ${money(top.discount, top.currency)} הנחה ב${STORE}`, codes: evCodes, footer: ev.end ? `עד ${heDate(ev.end)}` : '', site: host },
       text: compactLines([
-        `🎉 <b>${esc(ev.name)} ב${STORE} התחיל!</b>`,
+        `🎉 <b>${esc(ev.name.split(' –')[0])} ב${STORE} התחיל!</b>`,
         '',
         ...evCodes.map(line),
         '',
@@ -93,9 +93,9 @@ export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, r
     const top4 = [...ending].sort((a, b) => b.discount - a.discount).slice(0, 4);
     messages.push({
       kind: 'ending',
-      card: { kind: 'ending', title: 'נגמר מחר!', subtitle: `${ending.length} קודים ל${STORE} פגים ב-${heDate(ending[0].expires)}`, codes: top4, footer: 'מי שמתכנן להזמין, עכשיו הזמן', site: host },
+      card: { kind: 'ending', title: 'נגמרים מחר!', subtitle: `${ending.length} קודים ל${STORE} פגים ב-${heDate(ending[0].expires)}`, codes: top4, footer: 'מי שמתכנן להזמין, עכשיו הזמן', site: host },
       text: compactLines([
-        `⏰ <b>נגמר מחר!</b> ${ending.length} קודים ל${STORE} פגים מחר (${heDate(ending[0].expires)}).`,
+        `⏰ <b>נגמרים מחר!</b> ${ending.length} קודים ל${STORE} פגים מחר (${heDate(ending[0].expires)}).`,
         '',
         ...top4.map(line),
         '',
@@ -154,8 +154,8 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
           const short = ev.name.split(' –')[0];
           return [id, {
             kind: 'countdown',
-            card: { kind: 'countdown', bigNumber: d, bigLabel: d === 1 ? 'יום אחד!' : 'ימים', title: `עד ${short} בעליאקספרס`, points: ['מוסיפים מוצרים לעגלה כבר עכשיו', 'אוספים קופונים ממרכז הקופונים', 'הקודים יגיעו לכאן ברגע שייצאו'], site: host },
-            text: `⏳ <b>${d === 1 ? 'מחר' : `בעוד ${d} ימים`}: ${esc(ev.name)} בעליאקספרס!</b>\n\nמי שמתכונן מראש חוסך יותר. מוסיפים לעגלה עכשיו, כדי לראות כמה המחיר באמת יורד. הקודים של המבצע יפורסמו כאן ברגע שייצאו 🔔`,
+            card: { kind: 'countdown', bigNumber: d, bigLabel: d === 1 ? 'יום אחד!' : 'ימים', title: `עד ${short} בעליאקספרס`, points: ['מוסיפים מוצרים לעגלה כבר עכשיו', 'אוספים קופונים ממרכז הקופונים', 'הקודים יגיעו לכאן זמן קצר אחרי שייצאו'], site: host },
+            text: `⏳ <b>${d === 1 ? 'מחר' : `בעוד ${d} ימים`}: ${esc(short)} בעליאקספרס!</b>\n\nמי שמתכונן מראש חוסך יותר. מוסיפים לעגלה עכשיו, כדי לראות כמה המחיר באמת יורד. הקודים של המבצע יפורסמו כאן זמן קצר אחרי שייצאו 🔔`,
             buttons: [[{ text: '📅 עמוד המבצע', url: link(`/sale/${ev.slug}/`, `countdown-${ev.slug}`) }], [{ text: '🎟️ למרכז הקופונים', url: link('/go/coupon-center/', `countdown-${ev.slug}`) }]],
           }];
         }
@@ -171,7 +171,7 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
       return [weekKey, {
         kind: 'weekly',
         card: { kind: 'weekly', title: 'הקודים הכי שווים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
-        text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לרוב העגלות הקוד המשתלם הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
+        text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לעגלה ממוצעת, הקוד המשתלם בדרך כלל הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
         buttons: [[{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'weekly') }], [{ text: '🛒 לעליאקספרס', url: link(`/go/${top[0].id}/`, 'weekly') }]],
       }];
     },
@@ -211,9 +211,9 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
       const tips = (c.tips || []).slice(0, 3);
       return [pick.id, {
         kind: 'category',
-        card: { kind: 'category', emoji: c.emoji, title: `קונים ${c.short} בעליאקספרס?`, points: tips.map(([t]) => t), colors: categoryColors[c.slug], badge: `${c.emoji} ${c.name}`, site: host },
+        card: { kind: 'category', emoji: c.emoji, title: `קונים ${c.buy || c.short} בעליאקספרס?`, points: tips.map(([t]) => t), colors: categoryColors[c.slug], badge: `${c.emoji} ${c.name}`, site: host },
         text: compactLines([
-          `${c.emoji} <b>קונים ${esc(c.short)} בעליאקספרס? ככה עושים את זה נכון</b>`,
+          `${c.emoji} <b>קונים ${esc(c.buy || c.short)} בעליאקספרס? ככה עושים את זה נכון</b>`,
           '',
           ...tips.map(([t, d]) => `• <b>${esc(t)}.</b> ${esc(d.split('. ')[0].replace(/\.$/, ''))}.`),
           '',

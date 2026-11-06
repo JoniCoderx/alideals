@@ -16,8 +16,8 @@ const BUBBLE = (fill, mark) => `<svg viewBox="0 0 64 64" width="76" height="76">
 const THEMES = {
   new: { bg: 'linear-gradient(150deg,#ff7a2f 0%,#e5122f 70%,#b80d2a 100%)', badge: '🔥 קודים חדשים' },
   event: { bg: 'linear-gradient(150deg,#ff7a2f 0%,#e5122f 55%,#7a0b3a 100%)', badge: '🎉 המבצע התחיל' },
-  ending: { bg: 'linear-gradient(150deg,#2a1218 0%,#7a0b1f 60%,#e5122f 100%)', badge: '⏰ נגמר מחר' },
-  weekly: { bg: 'linear-gradient(150deg,#ffb400 0%,#ff7a2f 45%,#e5122f 100%)', badge: '🏆 הקוד של השבוע' },
+  ending: { bg: 'linear-gradient(150deg,#2a1218 0%,#7a0b1f 60%,#e5122f 100%)', badge: '⏰ נגמרים מחר' },
+  weekly: { bg: 'linear-gradient(150deg,#ffb400 0%,#ff7a2f 45%,#e5122f 100%)', badge: '🏆 הקודים של השבוע' },
 };
 
 // Text cards (tips / promotions / features / guides / countdown): light, dark or brand themes for variety in the feed.
