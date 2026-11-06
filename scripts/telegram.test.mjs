@@ -55,7 +55,7 @@ const lib = [
   { id: 'a', type: 'tip', emoji: '💡', title: 'A', points: [], text: 't', buttons: [['x', '/']] },
   { id: 'b', type: 'deal', emoji: '🎁', title: 'B', points: [], text: 't', buttons: [['y', '/go/coins/']] },
 ];
-const reg = { siteUrl: 'https://yeshdeal.com', library: lib, minGapDays: 2 };
+const reg = { siteUrl: 'https://yeshdeal.com', library: lib, announcements: [], minGapDays: 2 };
 
 test('regular posts only inside a slot, once per slot', () => {
   assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 9, weekday: 4 }).message, null);
@@ -81,4 +81,14 @@ test('weekly best code on Friday noon', () => {
   const r = planRegular({ ...reg, today: '2026-11-06', hour: 12, weekday: 5, coupons: codes });
   assert.equal(r.message.kind, 'weekly');
   assert.match(r.message.text, /ILAFF20/);
+});
+
+test('one-time announcement goes first, exactly once', () => {
+  const ann = [{ id: 'ann1', type: 'feature', emoji: '🔜', title: 'Soon', points: [], text: 't', buttons: [['x', '/finder/']] }];
+  const r1 = planRegular({ ...reg, announcements: ann, today: '2026-11-06', hour: 12, weekday: 4 });
+  assert.equal(r1.message.card.title, 'Soon');
+  const r2 = planRegular({ ...reg, announcements: ann, today: '2026-11-06', hour: 20, weekday: 4, regular: r1.regular });
+  assert.equal(r2.message.card.title, 'A');
+  const r3 = planRegular({ ...reg, announcements: ann, today: '2026-11-30', hour: 12, weekday: 1, regular: r2.regular });
+  assert.notEqual(r3.message?.card.title, 'Soon');
 });

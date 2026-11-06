@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mergeCoupons, safeLink, daysBetween } from './lib.mjs';
 import { renderCard } from './telegram-card.mjs';
-import { telegramPosts } from '../src/content/telegram-posts.mjs';
+import { telegramPosts, telegramAnnouncements } from '../src/content/telegram-posts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Telegram audience spells it with ע – the site covers both spellings for SEO.
@@ -118,7 +118,7 @@ export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, r
  * Pure: picks at most one "regular" post (tip / promotion / feature / countdown / weekly) for the current time slot.
  * Slots (Israel time): noon 11:00–13:59, evening 19:00–21:59. Returns { message|null, regular } (new state).
  */
-export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, minGapDays = 10 }) {
+export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, announcements = telegramAnnouncements, minGapDays = 10 }) {
   const slot = hour >= 11 && hour < 14 ? 'noon' : hour >= 19 && hour < 22 ? 'evening' : null;
   const state = { lastSlot: regular.lastSlot || '', history: { ...(regular.history || {}) } };
   if (!slot || state.lastSlot === `${today}|${slot}`) return { message: null, regular: state };
@@ -160,7 +160,18 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     });
   }
 
-  // 3) Evergreen rotation: the post shown least recently (never-shown first), respecting the gap.
+  // 3) One-time announcements (each posted once ever).
+  const ann = announcements.find((a) => !state.history[a.id]);
+  if (ann) {
+    return done(ann.id, {
+      kind: ann.type,
+      card: { kind: ann.type, emoji: ann.emoji, title: ann.title, points: ann.points, badge: ann.badge, site: host },
+      text: `${ann.emoji} <b>${esc(ann.title)}</b>\n\n${esc(ann.text)}`,
+      buttons: ann.buttons.map(([label, p]) => [{ text: label, url: link(p, ann.id) }]),
+    });
+  }
+
+  // 4) Evergreen rotation: the post shown least recently (never-shown first), respecting the gap.
   const candidates = library
     .map((p, i) => ({ p, i, last: state.history[p.id] || '' }))
     .filter(({ last }) => !last || daysBetween(last, today) >= minGapDays)

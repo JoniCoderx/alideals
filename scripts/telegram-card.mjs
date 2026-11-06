@@ -28,8 +28,8 @@ const TEXT_THEMES = {
   countdown: { bg: 'linear-gradient(150deg,#16151b 0%,#7a0b3a 55%,#e5122f 100%)', fg: '#fff', sub: 'rgba(255,255,255,.9)', accent: '#ffb400', chip: 'rgba(255,255,255,.12)', badge: '⏳ ספירה לאחור', brandFill: '#fff', brandMark: '#e5122f', url: ['#fff', '#7a0b3a'] },
 };
 
-export function textCardBody({ kind, emoji, title, points = [], bigNumber, bigLabel, site, name }) {
-  const t = TEXT_THEMES[kind] || TEXT_THEMES.tip;
+export function textCardBody({ kind, emoji, title, points = [], bigNumber, bigLabel, site, name, badge }) {
+  const t = { ...(TEXT_THEMES[kind] || TEXT_THEMES.tip), ...(badge ? { badge } : {}) };
   const brand = `<svg viewBox="0 0 64 64" width="72" height="72"><defs><linearGradient id="bg1" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#ff7a2f"/><stop offset="1" stop-color="#e5122f"/></linearGradient></defs><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="${t.brandFill}"/><path d="M22 39 42 19" stroke="${t.brandMark}" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="${t.brandMark}"/><circle cx="41" cy="37" r="5" fill="${t.brandMark}"/></svg>`;
   const css = `body{background:${t.bg};color:${t.fg};padding:60px 64px 52px;display:flex;flex-direction:column}
 .top{display:flex;align-items:center;justify-content:space-between}
@@ -58,7 +58,7 @@ export async function cardHTML({ kind, title, subtitle, codes, footer, site = 'y
   const font = async (f) => (await fs.readFile(path.join(ROOT, 'src/assets/fonts', f))).toString('base64');
   const [he, la] = await Promise.all([font('rubik-hebrew.woff2'), font('rubik-latin.woff2')]);
   if (TEXT_THEMES[kind]) {
-    const { css, html } = textCardBody({ kind, emoji: arguments[0].emoji, title, points: arguments[0].points, bigNumber: arguments[0].bigNumber, bigLabel: arguments[0].bigLabel, site, name });
+    const { css, html } = textCardBody({ kind, emoji: arguments[0].emoji, title, points: arguments[0].points, bigNumber: arguments[0].bigNumber, bigLabel: arguments[0].bigLabel, badge: arguments[0].badge, site, name });
     return `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><style>
 @font-face{font-family:R;src:url(data:font/woff2;base64,${he}) format('woff2');font-weight:400 800;unicode-range:U+0590-05FF,U+20AA}
 @font-face{font-family:R;src:url(data:font/woff2;base64,${la}) format('woff2');font-weight:400 800}

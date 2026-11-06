@@ -200,3 +200,14 @@ export const telegramPosts = [
     buttons: [['🛒 לחיפוש בעליאקספרס', '/go/home/']],
   },
 ];
+
+// One-time announcements: each is posted once (in the next free slot), before the regular rotation.
+export const telegramAnnouncements = [
+  {
+    id: 'ann-coming-soon', type: 'feature', emoji: '🚀', badge: '👀 בקרוב',
+    title: 'משהו גדול מגיע ליש דיל!',
+    points: ['מוצא הזול: אותו מוצר, הכי זול', 'דילים בשקלים עם משלוח לישראל', 'ואתם פה ראשונים 🔥'],
+    text: 'אנחנו בשלבי בדיקה אחרונים של כלי שעוד לא היה באף אתר קופונים בישראל: מדביקים קישור למוצר מעליאקספרס, ומקבלים את אותו מוצר בדיוק במחיר הכי נמוך אצל מוכרים אחרים.\n\nמי שבערוץ, ישמע ראשון כשזה עולה. שתפו את הערוץ עם מי שקונה בעליאקספרס 🙏',
+    buttons: [['👀 הצצה לאתר', '/finder/'], ['🔥 הקודים של עכשיו', '/']],
+  },
+];

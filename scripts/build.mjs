@@ -511,6 +511,18 @@ ${hotProducts.length ? `
   </div>
 </section>
 
+${!FINDER_API ? `<section class="section"><div class="wrap">
+  <div class="soon">
+    <div class="soon-head"><span class="soon-badge">👀 בקרוב</span><h2>משהו גדול מגיע ליש דיל!</h2><p>אנחנו בונים כלים שעוד לא היו באף אתר קופונים בישראל.</p></div>
+    <div class="soon-grid">
+      <a class="soon-card" href="/finder/"><b>🔎 מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר במחיר הכי נמוך בעליאקספרס. בלי לחפש, בלי להשוות לבד.</span><i>בקרוב</i></a>
+      <div class="soon-card"><b>🔥 דילים בשקלים</b><span>המוצרים הנמכרים ביותר עם משלוח לישראל, לפי קטגוריות, מתעדכן לבד כמה פעמים ביום.</span><i>בקרוב</i></div>
+      ${site.social.telegram ? `<a class="soon-card is-live" href="${esc(site.social.telegram)}" rel="noopener"><b>💬 קהילת יש דיל!</b><span>קודים חדשים ברגע שהם יוצאים, תזכורת לפני שקוד נגמר, וטיפים. בטלגרם, בחינם.</span><i>כבר פעיל · הצטרפו</i></a>` : ''}
+    </div>
+    ${site.social.telegram ? `<a class="btn btn-primary soon-cta" href="${esc(site.social.telegram)}" rel="noopener">רוצים להיות הראשונים לדעת? הצטרפו לטלגרם</a>` : ''}
+  </div>
+</div></section>` : ''}
+
 <section class="section"><div class="wrap">
   <h2 class="section-title">קופונים לעלי אקספרס לפי קטגוריה</h2>
   <div class="cat-grid">${categories.map((c) => `<a class="cat" href="/coupon/${c.slug}/"><b>${c.emoji} ${esc(c.name)}</b><span>קופון ל${esc(c.short)}</span></a>`).join('')}</div>
@@ -635,7 +647,7 @@ function finderPage() {
       <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>מצאו לי זול יותר</button>
     </div>
     <p class="muted finder-help">באפליקציה: עמוד המוצר ← שיתוף ← העתקת קישור. עובד גם עם קישורים מקוצרים.</p>
-    ${FINDER_API ? '' : '<p class="list-note">🚀 הפיצ\'ר עולה ממש בקרוב. בינתיים, <a href="/">כל קודי הקופון כאן</a>.</p>'}
+    ${FINDER_API ? '' : `<div class="soon-inline"><b>🚀 מוצא הזול עולה ממש בקרוב</b><span>אנחנו בשלבי בדיקה אחרונים. רוצים לדעת ראשונים כשזה עולה?</span>${site.social.telegram ? `<a class="btn btn-primary" href="${esc(site.social.telegram)}" rel="noopener">הצטרפו לטלגרם</a>` : ''}<a href="/">בינתיים: כל קודי הקופון ←</a></div>`}
   </form>
 </div></section>
 <section class="section"><div class="wrap narrow">
