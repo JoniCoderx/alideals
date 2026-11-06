@@ -271,6 +271,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <link rel="manifest" href="/site.webmanifest">
 <link rel="alternate" type="application/atom+xml" title="${esc(site.name)}: קודים חדשים" href="/feed.xml">
 <link rel="preload" href="/assets/fonts/rubik-hebrew.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/rubik-latin.woff2" as="font" type="font/woff2" crossorigin>
 <meta name="format-detection" content="telephone=no">
 ${verification.google ? `<meta name="google-site-verification" content="${esc(verification.google)}">` : ''}
 ${verification.bing ? `<meta name="msvalidate.01" content="${esc(verification.bing)}">` : ''}
