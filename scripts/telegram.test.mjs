@@ -130,3 +130,16 @@ test('every post carries the affiliate link (direct, not via /go/)', () => {
   assert.equal(long.text.length, 995);
   assert.equal(long.buttons[0][0].url, affLink);
 });
+
+import { collectReports } from './telegram.mjs';
+
+test('code reports: one per user per day, only active codes, replies for each', () => {
+  const up = (id, uid, text) => ({ update_id: id, message: { text, chat: { id: uid }, from: { id: uid } } });
+  const { reports, replies } = collectReports([
+    up(1, 7, '/start r_ilaff08'), up(2, 7, '/start r_ILAFF08'), up(3, 8, '/start r_ILAFF08'),
+    up(4, 9, '/start r_OLDCODE'), up(5, 9, '/start'), up(6, 9, 'hello'),
+  ], { codes: ['ILAFF08', 'ILAFF20'], today: '2026-11-07' });
+  assert.equal(reports.ILAFF08.length, 2);
+  assert.equal(reports.OLDCODE, undefined);
+  assert.deepEqual(replies.map((r) => r.kind), ['thanks', 'thanks', 'thanks', 'unknown', 'hello']);
+});

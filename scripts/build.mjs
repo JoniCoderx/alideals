@@ -140,6 +140,10 @@ function couponCard(c, { compact = false } = {}) {
   if (isCommunity) status = `<span class="tag tag-muted">מהקהילה · לא נבדק${c.foundAt ? ` · ${heDate(c.foundAt)}` : ''}</span>`;
   else if (c.sample) status = `<span class="tag tag-muted">דוגמה</span>`;
   else if (c.verified) status = `<span class="tag tag-ok">${ICON.check} נבדק ${heDate(c.verified)}</span>`;
+  else if (manual.updated) status = `<span class="tag tag-ok" title="הקוד אומת מול מקורות רשמיים בתאריך הזה">${ICON.check} עודכן ${heDate(manual.updated)}</span>`;
+  const rep = reports[c.code];
+  const flagged = !hidden && rep && rep.recent >= 3;
+  const reportLink = !hidden && !isCommunity && BOT ? `<a class="report" href="https://t.me/${BOT}?start=r_${encodeURIComponent(c.code)}" rel="noopener" target="_blank">לא עבד לכם? דווחו</a>` : '';
   return `
 <article class="coupon${c.featured ? ' is-featured' : ''}${isCommunity ? ' is-community' : ''}" id="c-${c.id}" data-min="${c.minOrder ?? 0}"${c.expires ? ` data-expires="${c.expires}"` : ''}>
   <div class="coupon-value" aria-hidden="true">
@@ -153,7 +157,9 @@ function couponCard(c, { compact = false } = {}) {
       ${c.expires && !c.sample ? `<span class="tag">בתוקף עד ${heDate(c.expires)}</span>` : ''}
       ${urgency}
       ${c.featured && !c.sample ? '<span class="tag tag-star">מומלץ</span>' : ''}
+      ${flagged ? '<span class="tag tag-warn">⚠️ חלק מהגולשים דיווחו שלא עבד</span>' : ''}
     </div>
+    ${reportLink}
     ${c.note && !compact ? `<p class="coupon-note">${esc(c.note)}</p>` : ''}
   </div>
   <div class="coupon-cta">
@@ -235,7 +241,7 @@ function topbar() {
   const short = activeEvent.name.split(' –')[0];
   const days = daysBetween(today, activeEvent.start);
   const text = live
-    ? `🔥 ${esc(activeEvent.name)}: המבצע פעיל עכשיו, הקודים כאן`
+    ? `🔥 קודי ${esc(short)} לישראל בתוקף עכשיו${activeEvent.end ? `, עד ${heDate(activeEvent.end)}` : ''}. לכל הקודים`
     : `⏳ ${esc(short)} מתחיל ${days === 1 ? 'מחר' : `בעוד ${days} ימים`}. כך מתכוננים`;
   return `<div class="topbar"><a href="/sale/${activeEvent.slug}/">${text} ←</a></div>`;
 }
@@ -357,7 +363,7 @@ ${body}
   <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>לא נפתח? לחצו כאן</a></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
-${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🔎 בקרוב: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר אצל המוכר הכי זול בעליאקספרס.</span><a href="/finder/">איך זה עובד ←</a></aside>` : ''}
+${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🔎 בקרוב: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים בעליאקספרס.</span><a href="/finder/">איך זה עובד ←</a></aside>` : ''}
 <script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
@@ -405,6 +411,10 @@ function faqBlock(items) {
 const allProducts = () => Object.values(gen.deals || {}).flat().filter((p) => safeLink(p.link) && safeLink(p.image));
 const catItems = (slugName) => (gen.deals?.[slugName] || []).filter((p) => safeLink(p.link) && safeLink(p.image));
 
+// Code reports collected by the Telegram bot (scripts/telegram.mjs → generated.json).
+const BOT = gen.telegram?.bot || '';
+const reports = Object.fromEntries(Object.entries(gen.telegram?.reports || {}).map(([code, list]) => [code, { recent: new Set((list || []).filter((r) => r && r.d && daysBetween(r.d, today) <= 3).map((r) => r.u)).size }]));
+
 const soonestExpiry = realCodes.map((c) => c.expires).filter(Boolean).sort()[0] || '';
 const heShort = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}.${Number(m)}`; };
 
@@ -451,19 +461,19 @@ function homePage() {
 ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div class="finder-tease">
   <div class="ft-text">
     <span class="ft-badge">🔥 חדש · עולה בקרוב</span>
-    <h2>מוצא הזול: אותו מוצר, במחיר הכי נמוך בעליאקספרס</h2>
-    <p>אותו מוצר נמכר בעליאקספרס אצל עשרות מוכרים, בהפרשים של עשרות אחוזים. מנוע החיפוש החכם שלנו מוצא אותם בשבילכם, תוך שניות.</p>
+    <h2>מוצא הזול: אותו מוצר, אצל מוכר זול יותר</h2>
+    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. מנוע החיפוש שלנו יחפש בשבילכם הצעות זולות יותר, תוך שניות.</p>
   </div>
-  <a class="ft-mock" href="/finder/" aria-label="למוצא הזול"><span class="ft-input">הדביקו קישור למוצר מעלי אקספרס… 🔗</span><span class="ft-go">מצא לי זול יותר</span></a>
+  <a class="ft-mock" href="/finder/" aria-label="למוצא הזול"><span class="ft-input">הדביקו קישור למוצר מעלי אקספרס… 🔗</span><span class="ft-go">איך זה יעבוד ←</span></a>
   <ol class="ft-steps">
     <li><b>🔗 מזהה את המוצר</b><span>מהקישור, גם מהאפליקציה</span></li>
     <li><b>🔍 סורק את כל המוכרים</b><span>שמוכרים את אותו מוצר, גם מה שלא מוצאים בחיפוש רגיל</span></li>
     <li><b>🛡️ מסנן את הלא אמינים</b><span>דירוג נמוך, בלי מכירות או בלי משלוח לישראל</span></li>
-    <li><b>💰 מסדר לפי מחיר בשקלים</b><span>הזול ביותר למעלה, עם קישור ישיר</span></li>
+    <li><b>💰 מסדר לפי מחיר בשקלים</b><span>הזול למעלה, ואתם משווים ומחליטים</span></li>
   </ol>
   ${site.social.telegram ? `<p class="ft-note">רוצים לדעת ראשונים כשזה עולה? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">הצטרפו לטלגרם ${ICON.telegram}</a></p>` : ''}
 </div></div></section>` : ''}
-${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🔎 חדש: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר במחיר הכי נמוך בעליאקספרס</span><i>נסו עכשיו ←</i></a></div></section>` : ''}
+${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🔎 חדש: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים</span><i>נסו עכשיו ←</i></a></div></section>` : ''}
 <section class="section" id="codes">
   <div class="wrap layout-2">
     <div>
@@ -523,21 +533,6 @@ ${hotProducts.length ? `
 
 <section class="section">
   <div class="wrap info-grid">
-    <div class="info-card"><h2>איך משתמשים בקוד קופון של עליאקספרס</h2>
-    <ol>
-      <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"העתק קוד"</b>. הקוד מועתק ועליאקספרס נפתחת.</li>
-      <li>מוסיפים מוצרים לעגלה ועוברים לתשלום.</li>
-      <li>בשורה <b>"קוד מבצע"</b> מדביקים את הקוד ולוחצים "החל".</li>
-      <li>בודקים שהסכום ירד, ורק אז משלמים.</li>
-    </ol>
-    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון בעליאקספרס</a>. מזמינים בפעם הראשונה? ראו <a href="/new-user/">קופון עליאקספרס למשתמש חדש</a>. כבר הזמנתם בעבר? <a href="/existing-user/">קוד קופון למשתמש קיים</a>.</p></div>
-    <div class="info-card"><h2>למה הקוד לא נכנס?</h2>
-    <ul>
-      <li><b>הסכום נמוך מהמינימום.</b> הוא נבדק אחרי הנחות החנות, אז כדאי לבחור מדרגה נמוכה יותר.</li>
-      <li><b>הקוד כבר נוצל בחשבון.</b> בדרך כלל כל קוד תקף פעם אחת למשתמש.</li>
-      <li><b>המכסה נגמרה.</b> בימי מבצע קודים נגמרים מהר. נסו קוד אחר מאותה מדרגה.</li>
-      <li><b>המוצרים לא משתתפים.</b> יש קטגוריות שלא נכללות במבצע.</li>
-    </ul></div>
     <div class="info-card"><h2>מתי יוצאים הקודים הכי שווים?</h2>
     <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של עליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p></div>
     <div class="info-card"><h2>מדריכים פופולריים</h2>
@@ -669,7 +664,7 @@ function finderPage() {
   const body = `
 <section class="hero"><div class="wrap narrow">${bc.html}
   <h1>🔎 מוצא הזול</h1>
-  <p class="lead">מדביקים קישור למוצר מעליאקספרס, ואנחנו מוצאים את <strong>אותו מוצר במחיר הכי נמוך</strong> אצל מוכרים אחרים, עם משלוח לישראל.</p>
+  <p class="lead">מדביקים קישור למוצר מעליאקספרס, ואנחנו מחפשים <strong>את אותו מוצר אצל מוכרים זולים יותר</strong>, עם משלוח לישראל. אתם משווים ובוחרים.</p>
   <form class="finder" id="finder-form" data-api="${esc(FINDER_API)}" autocomplete="off">
     <label for="finder-url" class="calc-label">הקישור למוצר</label>
     <div class="finder-row">
@@ -684,7 +679,7 @@ function finderPage() {
   <div id="finder-out" aria-live="polite"></div>
   <div class="prose">
     <h2>למה אותו מוצר עולה אחרת?</h2>
-    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. מוצא הזול עושה את החיפוש וההשוואה בשבילכם.</p>
+    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. מוצא הזול עושה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
     <h2>ואחרי שמצאתם: עוד הנחה</h2>
     <p>על המחיר הזול אפשר להוסיף <a href="/#calc">קוד קופון לפי סכום העגלה</a>, קופון של החנות וקופונים ממרכז הקופונים. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>.</p>
   </div>
@@ -692,8 +687,8 @@ function finderPage() {
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `מוצא הזול: אותו מוצר בעליאקספרס במחיר הכי נמוך | ${site.name}`,
-    description: 'מדביקים קישור למוצר מעליאקספרס ומקבלים את אותו מוצר במחיר הכי נמוך אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.',
+    title: `מוצא הזול: אותו מוצר בעליאקספרס אצל מוכר זול יותר | ${site.name}`,
+    description: 'מדביקים קישור למוצר מעליאקספרס ומקבלים הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.',
     pathname, body, ld: [bc.ld, faqLd(items)], noindex: !FINDER_API,
   });
 }

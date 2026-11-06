@@ -261,6 +261,30 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
 }
 
 /**
+ * Pure: folds bot updates into the code-report store.
+ * Users tap "לא עבד לכם? דווחו" on the site → t.me/<bot>?start=r_CODE → the bot receives "/start r_CODE".
+ * Store: { CODE: [{ d: 'YYYY-MM-DD', u: userId }] } – one entry per user per code per day, last 50 kept.
+ */
+export function collectReports(updates, { reports = {}, codes = [], today }) {
+  const next = { ...reports };
+  const replies = [];
+  const valid = new Set(codes.map((c) => String(c).toUpperCase()));
+  for (const u of updates) {
+    const msg = u.message;
+    const m = (msg?.text || '').trim().match(/^\/start\s+r_([A-Za-z0-9]{3,24})$/);
+    if (!m) { if (msg?.chat?.id && /^\/start/.test(msg.text || '')) replies.push({ chat: msg.chat.id, kind: 'hello' }); continue; }
+    const code = m[1].toUpperCase();
+    if (!valid.has(code)) { replies.push({ chat: msg.chat.id, kind: 'unknown', code }); continue; }
+    const list = next[code] ? [...next[code]] : [];
+    const uid = msg.from?.id ?? msg.chat.id;
+    if (!list.some((r) => r.u === uid && r.d === today)) list.push({ d: today, u: uid });
+    next[code] = list.slice(-50);
+    replies.push({ chat: msg.chat.id, kind: 'thanks', code });
+  }
+  return { reports: next, replies };
+}
+
+/**
  * Pure: makes sure every post carries the affiliate link (that's what sets the AliExpress cookie).
  * - buttons that point at our /go/ redirect pages become the direct affiliate link (one hop less,
  *   and on phones it opens the AliExpress app straight away);
@@ -318,6 +342,27 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
 
   const today = process.env.TODAY || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
   const { active } = mergeCoupons(manual.coupons, (gen.sheetCoupons || []).filter((c) => c.type !== 'deal'), today);
+  // Keep bot meta (username, code reports, update offset) across runs, whatever happens below.
+  const meta = { bot: gen.telegram?.bot || '', reports: gen.telegram?.reports || {}, updOffset: gen.telegram?.updOffset || 0 };
+  if (token && !dry && !previewDir) {
+    try {
+      const me = await api(token, 'getMe', new URLSearchParams());
+      meta.bot = me.result.username || meta.bot;
+      const upd = await api(token, 'getUpdates', new URLSearchParams({ offset: String(meta.updOffset + 1), timeout: '0', allowed_updates: JSON.stringify(['message']) }));
+      if (upd.result.length) {
+        meta.updOffset = upd.result[upd.result.length - 1].update_id;
+        const { reports, replies } = collectReports(upd.result, { reports: meta.reports, codes: active.map((c) => c.code), today });
+        meta.reports = reports;
+        const TXT = {
+          thanks: (c) => `תודה על הדיווח! 🙏\nרשמנו שהקוד ${c} לא עבד לכם. אם כמה גולשים מדווחים על אותו קוד, נסמן אותו באתר ונבדוק אותו.\n\nבינתיים כדאי לנסות קוד ממדרגה אחרת: ${site.url}/#codes`,
+          unknown: () => `תודה! הקוד הזה כבר לא ברשימה הפעילה שלנו. הקודים העדכניים כאן: ${site.url}/#codes`,
+          hello: () => `היי! 👋 אני הבוט של ${site.name}.\nכל הקודים העדכניים לעליאקספרס: ${site.url}\nוהערוץ שלנו: ${site.social.telegram}`,
+        };
+        for (const r of replies) await api(token, 'sendMessage', new URLSearchParams({ chat_id: String(r.chat), text: TXT[r.kind](r.code), disable_web_page_preview: 'true' })).catch(() => {});
+        console.log(`• bot updates: ${upd.result.length}, reports now: ${JSON.stringify(Object.fromEntries(Object.entries(meta.reports).map(([k, v]) => [k, v.length])))}`);
+      }
+    } catch (e) { console.log(`• bot updates skipped: ${e.message}`); }
+  }
   const repost = process.env.TELEGRAM_REPOST === '1' || process.env.TELEGRAM_REPOST === 'true';
   // Safety net: if the CI cache was lost, recover what was already posted from the live site.
   if (!gen.telegram?.posted || !Object.keys(gen.telegram.posted).length) {
@@ -354,8 +399,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     catch (e) { console.error(`✗ ${e.message}`); process.exitCode = 1; break; }
   }
   if (sent === messages.length) {
-    gen.telegram = { posted, regular: messages.some((m) => m.kind === reg.message?.kind && m.card === reg.message?.card) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
+    gen.telegram = { ...meta, posted, regular: messages.some((m) => m.kind === reg.message?.kind && m.card === reg.message?.card) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
     await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n');
   }
+  if (sent !== messages.length) { gen.telegram = { ...(gen.telegram || {}), ...meta }; await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n'); }
   console.log(`✓ telegram → ${chat}: ${sent}/${messages.length} posts`);
 }

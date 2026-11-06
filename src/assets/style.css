@@ -479,3 +479,7 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
   .footer-grid>div:first-child{grid-column:1/-1}
   .site-footer a{padding:4px 0;font-size:.88rem}
 }
+
+.report{display:inline-block;margin-top:4px;font-size:.78rem;color:var(--muted)!important;text-decoration:underline;text-underline-offset:2px}
+.tag-warn{background:#fff1e0;color:#9a4a00}
+.info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
