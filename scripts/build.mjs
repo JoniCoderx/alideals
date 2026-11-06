@@ -9,7 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { faq } from '../src/content/faq.mjs';
 import { guides as baseGuides } from '../src/content/guides.mjs';
 import { moreGuides } from '../src/content/guides-more.mjs';
-const guides = [...baseGuides, ...moreGuides];
+import { israelGuides } from '../src/content/guides-israel.mjs';
+const guides = [...baseGuides, ...moreGuides, ...israelGuides];
 import { eventContent } from '../src/content/events.mjs';
 import { categories } from '../src/content/categories.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
@@ -316,7 +317,7 @@ ${body}
     </div>
     <div>
       <h2>מדריכים</h2>
-      ${['first-time-aliexpress', 'how-to-use-aliexpress-coupon', 'is-aliexpress-safe', 'aliexpress-shipping-israel', 'aliexpress-vs-temu', 'aliexpress-dispute'].map((sl) => guides.find((g) => g.slug === sl)).filter(Boolean).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
+      ${['first-time-aliexpress', 'how-to-use-aliexpress-coupon', 'aliexpress-tracking', 'aliexpress-customs-israel', 'aliexpress-payment', 'is-aliexpress-safe', 'aliexpress-returns', 'aliexpress-customer-service'].map((sl) => guides.find((g) => g.slug === sl)).filter(Boolean).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
       <a href="/guides/">כל המדריכים ←</a>
     </div>
     <div>
