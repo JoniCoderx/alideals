@@ -147,9 +147,9 @@ function couponCard(c, { compact = false } = {}) {
   <div class="coupon-cta">
     ${hidden
       ? `<a class="btn btn-primary" href="/go/${c.id}/" ${OUT} data-go="${c.id}">למרכז הקופונים ${ICON.arrow}</a>`
-      : `<button class="btn btn-reveal" type="button" ${revealAttrs(c, title)} aria-label="הצג קוד: ${esc(title)}">
+      : `<button class="btn btn-reveal" type="button" ${revealAttrs(c, title)} aria-label="העתק קוד: ${esc(title)}">
           <span class="reveal-mask" aria-hidden="true">${masked}</span>
-          <span class="reveal-label" aria-hidden="true">הצג קוד</span>
+          <span class="reveal-label" aria-hidden="true">העתק קוד</span>
         </button>`}
   </div>
 </article>`;
@@ -332,7 +332,7 @@ ${body}
     <li>מדביקים את הקוד בשדה <b>"קוד מבצע"</b></li>
   </ol>
   <div class="modal-countdown" id="modal-countdown" role="status"><span>פותחים את אליאקספרס בעוד <b id="modal-count">2</b>…</span><i id="modal-bar"></i></div>
-  <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>פתיחה עכשיו</a><button type="button" id="modal-stay">להישאר באתר</button></div>
+  <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>לא נפתח? לחצו כאן</a></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
 <script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
@@ -408,7 +408,7 @@ function homePage() {
       <button class="featured" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>
         <span class="f-amount">${money(c.discount, c.currency)}</span>
         <span class="f-min">מעל ${money(c.minOrder, c.currency)}</span>
-        <span class="f-cta">הצג קוד</span>
+        <span class="f-cta">העתק קוד</span>
       </button>`).join('')}</div>` : ''}
   </div>
 </section>
@@ -448,7 +448,7 @@ function homePage() {
       <div class="side-card side-sticky">
         <h2>איך זה עובד?</h2>
         <ol class="steps">
-          <li><span><b>לוחצים "הצג קוד"</b> הקוד מועתק</span></li>
+          <li><span><b>לוחצים "העתק קוד"</b> הקוד מועתק</span></li>
           <li><span><b>אליאקספרס נפתחת</b> בלשונית חדשה</span></li>
           <li><span><b>מדביקים בתשלום</b> בשדה "קוד מבצע"</span></li>
         </ol>
@@ -472,7 +472,7 @@ ${hotProducts.length ? `
   <div class="wrap narrow prose">
     <h2>איך משתמשים בקוד קופון של אליאקספרס</h2>
     <ol>
-      <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"הצג קוד"</b>. הקוד מועתק ואליאקספרס נפתחת.</li>
+      <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"העתק קוד"</b>. הקוד מועתק ואליאקספרס נפתחת.</li>
       <li>מוסיפים מוצרים לעגלה ועוברים לתשלום.</li>
       <li>בשורה <b>"קוד מבצע"</b> מדביקים את הקוד ולוחצים "החל".</li>
       <li>בודקים שהסכום ירד, ורק אז משלמים.</li>

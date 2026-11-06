@@ -63,7 +63,11 @@
     onTick(left);
     timer = setInterval(function () {
       left -= 1;
-      if (left <= 0) { stopCountdown(); track('auto_open', { target_id: id }); goNow(id); return; }
+      if (left <= 0) {
+        clearInterval(timer); timer = null;
+        var box2 = $('modal-countdown'); if (box2) box2.querySelector('span').textContent = '🚀 פותחים את אליאקספרס!';
+        track('auto_open', { target_id: id }); goNow(id); return;
+      }
       onTick(left);
     }, 1000);
   }
@@ -201,7 +205,7 @@
     if (best) {
       var cta = best.s
         ? '<a class="btn btn-primary" href="/go/' + esc(best.id) + '/" target="_blank" rel="nofollow sponsored noopener" data-go="' + esc(best.id) + '">לקבלת הקוד</a>'
-        : '<button class="btn btn-primary" type="button" data-reveal="' + esc(best.id) + '" data-code="' + esc(best.code) + '" data-title="' + esc(best.t) + '">הצג את הקוד</button>';
+        : '<button class="btn btn-primary" type="button" data-reveal="' + esc(best.id) + '" data-code="' + esc(best.code) + '" data-title="' + esc(best.t) + '">העתק את הקוד</button>';
       html += '<div class="best"><span>לעגלה שלכם' + esc(approx) + ': <b>' + fmt(best.d) + ' הנחה</b></span>' + cta + '</div>';
     } else {
       html += '<div>הקוד הראשון מתחיל בהזמנה מעל ' + fmt(tiers.reduce(function (m, t) { return Math.min(m, t.m); }, Infinity)) + esc(approx) + '.</div>';
@@ -248,10 +252,8 @@
       setTimeout(function () { label.textContent = 'העתקה'; }, 1600);
     });
   });
-  if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) modal.close(); });
+  if (modal) modal.addEventListener('click', function (e) { if (e.target === modal && !timer) modal.close(); });
   if (modal) modal.addEventListener('close', stopCountdown);
-  var stay = $('modal-stay');
-  if (stay) stay.addEventListener('click', function () { stopCountdown(); track('stay_on_site'); });
   // Coming back with the Back button (bfcache): never resume an old countdown.
   window.addEventListener('pageshow', function () { stopCountdown(); if (modal && modal.open) modal.close(); });
 
