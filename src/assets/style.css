@@ -235,7 +235,7 @@ h1,h2,h3{line-height:1.25;margin:0 0 .5em}
   .footer-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:620px){
-  .site-header{position:static}
+  .site-header{position:static;backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
   .header-row{height:auto;flex-wrap:wrap;gap:4px 12px;padding-top:8px;padding-bottom:6px}
   .main-nav{width:calc(100% + 32px);margin:0 -16px;padding:0 12px}
   .brand{font-size:1.3rem}
