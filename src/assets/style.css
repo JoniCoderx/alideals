@@ -403,3 +403,31 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .promo-toast a{color:#ffb400;font-weight:800;text-decoration:none;margin-top:4px}
 .pt-x{position:absolute;top:6px;inset-inline-end:8px;background:none;border:0;color:#fff;opacity:.7;font-size:22px;cursor:pointer;line-height:1}
 @media (max-width:960px){.promo-toast{inset-inline:12px;max-width:none;bottom:84px}}
+
+/* compact one-row deal tiles */
+.deal-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.deal-tile{position:relative;text-decoration:none;color:var(--ink);padding:14px 14px 12px;gap:4px;transition:transform .15s,border-color .15s,box-shadow .15s}
+.deal-tile:hover{transform:translateY(-3px);border-color:var(--brand);box-shadow:0 10px 24px rgba(232,17,58,.12)}
+.deal-ic{font-size:30px;line-height:1}
+.deal-tile .tag{position:absolute;top:12px;inset-inline-end:12px;font-size:.7rem;padding:2px 8px}
+.deal-tile h3{font-size:.98rem;line-height:1.3;margin:4px 0 0}
+.deal-tile p{font-size:.84rem;line-height:1.45;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.deal-cta{margin-top:6px;font-weight:800;font-size:.88rem;color:var(--brand-2)}
+@media (max-width:620px){.deal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* compact home lower sections */
+.tiers-box{margin:22px 0 6px;border:1px solid var(--line);border-radius:16px;background:var(--card);padding:4px 16px}
+.tiers-box summary{cursor:pointer;list-style:none;padding:12px 0}
+.tiers-box summary::-webkit-details-marker{display:none}
+.tiers-box summary h2{margin:0;font-size:1.1rem;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tiers-box summary h2 span{font-size:.85rem;font-weight:600;color:var(--brand-2)}
+.tiers-box summary h2 span::after{content:" ▾"}
+.tiers-box[open] summary h2 span::after{content:" ▴"}
+.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.info-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;font-size:.92rem;line-height:1.55}
+.info-card h2{font-size:1.02rem;margin:0 0 8px}
+.info-card ol,.info-card ul{margin:0;padding-inline-start:18px;display:grid;gap:4px}
+.info-card p{margin:8px 0 0;color:var(--ink-2)}
+.info-card a{font-weight:600}
+@media (max-width:960px){.info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.info-grid{grid-template-columns:minmax(0,1fr)}}

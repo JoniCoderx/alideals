@@ -171,14 +171,17 @@ function couponCard(c, { compact = false } = {}) {
 </article>`;
 }
 
+const DEAL_ICON = { 'new-user': '🎁', 'coupon-center': '🎟️', coins: '🪙', choice: '🚚' };
+// Whole tile is one affiliate link (data-go → direct affiliate URL, same tab, app hand-off).
 function dealCard(d) {
   return `
-<article class="deal-tile">
+<a class="deal-tile" href="/go/${d.id}/" ${OUT} data-go="${d.id}">
+  <span class="deal-ic" aria-hidden="true">${DEAL_ICON[d.id] || '🔥'}</span>
   ${d.badge ? `<span class="tag tag-star">${esc(d.badge)}</span>` : ''}
   <h3>${esc(d.title)}</h3>
   <p>${esc(d.text || '')}</p>
-  <a class="btn btn-ghost" href="/go/${d.id}/" ${OUT} data-go="${d.id}">למבצע ${ICON.arrow}</a>
-</article>`;
+  <span class="deal-cta">למבצע ←</span>
+</a>`;
 }
 
 function productCard(p) {
@@ -487,9 +490,10 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
       <p class="muted">קודים שקונים פרסמו בפורומים ברשת בשבועות האחרונים. לא בדקנו אותם, אז שווה לנסות רק אם הקודים למעלה לא נכנסו.</p>
       <div class="coupon-list">${community.slice(0, 12).map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
 
-      <h2 class="section-title" id="tiers">איזה קוד מתאים לסכום שלי?</h2>
+      <details class="tiers-box" id="tiers"><summary><h2>איזה קוד מתאים לסכום שלי? <span>טבלת כל המדרגות</span></h2></summary>
       ${tierTable(coupons)}
       <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
+      </details>
 
       <h2 class="section-title">עוד דרכים לחסוך בעליאקספרס</h2>
       <div class="deal-grid">${deals.map(dealCard).join('')}</div>
@@ -520,49 +524,36 @@ ${hotProducts.length ? `
 </section>` : ''}
 
 <section class="section">
-  <div class="wrap narrow prose">
-    <h2>איך משתמשים בקוד קופון של עליאקספרס</h2>
+  <div class="wrap info-grid">
+    <div class="info-card"><h2>איך משתמשים בקוד קופון של עליאקספרס</h2>
     <ol>
       <li>בוחרים קוד מהרשימה לפי הסכום שבעגלה ולוחצים <b>"העתק קוד"</b>. הקוד מועתק ועליאקספרס נפתחת.</li>
       <li>מוסיפים מוצרים לעגלה ועוברים לתשלום.</li>
       <li>בשורה <b>"קוד מבצע"</b> מדביקים את הקוד ולוחצים "החל".</li>
       <li>בודקים שהסכום ירד, ורק אז משלמים.</li>
     </ol>
-    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון בעליאקספרס</a>. מזמינים בפעם הראשונה? ראו <a href="/new-user/">קופון עליאקספרס למשתמש חדש</a>. כבר הזמנתם בעבר? <a href="/existing-user/">קוד קופון למשתמש קיים</a>.</p>
-
-    <h2>למה הקוד לא נכנס?</h2>
+    <p>המדריך המלא, כולל אפליקציה: <a href="/guides/how-to-use-aliexpress-coupon/">איך משתמשים בקוד קופון בעליאקספרס</a>. מזמינים בפעם הראשונה? ראו <a href="/new-user/">קופון עליאקספרס למשתמש חדש</a>. כבר הזמנתם בעבר? <a href="/existing-user/">קוד קופון למשתמש קיים</a>.</p></div>
+    <div class="info-card"><h2>למה הקוד לא נכנס?</h2>
     <ul>
       <li><b>הסכום נמוך מהמינימום.</b> הוא נבדק אחרי הנחות החנות, אז כדאי לבחור מדרגה נמוכה יותר.</li>
       <li><b>הקוד כבר נוצל בחשבון.</b> בדרך כלל כל קוד תקף פעם אחת למשתמש.</li>
       <li><b>המכסה נגמרה.</b> בימי מבצע קודים נגמרים מהר. נסו קוד אחר מאותה מדרגה.</li>
       <li><b>המוצרים לא משתתפים.</b> יש קטגוריות שלא נכללות במבצע.</li>
-    </ul>
-
-    <h2>מתי יוצאים הקודים הכי שווים?</h2>
-    <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של עליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p>
-
-    <h2>מדריכים פופולריים</h2>
+    </ul></div>
+    <div class="info-card"><h2>מתי יוצאים הקודים הכי שווים?</h2>
+    <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של עליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p></div>
+    <div class="info-card"><h2>מדריכים פופולריים</h2>
     <ul>
       <li><a href="/guides/first-time-aliexpress/">איך קונים בעליאקספרס בפעם הראשונה</a></li>
       <li><a href="/guides/is-aliexpress-safe/">האם עליאקספרס בטוח?</a></li>
       <li><a href="/guides/aliexpress-shipping-israel/">כמה זמן לוקח משלוח לישראל</a></li>
       <li><a href="/guides/aliexpress-vs-temu/">עליאקספרס או טמו: מה עדיף?</a></li>
       <li><a href="/guides/aliexpress-dispute/">איך פותחים מחלוקת ומקבלים החזר</a></li>
-    </ul>
+    </ul></div>
   </div>
 </section>
 
-${!FINDER_API ? `<section class="section"><div class="wrap">
-  <div class="soon">
-    <div class="soon-head"><span class="soon-badge">👀 בקרוב</span><h2>משהו גדול מגיע ליש דיל!</h2><p>אנחנו בונים כלים שעוד לא היו באף אתר קופונים בישראל.</p></div>
-    <div class="soon-grid">
-      <a class="soon-card" href="/finder/"><b>🔎 מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר במחיר הכי נמוך בעליאקספרס. בלי לחפש, בלי להשוות לבד.</span><i>בקרוב</i></a>
-      <div class="soon-card"><b>🔥 דילים בשקלים</b><span>המוצרים הנמכרים ביותר עם משלוח לישראל, לפי קטגוריות, מתעדכן לבד כמה פעמים ביום.</span><i>בקרוב</i></div>
-      ${site.social.telegram ? `<a class="soon-card is-live" href="${esc(site.social.telegram)}" rel="noopener"><b>💬 קהילת יש דיל!</b><span>קודים חדשים ברגע שהם יוצאים, תזכורת לפני שקוד נגמר, וטיפים. בטלגרם, בחינם.</span><i>כבר פעיל · הצטרפו</i></a>` : ''}
-    </div>
-    ${tgBtn('רוצים להיות הראשונים לדעת? הצטרפו לטלגרם', 'soon-cta')}
-  </div>
-</div></section>` : ''}
+
 
 <section class="section"><div class="wrap">
   <h2 class="section-title">קופונים לעלי אקספרס לפי קטגוריה</h2>
