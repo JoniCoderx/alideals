@@ -12,7 +12,7 @@ import { moreGuides } from '../src/content/guides-more.mjs';
 import { israelGuides } from '../src/content/guides-israel.mjs';
 const guides = [...baseGuides, ...moreGuides, ...israelGuides];
 import { eventContent } from '../src/content/events.mjs';
-import { categories } from '../src/content/categories.mjs';
+import { categories, categoryColors } from '../src/content/categories.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
 import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
@@ -117,11 +117,7 @@ const tgBtn = (label, cls = '') => site.social.telegram ? `<a class="btn btn-tg 
 
 
 // Category cards: each category gets its own colour pair + a big emoji illustration (no image requests).
-const CAT_COLORS = {
-  clothing: ['#ff6a88', '#ff2e63'], shoes: ['#ff9a3c', '#ff5e1a'], phones: ['#4f7cff', '#2b4fd8'], headphones: ['#8b5cf6', '#6d28d9'],
-  smartwatches: ['#14b8a6', '#0f766e'], home: ['#f59e0b', '#d97706'], kids: ['#f472b6', '#db2777'], tools: ['#64748b', '#334155'],
-  car: ['#ef4444', '#b91c1c'], beauty: ['#e879f9', '#c026d3'], sports: ['#22c55e', '#15803d'], gaming: ['#6366f1', '#312e81'],
-};
+const CAT_COLORS = categoryColors;
 const catStyle = (slug) => { const [a, b] = CAT_COLORS[slug] || ['#ff7a2f', '#e5122f']; return `--c1:${a};--c2:${b}`; };
 const catCard = (c, sub) => `<a class="cat cat-art" href="/coupon/${c.slug}/" style="${catStyle(c.slug)}"><i class="cat-emoji" aria-hidden="true">${c.emoji}</i><b>${esc(c.name)}</b><span>${esc(sub)}</span><em>לקופונים ←</em></a>`;
 
@@ -448,6 +444,7 @@ function homePage() {
         <span class="f-min">מעל ${money(c.minOrder, c.currency)}</span>
         <span class="f-cta">העתק קוד</span>
       </button>`).join('')}</div>` : ''}
+    ${site.social.telegram ? `<div class="m-tg">${tgBtn('קודים חדשים ישר לטלפון: הצטרפו לטלגרם', 'btn-block')}</div>` : ''}
   </div>
 </section>
 
@@ -484,6 +481,7 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
         ${coupons.map((c) => couponCard(c)).join('')}
       </div>
       <p class="empty-filter muted" id="empty-filter" hidden>אין קודים בטווח הזה. נסו טווח אחר.</p>
+      ${site.social.telegram ? `<div class="m-tg m-tg-list"><b>🔔 רוצים לדעת כשיוצאים קודים חדשים?</b>${tgBtn('הצטרפו לערוץ הטלגרם', 'btn-block')}</div>` : ''}
 
       ${community.length ? `
       <div class="section-head" id="community"><h2 class="section-title">קודים חדשים מהקהילה</h2></div>

@@ -26,11 +26,13 @@ const TEXT_THEMES = {
   guide: { bg: 'linear-gradient(160deg,#fffaf7 0%,#fffaf7 62%,#ffe1d6 100%)', fg: '#1b1b24', sub: '#3a3a46', accent: '#16151b', numFg: '#fff', chip: '#16151b', chipFg: '#fff', chipLine: '#16151b', panel: '#fff', panelLine: '#efe3dd', tile: 'linear-gradient(150deg,#ff7a2f,#e5122f)', deco: 'rgba(22,21,27,.05)', badge: '📖 מדריך', brandFill: 'url(#bg1)', brandMark: '#fff', bang: '#e5122f', url: ['#16151b', '#fff'], tag: '#e5122f' },
   deal: { bg: 'linear-gradient(150deg,#ff7a2f 0%,#e5122f 70%,#b80d2a 100%)', fg: '#fff', sub: '#fff', accent: '#fff', numFg: '#c8102e', chip: 'rgba(255,255,255,.16)', chipLine: 'rgba(255,255,255,.35)', panel: 'rgba(255,255,255,.13)', panelLine: 'rgba(255,255,255,.28)', tile: 'rgba(255,255,255,.18)', deco: 'rgba(255,255,255,.08)', badge: '🎁 הטבה', brandFill: '#fff', brandMark: '#e5122f', bang: '#fff', url: ['#fff', '#c8102e'], tag: '#fff' },
   feature: { bg: 'radial-gradient(800px 600px at 0% 100%,rgba(229,18,47,.4),transparent 60%),radial-gradient(600px 500px at 100% 0%,rgba(255,122,47,.25),transparent 60%),#16151b', fg: '#fff', sub: '#e6e1de', accent: '#ff5a4a', numFg: '#fff', chip: 'rgba(255,255,255,.08)', chipLine: 'rgba(255,255,255,.25)', panel: 'rgba(255,255,255,.06)', panelLine: 'rgba(255,255,255,.14)', tile: 'linear-gradient(150deg,#ff7a2f,#e5122f)', deco: 'rgba(255,255,255,.045)', badge: '✨ באתר', brandFill: 'url(#bg1)', brandMark: '#fff', bang: '#ff5a4a', url: ['#fff', '#16151b'], tag: '#ffb400' },
+  spot: { bg: 'radial-gradient(700px 500px at 100% 0%,rgba(255,180,0,.45),transparent 60%),linear-gradient(150deg,#ff6a2f 0%,#e5122f 60%,#a80b2a 100%)', fg: '#fff', sub: '#fff', accent: '#fff', numFg: '#c8102e', chip: 'rgba(255,255,255,.16)', chipLine: 'rgba(255,255,255,.35)', panel: 'rgba(255,255,255,.13)', panelLine: 'rgba(255,255,255,.28)', tile: 'rgba(255,255,255,.18)', deco: 'rgba(255,255,255,.08)', badge: '⚡ הקוד של עכשיו', brandFill: '#fff', brandMark: '#e5122f', bang: '#fff', url: ['#fff', '#c8102e'], tag: '#ffe08a', codeTitle: true },
+  category: { bg: 'linear-gradient(150deg,#ff7a2f,#e5122f)', fg: '#fff', sub: '#fff', accent: '#fff', numFg: '#16151b', chip: 'rgba(255,255,255,.18)', chipLine: 'rgba(255,255,255,.4)', panel: 'rgba(255,255,255,.14)', panelLine: 'rgba(255,255,255,.3)', tile: 'rgba(255,255,255,.2)', deco: 'rgba(255,255,255,.09)', badge: '🛍️ קטגוריה', brandFill: '#fff', brandMark: '#e5122f', bang: '#fff', url: ['#fff', '#16151b'], tag: '#fff' },
   countdown: { bg: 'linear-gradient(150deg,#16151b 0%,#7a0b3a 55%,#e5122f 100%)', fg: '#fff', sub: '#fff', accent: '#ffb400', numFg: '#16151b', chip: 'rgba(255,255,255,.12)', chipLine: 'rgba(255,255,255,.3)', panel: 'rgba(255,255,255,.1)', panelLine: 'rgba(255,255,255,.22)', tile: 'rgba(255,255,255,.14)', deco: 'rgba(255,255,255,.06)', badge: '⏳ ספירה לאחור', brandFill: '#fff', brandMark: '#e5122f', bang: '#fff', url: ['#fff', '#7a0b3a'], tag: '#ffb400' },
 };
 
-export function textCardBody({ kind, emoji, title, points = [], bigNumber, bigLabel, site, name, badge }) {
-  const t = { ...(TEXT_THEMES[kind] || TEXT_THEMES.tip), ...(badge ? { badge } : {}) };
+export function textCardBody({ kind, emoji, title, points = [], bigNumber, bigLabel, site, name, badge, colors }) {
+  const t = { ...(TEXT_THEMES[kind] || TEXT_THEMES.tip), ...(badge ? { badge } : {}), ...(colors ? { bg: `radial-gradient(700px 500px at 100% 0%,rgba(255,255,255,.22),transparent 60%),linear-gradient(150deg,${colors[0]},${colors[1]})` } : {}) };
   const brand = `<svg viewBox="0 0 64 64" width="70" height="70"><defs><linearGradient id="bg1" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#ff7a2f"/><stop offset="1" stop-color="#e5122f"/></linearGradient></defs><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="${t.brandFill}"/><path d="M22 39 42 19" stroke="${t.brandMark}" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="${t.brandMark}"/><circle cx="41" cy="37" r="5" fill="${t.brandMark}"/></svg>`;
   const pts = points.slice(0, 4);
   const long = title.length > 24;
@@ -53,9 +55,10 @@ li{display:flex;align-items:center;gap:20px;font-size:${pts.some((p) => p.length
 li b{flex:none;display:grid;place-items:center;width:60px;height:60px;border-radius:18px;background:${t.accent};color:${t.numFg};font-size:32px}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .url{background:${t.url[0]};color:${t.url[1]};border-radius:999px;padding:14px 32px;font-size:34px;font-weight:800}
-.tag{font-size:30px;font-weight:700;color:${t.tag}}`;
+.tag{font-size:30px;font-weight:700;color:${t.tag}}
+.codebox{align-self:flex-start;margin-top:30px;direction:ltr;font-family:ui-monospace,Menlo,monospace;font-weight:800;font-size:76px;letter-spacing:4px;background:#fff;color:#c8102e;border:5px dashed #ffb400;border-radius:24px;padding:14px 34px;box-shadow:0 16px 40px rgba(0,0,0,.2)}`;
   const head = bigNumber != null
-    ? `<div class="big">${esc(bigNumber)}</div><div class="biglabel">${esc(bigLabel || '')}</div><h1 style="margin-top:26px">${esc(title)}</h1>`
+    ? `<div class="big">${esc(bigNumber)}</div><div class="biglabel">${esc(bigLabel || '')}</div>${t.codeTitle ? `<div class="codebox">${esc(title)}</div>` : `<h1 style="margin-top:26px">${esc(title)}</h1>`}`
     : `<div class="head"><div class="tile">${emoji || '💡'}</div><h1>${esc(title)}</h1></div>`;
   const html = `<div class="deco"><div class="pct">%</div><div class="ring"></div></div>
 <div class="top"><div class="brand">${brand}<span>${esc(name)}<span style="color:${t.bang}">!</span></span></div><div class="badge">${esc(t.badge)}</div></div>
@@ -71,7 +74,7 @@ export async function cardHTML({ kind, title, subtitle, codes, footer, site = 'y
   const font = async (f) => (await fs.readFile(path.join(ROOT, 'src/assets/fonts', f))).toString('base64');
   const [he, la] = await Promise.all([font('rubik-hebrew.woff2'), font('rubik-latin.woff2')]);
   if (TEXT_THEMES[kind]) {
-    const { css, html } = textCardBody({ kind, emoji: arguments[0].emoji, title, points: arguments[0].points, bigNumber: arguments[0].bigNumber, bigLabel: arguments[0].bigLabel, badge: arguments[0].badge, site, name });
+    const { css, html } = textCardBody({ kind, emoji: arguments[0].emoji, title, points: arguments[0].points, bigNumber: arguments[0].bigNumber, bigLabel: arguments[0].bigLabel, badge: arguments[0].badge, colors: arguments[0].colors, site, name });
     return `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><style>
 @font-face{font-family:R;src:url(data:font/woff2;base64,${he}) format('woff2');font-weight:400 800;unicode-range:U+0590-05FF,U+20AA}
 @font-face{font-family:R;src:url(data:font/woff2;base64,${la}) format('woff2');font-weight:400 800}

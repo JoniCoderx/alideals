@@ -431,3 +431,51 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .info-card a{font-weight:600}
 @media (max-width:960px){.info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:620px){.info-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- mobile polish ---------- */
+.m-tg{display:none}
+@media (max-width:620px){
+  .hero{padding:14px 0 22px}
+  .hero-grid{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+  .hero-text{order:1}
+  .hero-grid .featured-row{order:2;margin-top:6px}
+  .m-tg{display:block;order:3}
+  .hero-grid .calc{order:4}
+  .hero-home .lead{display:none}
+  .hero-home .hero-cta{display:none}
+  .slogan{font-size:2.5rem;margin-bottom:10px}
+  .stats{font-size:.92rem;margin-bottom:10px}
+  .urgency{margin-bottom:4px;font-size:.88rem}
+  .featured{padding:14px 6px 12px}
+  .m-tg-list{display:grid;gap:8px;margin:16px 0 4px;padding:14px;border-radius:16px;background:#e9f6fd;border:1px solid #bfe3f5;text-align:center}
+  .m-tg-list b{font-size:.98rem;color:#0f5e86}
+  /* coupon cards: tighter */
+  .coupon{padding:10px;gap:8px 10px;grid-template-columns:64px minmax(0,1fr)}
+  .coupon-value{height:60px}
+  .v-amount{font-size:1.2rem}
+  .coupon-title{font-size:.98rem;margin:0}
+  .coupon-meta{gap:4px}
+  .coupon-cta .btn,.coupon-cta .btn-reveal{height:44px}
+  .coupon-list{gap:8px}
+  /* finder teaser: titles only */
+  .ft-steps span{display:none}
+  .ft-steps li{padding:10px}
+  .ft-steps b{font-size:.88rem}
+  .finder-tease p{font-size:.94rem}
+  /* info cards: swipeable row */
+  .info-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding-bottom:6px;scrollbar-width:none}
+  .info-grid::-webkit-scrollbar{display:none}
+  .info-card{flex:0 0 84%;scroll-snap-align:start}
+  /* categories: shorter tiles */
+  .cat-art{min-height:108px;padding:12px}
+  .cat-art .cat-emoji{font-size:38px;top:8px}
+  .cat-art b{margin-top:30px;font-size:.98rem}
+  .cat-art em{display:none}
+  /* deals */
+  .deal-tile{padding:12px}
+  .deal-tile p{-webkit-line-clamp:2}
+  /* footer: two columns */
+  .footer-grid{grid-template-columns:1fr 1fr;gap:18px 14px}
+  .footer-grid>div:first-child{grid-column:1/-1}
+  .site-footer a{padding:4px 0;font-size:.88rem}
+}

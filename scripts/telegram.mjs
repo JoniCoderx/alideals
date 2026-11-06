@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { mergeCoupons, safeLink, daysBetween } from './lib.mjs';
 import { renderCard } from './telegram-card.mjs';
 import { telegramPosts, telegramAnnouncements } from '../src/content/telegram-posts.mjs';
+import { categories, categoryColors } from '../src/content/categories.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Telegram audience spells it with ע – the site covers both spellings for SEO.
@@ -118,49 +119,112 @@ export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, r
  * Pure: picks at most one "regular" post (tip / promotion / feature / countdown / weekly) for the current time slot.
  * Slots (Israel time): noon 11:00–13:59, evening 19:00–21:59. Returns { message|null, regular } (new state).
  */
-export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, announcements = telegramAnnouncements, minGapDays = 10 }) {
-  const slot = hour >= 11 && hour < 14 ? 'noon' : hour >= 19 && hour < 22 ? 'evening' : null;
+// Seven daily slots (Israel time). Each slot has a preferred content type, falling back to the evergreen library,
+// so the channel gets a varied rhythm: code in the morning, tips, a category at noon, deals, code again, prime time, guide at night.
+export const SLOTS = [
+  { id: 'morning', from: 8, to: 10, prefer: ['spot'] },
+  { id: 'midmorning', from: 10, to: 12, prefer: [] },
+  { id: 'noon', from: 12, to: 14, prefer: ['weekly', 'category'] },
+  { id: 'afternoon', from: 14, to: 16, prefer: [] },
+  { id: 'evening', from: 17, to: 19, prefer: ['spot'] },
+  { id: 'prime', from: 19, to: 21, prefer: ['countdown'] },
+  { id: 'night', from: 21, to: 23, prefer: ['category'] },
+];
+
+export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, announcements = telegramAnnouncements, cats = categories, minGapDays = 8, spotGapDays = 3, catGapDays = 10 }) {
+  const slot = SLOTS.find((s) => hour >= s.from && hour < s.to);
   const state = { lastSlot: regular.lastSlot || '', history: { ...(regular.history || {}) } };
-  if (!slot || state.lastSlot === `${today}|${slot}`) return { message: null, regular: state };
+  if (!slot || state.lastSlot === `${today}|${slot.id}`) return { message: null, regular: state };
   const host = new URL(siteUrl).host;
   const link = (p, campaign) => {
     const [pathPart, hash] = p.split('#');
     return `${siteUrl}${pathPart}?utm_source=telegram&utm_medium=social&utm_campaign=${campaign}${hash ? `#${hash}` : ''}`;
   };
-  const done = (id, message) => { state.lastSlot = `${today}|${slot}`; state.history[id] = today; return { message, regular: state }; };
-  const real = coupons.filter((c) => c.code && !c.sample);
+  const done = (id, message) => { state.lastSlot = `${today}|${slot.id}`; state.history[id] = today; return { message, regular: state }; };
+  const fresh = (id, gap) => !state.history[id] || daysBetween(state.history[id], today) >= gap;
+  const real = coupons.filter((c) => c.code && !c.sample).sort((a, b) => a.minOrder - b.minOrder);
 
-  // 1) Countdown before a sale (3 days and 1 day before), evening slot.
-  if (slot === 'evening') {
-    for (const ev of events) {
-      const d = daysBetween(today, ev.start);
-      const id = `cd|${ev.slug}|${ev.start}|${d}`;
-      if ((d === 3 || d === 1) && !state.history[id]) {
-        const short = ev.name.split(' –')[0];
-        return done(id, {
-          kind: 'countdown',
-          card: { kind: 'countdown', bigNumber: d, bigLabel: d === 1 ? 'יום אחד!' : 'ימים', title: `עד ${short} בעליאקספרס`, points: ['מוסיפים מוצרים לעגלה כבר עכשיו', 'אוספים קופונים ממרכז הקופונים', 'הקודים יגיעו לכאן ברגע שייצאו'], site: host },
-          text: `⏳ <b>${d === 1 ? 'מחר' : `בעוד ${d} ימים`}: ${esc(ev.name)} בעליאקספרס!</b>\n\nמי שמתכונן מראש חוסך יותר. מוסיפים לעגלה עכשיו, כדי לראות כמה המחיר באמת יורד. הקודים של המבצע יפורסמו כאן ברגע שייצאו 🔔`,
-          buttons: [[{ text: '📅 עמוד המבצע', url: link(`/sale/${ev.slug}/`, `countdown-${ev.slug}`) }], [{ text: '🎟️ למרכז הקופונים', url: link('/go/coupon-center/', `countdown-${ev.slug}`) }]],
-        });
+  const makers = {
+    // Countdown before a sale (3 days and 1 day before).
+    countdown() {
+      for (const ev of events) {
+        const d = daysBetween(today, ev.start);
+        const id = `cd|${ev.slug}|${ev.start}|${d}`;
+        if ((d === 3 || d === 1) && !state.history[id]) {
+          const short = ev.name.split(' –')[0];
+          return [id, {
+            kind: 'countdown',
+            card: { kind: 'countdown', bigNumber: d, bigLabel: d === 1 ? 'יום אחד!' : 'ימים', title: `עד ${short} בעליאקספרס`, points: ['מוסיפים מוצרים לעגלה כבר עכשיו', 'אוספים קופונים ממרכז הקופונים', 'הקודים יגיעו לכאן ברגע שייצאו'], site: host },
+            text: `⏳ <b>${d === 1 ? 'מחר' : `בעוד ${d} ימים`}: ${esc(ev.name)} בעליאקספרס!</b>\n\nמי שמתכונן מראש חוסך יותר. מוסיפים לעגלה עכשיו, כדי לראות כמה המחיר באמת יורד. הקודים של המבצע יפורסמו כאן ברגע שייצאו 🔔`,
+            buttons: [[{ text: '📅 עמוד המבצע', url: link(`/sale/${ev.slug}/`, `countdown-${ev.slug}`) }], [{ text: '🎟️ למרכז הקופונים', url: link('/go/coupon-center/', `countdown-${ev.slug}`) }]],
+          }];
+        }
       }
-    }
-  }
+      return null;
+    },
+    // Weekly best codes – Friday noon.
+    weekly() {
+      const weekKey = `weekly|${today.slice(0, 4)}-${Math.ceil(daysBetween(`${today.slice(0, 4)}-01-01`, today) / 7)}`;
+      if (weekday !== 5 || !real.length || state.history[weekKey]) return null;
+      const top = [...real].sort((a, b) => b.discount - a.discount).slice(0, 3);
+      const mid = real[Math.floor(real.length / 2)];
+      return [weekKey, {
+        kind: 'weekly',
+        card: { kind: 'weekly', title: 'הקודים הכי שווים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
+        text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לרוב העגלות הקוד המשתלם הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
+        buttons: [[{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'weekly') }], [{ text: '🛒 לעליאקספרס', url: link(`/go/${top[0].id}/`, 'weekly') }]],
+      }];
+    },
+    // "Code of the moment": one code, big, with the cart range it fits.
+    spot() {
+      const pick = real
+        .map((c, i) => ({ c, i, id: `spot|${c.code}`, last: state.history[`spot|${c.code}`] || '' }))
+        .filter(({ id }) => fresh(id, spotGapDays))
+        .sort((a, b) => a.last.localeCompare(b.last) || (b.c.featured ? 1 : 0) - (a.c.featured ? 1 : 0) || a.i - b.i)[0];
+      if (!pick) return null;
+      const c = pick.c;
+      const next = real[pick.i + 1];
+      const range = next ? `מ־${money(c.minOrder, c.currency)} עד ${money((next.minOrder - 0.01).toFixed(2), c.currency)}` : `מ־${money(c.minOrder, c.currency)} ומעלה`;
+      const until = c.expires ? `בתוקף עד ${heDate(c.expires)}` : '';
+      return [pick.id, {
+        kind: 'spot',
+        card: { kind: 'spot', bigNumber: money(c.discount, c.currency), bigLabel: `הנחה בקנייה מעל ${money(c.minOrder, c.currency)}`, title: c.code, points: ['מדביקים בתשלום, בשדה "קוד מבצע"', until].filter(Boolean), site: host },
+        text: compactLines([
+          `⚡ <b>הקוד של עכשיו: ${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}</b>`,
+          '',
+          `👉 <code>${esc(c.code)}</code> (לחיצה מעתיקה)`,
+          '',
+          `מתאים לעגלה ${range}.${until ? ` ${until}.` : ''}`,
+          next ? `💡 חסר לכם מעט ל־${money(next.minOrder, next.currency)}? שם מחכה הנחה של ${money(next.discount, next.currency)}.` : '',
+        ]),
+        buttons: [[{ text: `🛒 לעליאקספרס עם הקוד`, url: link(`/go/${c.id}/`, 'spot') }], [{ text: '🧮 כל הקודים + מחשבון', url: link('/#calc', 'spot') }]],
+      }];
+    },
+    // Category spotlight: buying tip + link to the category coupon page.
+    category() {
+      const pick = cats
+        .map((c, i) => ({ c, i, id: `cat|${c.slug}`, last: state.history[`cat|${c.slug}`] || '' }))
+        .filter(({ id }) => fresh(id, catGapDays))
+        .sort((a, b) => a.last.localeCompare(b.last) || a.i - b.i)[0];
+      if (!pick) return null;
+      const c = pick.c;
+      const tips = (c.tips || []).slice(0, 3);
+      return [pick.id, {
+        kind: 'category',
+        card: { kind: 'category', emoji: c.emoji, title: `קונים ${c.short} בעליאקספרס?`, points: tips.map(([t]) => t), colors: categoryColors[c.slug], badge: `${c.emoji} ${c.name}`, site: host },
+        text: compactLines([
+          `${c.emoji} <b>קונים ${esc(c.short)} בעליאקספרס? ככה עושים את זה נכון</b>`,
+          '',
+          ...tips.map(([t, d]) => `• <b>${esc(t)}.</b> ${esc(d.split('. ')[0].replace(/\.$/, ''))}.`),
+          '',
+          'ועל הכול: קוד קופון לפי סכום העגלה 👇',
+        ]),
+        buttons: [[{ text: `🎟️ קופון ל${c.short}`, url: link(`/coupon/${c.slug}/`, `cat-${c.slug}`) }]],
+      }];
+    },
+  };
 
-  // 2) Weekly best code – Friday noon.
-  const weekKey = `weekly|${today.slice(0, 4)}-${Math.ceil(daysBetween(`${today.slice(0, 4)}-01-01`, today) / 7)}`;
-  if (slot === 'noon' && weekday === 5 && real.length && !state.history[weekKey]) {
-    const top = [...real].sort((a, b) => b.discount - a.discount).slice(0, 3);
-    const mid = [...real].sort((a, b) => a.minOrder - b.minOrder)[Math.floor(real.length / 2)];
-    return done(weekKey, {
-      kind: 'weekly',
-      card: { kind: 'weekly', title: 'הקודים הכי שווים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
-      text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לרוב העגלות הקוד המשתלם הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
-      buttons: [[{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'weekly') }], [{ text: '🛒 לעליאקספרס', url: link(`/go/${top[0].id}/`, 'weekly') }]],
-    });
-  }
-
-  // 3) One-time announcements (each posted once ever).
+  // 1) One-time announcements (each posted once ever) go first.
   const ann = announcements.find((a) => !state.history[a.id]);
   if (ann) {
     return done(ann.id, {
@@ -171,12 +235,22 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     });
   }
 
-  // 4) Evergreen rotation: the post shown least recently (never-shown first), respecting the gap.
+  // 2) The slot's preferred content.
+  for (const kind of slot.prefer) {
+    const r = makers[kind]?.();
+    if (r) return done(r[0], r[1]);
+  }
+
+  // 3) Evergreen rotation: the post shown least recently (never-shown first), respecting the gap.
   const candidates = library
     .map((p, i) => ({ p, i, last: state.history[p.id] || '' }))
     .filter(({ last }) => !last || daysBetween(last, today) >= minGapDays)
     .sort((a, b) => a.last.localeCompare(b.last) || a.i - b.i);
-  if (!candidates.length) return { message: null, regular: state };
+  if (!candidates.length) {
+    // Library exhausted for now: fall back to a code or a category rather than staying silent.
+    for (const kind of ['spot', 'category']) { const r = makers[kind](); if (r) return done(r[0], r[1]); }
+    return { message: null, regular: state };
+  }
   const post = candidates[0].p;
   return done(post.id, {
     kind: post.type,

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 */3 * * *'   # every 3 hours (UTC)
+    - cron: '17 * * * *'   # hourly (UTC): site refresh + up to 7 Telegram posts a day in Israel-time slots
   workflow_dispatch:
     inputs:
       telegram_repost:

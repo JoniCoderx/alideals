@@ -55,18 +55,39 @@ const lib = [
   { id: 'a', type: 'tip', emoji: '💡', title: 'A', points: [], text: 't', buttons: [['x', '/']] },
   { id: 'b', type: 'deal', emoji: '🎁', title: 'B', points: [], text: 't', buttons: [['y', '/go/coins/']] },
 ];
-const reg = { siteUrl: 'https://yeshdeal.com', library: lib, announcements: [], minGapDays: 2 };
+const reg = { siteUrl: 'https://yeshdeal.com', library: lib, announcements: [], cats: [], minGapDays: 2 };
 
 test('regular posts only inside a slot, once per slot', () => {
-  assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 9, weekday: 4 }).message, null);
-  const r1 = planRegular({ ...reg, today: '2026-11-06', hour: 12, weekday: 4 });
+  assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 7, weekday: 4 }).message, null);
+  const r1 = planRegular({ ...reg, today: '2026-11-06', hour: 10, weekday: 4 });
   assert.equal(r1.message.card.title, 'A');
   assert.match(r1.message.buttons[0][0].url, /utm_campaign=a/);
-  assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 13, weekday: 4, regular: r1.regular }).message, null);
-  const r2 = planRegular({ ...reg, today: '2026-11-06', hour: 20, weekday: 4, regular: r1.regular });
+  assert.equal(planRegular({ ...reg, today: '2026-11-06', hour: 11, weekday: 4, regular: r1.regular }).message, null);
+  const r2 = planRegular({ ...reg, today: '2026-11-06', hour: 14, weekday: 4, regular: r1.regular });
   assert.equal(r2.message.card.title, 'B');
-  assert.equal(planRegular({ ...reg, today: '2026-11-07', hour: 12, weekday: 5, regular: r2.regular }).message, null, 'gap respected');
-  assert.equal(planRegular({ ...reg, today: '2026-11-08', hour: 12, weekday: 6, regular: r2.regular }).message.card.title, 'A');
+  assert.equal(planRegular({ ...reg, today: '2026-11-07', hour: 10, weekday: 5, regular: r2.regular }).message, null, 'gap respected');
+  assert.equal(planRegular({ ...reg, today: '2026-11-08', hour: 10, weekday: 6, regular: r2.regular }).message.card.title, 'A');
+});
+
+test('seven slots a day: code in the morning, category at noon/night, each slot once', () => {
+  const cats = [{ slug: 'shoes', name: 'נעליים', short: 'נעליים', emoji: '👟', tips: [['טיפ', 'פירוט. עוד']] }];
+  const big = Array.from({ length: 10 }, (_, i) => ({ id: 'p' + i, type: 'tip', emoji: '💡', title: 'T' + i, points: [], text: 't', buttons: [['x', '/']] }));
+  let regular = {}; const kinds = [];
+  for (const hour of [7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 19, 21, 22, 23]) {
+    const r = planRegular({ ...reg, library: big, cats, coupons: codes, today: '2026-11-04', hour, weekday: 3, regular });
+    regular = r.regular; if (r.message) kinds.push(r.message.kind);
+  }
+  assert.equal(kinds.length, 7);
+  assert.equal(kinds[0], 'spot');
+  assert.equal(kinds[2], 'category');
+  assert.equal(kinds[4], 'spot');
+});
+
+test('code spotlight shows one code with its cart range and next tier', () => {
+  const r = planRegular({ ...reg, coupons: codes, today: '2026-11-04', hour: 8, weekday: 3 });
+  assert.equal(r.message.kind, 'spot');
+  assert.match(r.message.text, /<code>/);
+  assert.match(r.message.buttons[0][0].url, /\/go\//);
 });
 
 test('countdown wins the evening slot 3 days and 1 day before a sale', () => {

@@ -183,3 +183,10 @@ export const categories = [
     ],
   },
 ];
+
+// Colour pair per category (site cards/heroes + Telegram category cards).
+export const categoryColors = {
+  clothing: ['#ff6a88', '#ff2e63'], shoes: ['#ff9a3c', '#ff5e1a'], phones: ['#4f7cff', '#2b4fd8'], headphones: ['#8b5cf6', '#6d28d9'],
+  smartwatches: ['#14b8a6', '#0f766e'], home: ['#f59e0b', '#d97706'], kids: ['#f472b6', '#db2777'], tools: ['#64748b', '#334155'],
+  car: ['#ef4444', '#b91c1c'], beauty: ['#e879f9', '#c026d3'], sports: ['#22c55e', '#15803d'], gaming: ['#6366f1', '#312e81'],
+};
