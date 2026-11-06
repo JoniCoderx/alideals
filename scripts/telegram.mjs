@@ -186,6 +186,23 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
   });
 }
 
+/**
+ * Pure: makes sure every post carries the affiliate link (that's what sets the AliExpress cookie).
+ * - buttons that point at our /go/ redirect pages become the direct affiliate link (one hop less,
+ *   and on phones it opens the AliExpress app straight away);
+ * - posts without any AliExpress button get a "🛒 לעליאקספרס" button;
+ * - the caption gets a direct affiliate link as its last line (when it still fits Telegram's limit).
+ */
+export function withAffiliate(msg, { siteUrl, affLink, store = STORE }) {
+  if (!msg || !safeLink(affLink)) return msg;
+  const isAli = (u) => { try { return /(^|\.)aliexpress\.(com|us|ru)$|^s\.click\.aliexpress\.com$/.test(new URL(u).host); } catch { return false; } };
+  const buttons = (msg.buttons || []).map((row) => row.map((b) => (b.url && b.url.startsWith(`${siteUrl}/go/`) ? { ...b, url: affLink } : b)));
+  if (!buttons.flat().some((b) => isAli(b.url))) buttons.push([{ text: `🛒 ל${store}`, url: affLink }]);
+  const tail = `\n\n🛒 <a href="${affLink}">כניסה ל${store}</a>`;
+  const text = msg.text.includes(affLink) || msg.text.length + tail.length > 1000 ? msg.text : msg.text + tail;
+  return { ...msg, buttons, text };
+}
+
 async function api(token, method, body) {
   const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, { method: 'POST', body });
   const j = await res.json();
@@ -235,8 +252,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
       if (r.ok) { gen.telegram = await r.json(); console.log(`• recovered telegram state from site (${Object.keys(gen.telegram.posted || {}).length} entries)`); }
     } catch { /* first run */ }
   }
-  const { messages, posted } = planPosts({ coupons: active, events: manual.events || [], posted: gen.telegram?.posted || {}, today, siteUrl: site.url, repost: repost || !!previewDir });
+  const aff = (m) => withAffiliate(m, { siteUrl: site.url, affLink: site.affiliate.defaultLink });
+  const { messages: planned, posted } = planPosts({ coupons: active, events: manual.events || [], posted: gen.telegram?.posted || {}, today, siteUrl: site.url, repost: repost || !!previewDir });
 
+  const messages = planned.map(aff);
   if (dry || previewDir) {
     for (const m of messages) {
       console.log(`--- ${m.kind} (${m.text.length} chars)\n${m.text}\n${JSON.stringify(m.buttons)}`);
@@ -253,7 +272,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const hour = process.env.FORCE_HOUR ? Number(process.env.FORCE_HOUR) : tz({ hour: 'numeric', hour12: false });
   const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
   const reg = planRegular({ today, hour, weekday, regular: gen.telegram?.regular, events: manual.events || [], coupons: active, siteUrl: site.url });
-  if (!messages.length && reg.message) messages.push(reg.message);
+  if (!messages.length && reg.message) messages.push(aff(reg.message));
 
   let sent = 0;
   for (const m of messages) {
@@ -261,7 +280,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     catch (e) { console.error(`✗ ${e.message}`); process.exitCode = 1; break; }
   }
   if (sent === messages.length) {
-    gen.telegram = { posted, regular: messages.includes(reg.message) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
+    gen.telegram = { posted, regular: messages.some((m) => m.kind === reg.message?.kind && m.card === reg.message?.card) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
     await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n');
   }
   console.log(`✓ telegram → ${chat}: ${sent}/${messages.length} posts`);

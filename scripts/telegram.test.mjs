@@ -92,3 +92,20 @@ test('one-time announcement goes first, exactly once', () => {
   const r3 = planRegular({ ...reg, announcements: ann, today: '2026-11-30', hour: 12, weekday: 1, regular: r2.regular });
   assert.notEqual(r3.message?.card.title, 'Soon');
 });
+
+import { withAffiliate } from './telegram.mjs';
+
+test('every post carries the affiliate link (direct, not via /go/)', () => {
+  const affLink = 'https://s.click.aliexpress.com/e/_abc';
+  const siteUrl = 'https://yeshdeal.com';
+  const tip = withAffiliate({ text: 'טיפ', buttons: [[{ text: 'מדריך', url: `${siteUrl}/guides/x/?utm_source=telegram` }]] }, { siteUrl, affLink });
+  assert.equal(tip.buttons.length, 2);
+  assert.equal(tip.buttons[1][0].url, affLink);
+  assert.ok(tip.text.endsWith(`<a href="${affLink}">כניסה לעליאקספרס</a>`));
+  const code = withAffiliate({ text: 'קוד', buttons: [[{ text: 'לעלי', url: `${siteUrl}/go/c1/?utm_source=telegram` }]] }, { siteUrl, affLink });
+  assert.equal(code.buttons.length, 1);
+  assert.equal(code.buttons[0][0].url, affLink);
+  const long = withAffiliate({ text: 'x'.repeat(995), buttons: [] }, { siteUrl, affLink });
+  assert.equal(long.text.length, 995);
+  assert.equal(long.buttons[0][0].url, affLink);
+});
