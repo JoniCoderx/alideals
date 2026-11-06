@@ -1,4 +1,4 @@
-// "מוצא הזול" – pure logic shared by the Cloudflare Worker and the tests (no Node/Worker-specific APIs).
+// "צייד הדילים" – pure logic shared by the Cloudflare Worker and the tests (no Node/Worker-specific APIs).
 // Given an AliExpress product, find the same product from other sellers and rank by price.
 
 const ALI_HOST = /(^|\.)aliexpress\.(com|us|ru)$/i;

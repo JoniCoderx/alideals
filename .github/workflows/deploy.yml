@@ -131,7 +131,7 @@ jobs:
       - name: Ping IndexNow
         run: sleep 30 && node scripts/indexnow.mjs
 
-  # "מוצא הזול" API (Cloudflare Worker). Runs only when CLOUDFLARE_API_TOKEN is set.
+  # "צייד הדילים" API (Cloudflare Worker). Runs only when CLOUDFLARE_API_TOKEN is set.
   worker:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest

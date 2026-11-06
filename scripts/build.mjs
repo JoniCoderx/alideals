@@ -260,7 +260,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
   const robots = noindex || SAMPLE_MODE ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1';
   const nav = [
     ['/', 'קודי קופון'],
-    ...(FINDER_API ? [['/finder/', '🔎 מוצא הזול']] : []),
+    ...(FINDER_API ? [['/finder/', '🎯 צייד הדילים']] : []),
     ['/coupon/', 'קטגוריות'],
     ...(allProducts().length ? [['/deals/', 'דילים']] : []),
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
@@ -343,6 +343,7 @@ ${body}
       <a href="/about/">אודות</a>
       <a href="/disclosure/">גילוי נאות</a>
       <a href="/privacy/">פרטיות</a>
+      <a href="/finder/">🎯 צייד הדילים${FINDER_API ? '' : ' (בקרוב)'}</a>
       ${site.social.telegram ? `<a class="foot-tg" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">ערוץ טלגרם ${ICON.telegram}</a>` : ''}
       ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">ערוץ וואטסאפ</a>` : ''}
     </div>
@@ -363,7 +364,7 @@ ${body}
   <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>לא נפתח? לחצו כאן</a></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
-${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🔎 בקרוב: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים בעליאקספרס.</span><a href="/finder/">איך זה עובד ←</a></aside>` : ''}
+${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🎯 בקרוב: צייד הדילים</b><span>אתם שולחים קישור למוצר, הצייד סורק את המוכרים וחוזר עם הצעות זולות יותר.</span><a href="/finder/">להכיר את הצייד ←</a></aside>` : ''}
 <script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
@@ -458,22 +459,28 @@ function homePage() {
   </div>
 </section>
 
-${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div class="finder-tease">
+${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div class="finder-tease hunter">
   <div class="ft-text">
-    <span class="ft-badge">🔥 חדש · עולה בקרוב</span>
-    <h2>מוצא הזול: אותו מוצר, אצל מוכר זול יותר</h2>
-    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. מנוע החיפוש שלנו יחפש בשבילכם הצעות זולות יותר, תוך שניות.</p>
+    <span class="ft-badge">🎯 חדש · יוצא לציד בקרוב</span>
+    <h2>צייד הדילים</h2>
+    <p class="hunter-tag">אתם שולחים קישור. הצייד חוזר עם דיל.</p>
+    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. מדביקים קישור, והצייד סורק את השטח ומביא לכם הצעות זולות יותר לאותו מוצר, תוך שניות.</p>
+    <a class="btn ft-cta" href="/finder/">איך הצייד עובד ←</a>
   </div>
-  <a class="ft-mock" href="/finder/" aria-label="למוצא הזול"><span class="ft-input">הדביקו קישור למוצר מעלי אקספרס… 🔗</span><span class="ft-go">איך זה יעבוד ←</span></a>
+  <div class="ft-visual"><div class="radar" aria-hidden="true">
+    <div class="radar-sweep"></div>
+    <span class="blip b1"><i>₪89</i></span><span class="blip b2"><i>₪74</i></span><span class="blip b4"><i>₪95</i></span><span class="blip b3 best"><i>₪61 🎯</i></span>
+    <div class="radar-core">🎯</div>
+  </div><small>המחשה</small></div>
   <ol class="ft-steps">
-    <li><b>🔗 מזהה את המוצר</b><span>מהקישור, גם מהאפליקציה</span></li>
-    <li><b>🔍 סורק את כל המוכרים</b><span>שמוכרים את אותו מוצר, גם מה שלא מוצאים בחיפוש רגיל</span></li>
-    <li><b>🛡️ מסנן את הלא אמינים</b><span>דירוג נמוך, בלי מכירות או בלי משלוח לישראל</span></li>
-    <li><b>💰 מסדר לפי מחיר בשקלים</b><span>הזול למעלה, ואתם משווים ומחליטים</span></li>
+    <li><b>🎯 נועל מטרה</b><span>מזהה את המוצר מהקישור, גם מהאפליקציה</span></li>
+    <li><b>📡 סורק את השטח</b><span>עובר על המוכרים שמוכרים את אותו מוצר</span></li>
+    <li><b>🛡️ עוקף מלכודות</b><span>מסנן דירוג נמוך, בלי מכירות או בלי משלוח לישראל</span></li>
+    <li><b>🏆 מביא את השלל</b><span>הזול למעלה, במחיר בשקלים. אתם מחליטים</span></li>
   </ol>
-  ${site.social.telegram ? `<p class="ft-note">רוצים לדעת ראשונים כשזה עולה? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">הצטרפו לטלגרם ${ICON.telegram}</a></p>` : ''}
+  ${site.social.telegram ? `<p class="ft-note">רוצים להיות הראשונים כשהצייד יוצא לדרך? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">הצטרפו לטלגרם ${ICON.telegram}</a></p>` : ''}
 </div></div></section>` : ''}
-${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🔎 חדש: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים</span><i>נסו עכשיו ←</i></a></div></section>` : ''}
+${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🎯 חדש: צייד הדילים</b><span>אתם שולחים קישור למוצר, הצייד חוזר עם הצעות זולות יותר לאותו מוצר</span><i>שלחו את הצייד ←</i></a></div></section>` : ''}
 <section class="section" id="codes">
   <div class="wrap layout-2">
     <div>
@@ -654,32 +661,38 @@ const FINDER_API = (site.cheapest?.apiUrl || '').replace(/\/$/, '');
 
 function finderPage() {
   const pathname = '/finder/';
-  const bc = breadcrumbs([{ name: 'מוצא הזול', url: pathname }]);
+  const bc = breadcrumbs([{ name: 'צייד הדילים', url: pathname }]);
   const items = [
-    { q: 'איך מוצא הזול עובד?', a: 'מדביקים קישור למוצר מעליאקספרס. המערכת בודקת את המוצר, מחפשת את אותו מוצר אצל מוכרים אחרים עם משלוח לישראל, ומציגה את האפשרויות הזולות ביותר עם דירוג המוכר וכמות המכירות.' },
+    { q: 'איך צייד הדילים עובד?', a: 'מדביקים קישור למוצר מעליאקספרס. הצייד מזהה את המוצר, סורק מוכרים אחרים שמוכרים אותו עם משלוח לישראל, מסנן מוכרים עם דירוג נמוך או בלי מכירות, ומציג את ההצעות הזולות עם דירוג המוכר וכמות המכירות.' },
     { q: 'איך מעתיקים קישור מהאפליקציה של עליאקספרס?', a: 'בעמוד המוצר באפליקציה לוחצים על כפתור השיתוף ובוחרים "העתקת קישור". אחר כך מדביקים כאן בשדה.' },
-    { q: 'זה בטוח אותו מוצר?', a: 'המערכת משווה לפי שם המוצר והקטגוריה ומסננת מוכרים עם דירוג נמוך, אבל לפני שקונים חשוב לבדוק בעמוד המוצר שזה בדיוק מה שאתם רוצים: צבע, גרסה, מידה ומפרט.' },
+    { q: 'זה בטוח אותו מוצר?', a: 'הצייד משווה לפי שם המוצר והקטגוריה ומסננת מוכרים עם דירוג נמוך, אבל לפני שקונים חשוב לבדוק בעמוד המוצר שזה בדיוק מה שאתם רוצים: צבע, גרסה, מידה ומפרט.' },
     { q: 'זה עולה משהו?', a: 'לא. השימוש חינם. הקישורים הם קישורי שותפים, ואנחנו עשויים לקבל עמלה מעליאקספרס בלי תוספת למחיר שלכם.' },
   ];
   const body = `
-<section class="hero"><div class="wrap narrow">${bc.html}
-  <h1>🔎 מוצא הזול</h1>
-  <p class="lead">מדביקים קישור למוצר מעליאקספרס, ואנחנו מחפשים <strong>את אותו מוצר אצל מוכרים זולים יותר</strong>, עם משלוח לישראל. אתם משווים ובוחרים.</p>
+<section class="hero hero-hunter"><div class="wrap narrow">${bc.html}
+  <div class="hunter-head"><div><h1>🎯 צייד הדילים</h1>
+  <p class="hunter-tag">אתם שולחים קישור. הצייד חוזר עם דיל.</p>
+  <p class="lead">מדביקים קישור למוצר מעליאקספרס, והצייד מחפש <strong>את אותו מוצר אצל מוכרים זולים יותר</strong>, עם משלוח לישראל. אתם משווים ובוחרים.</p></div>
+  <div class="ft-visual"><div class="radar" aria-hidden="true">
+    <div class="radar-sweep"></div>
+    <span class="blip b1"><i>₪89</i></span><span class="blip b2"><i>₪74</i></span><span class="blip b4"><i>₪95</i></span><span class="blip b3 best"><i>₪61 🎯</i></span>
+    <div class="radar-core">🎯</div>
+  </div></div></div>
   <form class="finder" id="finder-form" data-api="${esc(FINDER_API)}" autocomplete="off">
     <label for="finder-url" class="calc-label">הקישור למוצר</label>
     <div class="finder-row">
       <input id="finder-url" name="url" type="text" inputmode="url" dir="ltr" placeholder="https://he.aliexpress.com/item/..." required>
-      <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>מצאו לי זול יותר</button>
+      <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>🎯 שלחו את הצייד</button>
     </div>
     <p class="muted finder-help">באפליקציה: עמוד המוצר ← שיתוף ← העתקת קישור. עובד גם עם קישורים מקוצרים.</p>
-    ${FINDER_API ? '' : `<div class="soon-inline"><b>🚀 מוצא הזול עולה ממש בקרוב</b><span>אנחנו בשלבי בדיקה אחרונים. רוצים לדעת ראשונים כשזה עולה?</span>${tgBtn('הצטרפו לטלגרם')}<a href="/">בינתיים: כל קודי הקופון ←</a></div>`}
+    ${FINDER_API ? '' : `<div class="soon-inline"><b>🎯 הצייד יוצא לדרך ממש בקרוב</b><span>אנחנו בשלבי כיול אחרונים. רוצים לדעת ראשונים כשהוא עולה?</span>${tgBtn('הצטרפו לטלגרם')}<a href="/">בינתיים: כל קודי הקופון ←</a></div>`}
   </form>
 </div></section>
 <section class="section"><div class="wrap narrow">
   <div id="finder-out" aria-live="polite"></div>
   <div class="prose">
     <h2>למה אותו מוצר עולה אחרת?</h2>
-    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. מוצא הזול עושה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
+    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים עושה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
     <h2>ואחרי שמצאתם: עוד הנחה</h2>
     <p>על המחיר הזול אפשר להוסיף <a href="/#calc">קוד קופון לפי סכום העגלה</a>, קופון של החנות וקופונים ממרכז הקופונים. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>.</p>
   </div>
@@ -687,8 +700,8 @@ function finderPage() {
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `מוצא הזול: אותו מוצר בעליאקספרס אצל מוכר זול יותר | ${site.name}`,
-    description: 'מדביקים קישור למוצר מעליאקספרס ומקבלים הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.',
+    title: `צייד הדילים: אותו מוצר בעליאקספרס אצל מוכר זול יותר | ${site.name}`,
+    description: 'צייד הדילים: מדביקים קישור למוצר מעליאקספרס, והצייד מביא הצעות זולות יותר לאותו מוצר אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.',
     pathname, body, ld: [bc.ld, faqLd(items)], noindex: !FINDER_API,
   });
 }

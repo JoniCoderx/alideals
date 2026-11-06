@@ -1,4 +1,4 @@
-// Cloudflare Worker: "מוצא הזול" API for yeshdeal.com
+// Cloudflare Worker: "צייד הדילים" API for yeshdeal.com
 //   GET /api/cheapest?url=<AliExpress product link or id>
 // Secrets (wrangler secret put): ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID
 // Vars (wrangler.toml): ALLOWED_ORIGIN

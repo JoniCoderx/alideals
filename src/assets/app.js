@@ -285,7 +285,7 @@
     if (code && code === b.getAttribute('data-code')) markRevealed(id, code);
   });
 
-  /* ---------- מוצא הזול: paste a product link → cheapest same product (via the Worker API) ---------- */
+  /* ---------- צייד הדילים: paste a product link → cheapest same product (via the Worker API) ---------- */
   var ff = $('finder-form');
   if (ff) {
     var api = ff.getAttribute('data-api') || '';

@@ -1,4 +1,4 @@
-# Cloudflare Worker for "מוצא הזול" (cheapest-product finder).
+# Cloudflare Worker for "צייד הדילים" (deal hunter: cheaper offers for the same product).
 # Deployed by GitHub Actions when the CLOUDFLARE_API_TOKEN secret exists.
 name = "yeshdeal-api"
 main = "src/index.mjs"
