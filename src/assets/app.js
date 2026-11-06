@@ -12,6 +12,27 @@
   })();
 
   // Hide codes that expired since the last build (in case a scheduled build was missed).
+  (function () {
+    var t = document.getElementById('promo-toast');
+    if (!t || location.pathname.indexOf('/finder') === 0) return;
+    var seen = false;
+    try { seen = !!localStorage.getItem('yd-promo-finder'); } catch (e) {}
+    if (seen) return;
+    var close = function () { t.classList.remove('is-in'); try { localStorage.setItem('yd-promo-finder', '1'); } catch (e) {} setTimeout(function () { t.hidden = true; }, 300); };
+    t.querySelector('.pt-x').addEventListener('click', close);
+    t.querySelector('a').addEventListener('click', function () { try { localStorage.setItem('yd-promo-finder', '1'); } catch (e) {} });
+    setTimeout(function () { t.hidden = false; requestAnimationFrame(function () { t.classList.add('is-in'); }); }, 9000);
+  })();
+  document.querySelectorAll('.urgency[data-until]').forEach(function (el) {
+    var until = el.getAttribute('data-until');
+    var days = Math.round((Date.parse(until + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 864e5);
+    var span = el.querySelector('span');
+    if (days < 0) { el.hidden = true; return; }
+    if (days === 0) span.textContent = 'היום היום האחרון לקודים! ממהרים';
+    else if (days === 1) span.textContent = 'נשאר יום אחד אחרון לקודים';
+    else if (days <= 14) span.textContent = 'נשארו ' + days + ' ימים לקודים, לפני שהם נגמרים';
+    if (days <= 3) el.classList.add('is-hot');
+  });
   document.querySelectorAll('.coupon[data-expires]').forEach(function (card) {
     if (card.getAttribute('data-expires') < today) { card.hidden = true; card.setAttribute('data-expired', ''); }
   });

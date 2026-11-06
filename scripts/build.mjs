@@ -113,7 +113,7 @@ const ICON = {
   arrow: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 5 7 10l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   telegram: `<svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.94 4.3a1.1 1.1 0 0 0-1.5-1.17L2.7 10.1c-.95.38-.9 1.74.07 2.05l4.47 1.4 1.7 5.36c.25.8 1.26 1.04 1.85.45l2.52-2.5 4.53 3.33c.68.5 1.65.12 1.82-.7l2.28-15.2Zm-4.2 3.06-7.6 6.9a.6.6 0 0 0-.19.36l-.33 2.45c-.03.2-.31.22-.37.03l-1.14-3.6a.6.6 0 0 1 .26-.69l9.05-5.6c.2-.13.43.14.32.15Z"/></svg>`,
 };
-const tgBtn = (label, cls = '') => site.social.telegram ? `<a class="btn btn-tg ${cls}" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">${ICON.telegram}<span>${label}</span></a>` : '';
+const tgBtn = (label, cls = '') => site.social.telegram ? `<a class="btn btn-tg ${cls}" href="${esc(site.social.telegram)}" rel="noopener" target="_blank"><span>${label}</span>${ICON.telegram}</a>` : '';
 
 
 // Category cards: each category gets its own colour pair + a big emoji illustration (no image requests).
@@ -338,7 +338,7 @@ ${body}
       <a href="/about/">אודות</a>
       <a href="/disclosure/">גילוי נאות</a>
       <a href="/privacy/">פרטיות</a>
-      ${site.social.telegram ? `<a class="foot-tg" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">${ICON.telegram} ערוץ טלגרם</a>` : ''}
+      ${site.social.telegram ? `<a class="foot-tg" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">ערוץ טלגרם ${ICON.telegram}</a>` : ''}
       ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">ערוץ וואטסאפ</a>` : ''}
     </div>
   </div>
@@ -358,6 +358,7 @@ ${body}
   <div class="modal-links"><a id="modal-go" href="/go/home/" ${OUT}>לא נפתח? לחצו כאן</a></div>
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
+${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🔎 בקרוב: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר אצל המוכר הכי זול בעליאקספרס.</span><a href="/finder/">איך זה עובד ←</a></aside>` : ''}
 <script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
@@ -405,6 +406,9 @@ function faqBlock(items) {
 const allProducts = () => Object.values(gen.deals || {}).flat().filter((p) => safeLink(p.link) && safeLink(p.image));
 const catItems = (slugName) => (gen.deals?.[slugName] || []).filter((p) => safeLink(p.link) && safeLink(p.image));
 
+const soonestExpiry = realCodes.map((c) => c.expires).filter(Boolean).sort()[0] || '';
+const heShort = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}.${Number(m)}`; };
+
 function homePage() {
   const pathname = '/';
   const title = realCodes.length
@@ -415,13 +419,15 @@ function homePage() {
     : `קודי הקופון וההנחות של עליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const body = `
-<section class="hero">
+<section class="hero hero-home">
+  <div class="hero-deco" aria-hidden="true"><span class="fl fl1">%</span><span class="fl fl2">🎟️</span><span class="fl fl3">%</span><span class="fl fl4">💸</span></div>
   <div class="wrap hero-grid">
     <div class="hero-text">
       <h1 class="h1-kicker">קודי קופון לעליאקספרס · ${esc(monthYear)}</h1>
       <p class="slogan">קונים בעליאקספרס?<br><span class="hl">יש דיל.</span></p>
       <p class="lead">כל הקופונים וההנחות לעלי אקספרס במקום אחד. בוחרים קוד לפי העגלה, ומשלמים פחות על כל הזמנה.</p>
-      <p class="stats">${realCodes.length ? `<b>${realCodes.length}</b> קודים פעילים · עד <b>$${maxDiscount}</b> הנחה · ` : ''}עודכן ב-${esc(updatedHe)}</p>
+      <p class="stats">${realCodes.length ? `<b>${realCodes.length}</b> קודים פעילים · עד <b>$${maxDiscount}</b> הנחה, כ־${Math.round(maxDiscount * USD_ILS)} שקל · ` : ''}עודכן ב-${esc(updatedHe)}</p>
+      ${soonestExpiry ? `<p class="urgency" data-until="${soonestExpiry}">⏳ <span>הקודים בתוקף עד ${esc(heShort(soonestExpiry))}</span></p>` : ''}
       <ul class="trust">
         <li>${ICON.check} קודים שפג תוקפם יורדים מהרשימה</li>
         <li>${ICON.check} מסודר לפי סכום העגלה</li>
@@ -433,8 +439,8 @@ function homePage() {
       </div>
     </div>
     ${calcWidget()}
-    ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c) => `
-      <button class="featured" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>
+    ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c, i) => `
+      <button class="featured${i === 1 ? ' is-hot' : ''}" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)}>${i === 1 ? '<span class="f-badge">🔥 הכי פופולרי</span>' : ''}
         <span class="f-amount">${money(c.discount, c.currency)}</span>
         <span class="f-min">מעל ${money(c.minOrder, c.currency)}</span>
         <span class="f-cta">העתק קוד</span>
@@ -446,10 +452,16 @@ ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div cl
   <div class="ft-text">
     <span class="ft-badge">🔥 חדש · עולה בקרוב</span>
     <h2>מוצא הזול: אותו מוצר, במחיר הכי נמוך בעליאקספרס</h2>
-    <p>מדביקים קישור למוצר, ותוך שניות מקבלים את אותו מוצר אצל המוכרים הזולים ביותר. בלי לחפש ובלי להשוות לבד.</p>
+    <p>אותו מוצר נמכר בעליאקספרס אצל עשרות מוכרים, בהפרשים של עשרות אחוזים. מנוע החיפוש החכם שלנו מוצא אותם בשבילכם, תוך שניות.</p>
   </div>
-  <a class="ft-mock" href="/finder/" aria-label="למוצא הזול"><span class="ft-input">🔗 הדביקו קישור למוצר מעלי אקספרס…</span><span class="ft-go">מצא לי זול יותר</span></a>
-  ${site.social.telegram ? `<p class="ft-note">רוצים לדעת ראשונים כשזה עולה? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">${ICON.telegram} הצטרפו לטלגרם</a></p>` : ''}
+  <a class="ft-mock" href="/finder/" aria-label="למוצא הזול"><span class="ft-input">הדביקו קישור למוצר מעלי אקספרס… 🔗</span><span class="ft-go">מצא לי זול יותר</span></a>
+  <ol class="ft-steps">
+    <li><b>🔗 מזהה את המוצר</b><span>מהקישור, גם מהאפליקציה</span></li>
+    <li><b>🔍 סורק את כל המוכרים</b><span>שמוכרים את אותו מוצר, גם מה שלא מוצאים בחיפוש רגיל</span></li>
+    <li><b>🛡️ מסנן את הלא אמינים</b><span>דירוג נמוך, בלי מכירות או בלי משלוח לישראל</span></li>
+    <li><b>💰 מסדר לפי מחיר בשקלים</b><span>הזול ביותר למעלה, עם קישור ישיר</span></li>
+  </ol>
+  ${site.social.telegram ? `<p class="ft-note">רוצים לדעת ראשונים כשזה עולה? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">הצטרפו לטלגרם ${ICON.telegram}</a></p>` : ''}
 </div></div></section>` : ''}
 ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🔎 חדש: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר במחיר הכי נמוך בעליאקספרס</span><i>נסו עכשיו ←</i></a></div></section>` : ''}
 <section class="section" id="codes">
