@@ -130,3 +130,28 @@ jobs:
           node-version: 22
       - name: Ping IndexNow
         run: sleep 30 && node scripts/indexnow.mjs
+
+  # "מוצא הזול" API (Cloudflare Worker). Runs only when CLOUDFLARE_API_TOKEN is set.
+  worker:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy worker
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: worker
+        run: |
+          npx -y wrangler@4 deploy
+          for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID; do
+            v="${!k}"; [ -n "$v" ] && printf '%s' "$v" | npx -y wrangler@4 secret put "$k"
+          done
+        env:
+          ALI_APP_KEY: ${{ secrets.ALI_APP_KEY }}
+          ALI_APP_SECRET: ${{ secrets.ALI_APP_SECRET }}
+          ALI_TRACKING_ID: ${{ secrets.ALI_TRACKING_ID }}

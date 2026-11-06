@@ -240,6 +240,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
   const robots = noindex || SAMPLE_MODE ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1';
   const nav = [
     ['/', 'קודי קופון'],
+    ...(FINDER_API ? [['/finder/', '🔎 מוצא הזול']] : []),
     ['/coupon/', 'קטגוריות'],
     ...(allProducts().length ? [['/deals/', 'דילים']] : []),
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
@@ -418,6 +419,7 @@ function homePage() {
   </div>
 </section>
 
+${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🔎 חדש: מוצא הזול</b><span>מדביקים קישור למוצר, ומקבלים את אותו מוצר במחיר הכי נמוך בעליאקספרס</span><i>נסו עכשיו ←</i></a></div></section>` : ''}
 <section class="section" id="codes">
   <div class="wrap layout-2">
     <div>
@@ -596,6 +598,49 @@ function eventPage(ev) {
     title: `קוד קופון אליאקספרס ${le(short)} ${year} | ${site.name}`,
     description: `קודי הקופון של אליאקספרס ${le(ev.name)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
     pathname, body, ld: faqItems.length ? [bc.ld, faqLd(faqItems)] : [bc.ld],
+  });
+}
+
+const FINDER_API = (site.cheapest?.apiUrl || '').replace(/\/$/, '');
+
+function finderPage() {
+  const pathname = '/finder/';
+  const bc = breadcrumbs([{ name: 'מוצא הזול', url: pathname }]);
+  const items = [
+    { q: 'איך מוצא הזול עובד?', a: 'מדביקים קישור למוצר מעליאקספרס. המערכת בודקת את המוצר, מחפשת את אותו מוצר אצל מוכרים אחרים עם משלוח לישראל, ומציגה את האפשרויות הזולות ביותר עם דירוג המוכר וכמות המכירות.' },
+    { q: 'איך מעתיקים קישור מהאפליקציה של עליאקספרס?', a: 'בעמוד המוצר באפליקציה לוחצים על כפתור השיתוף ובוחרים "העתקת קישור". אחר כך מדביקים כאן בשדה.' },
+    { q: 'זה בטוח אותו מוצר?', a: 'המערכת משווה לפי שם המוצר והקטגוריה ומסננת מוכרים עם דירוג נמוך, אבל לפני שקונים חשוב לבדוק בעמוד המוצר שזה בדיוק מה שאתם רוצים: צבע, גרסה, מידה ומפרט.' },
+    { q: 'זה עולה משהו?', a: 'לא. השימוש חינם. הקישורים הם קישורי שותפים, ואנחנו עשויים לקבל עמלה מעליאקספרס בלי תוספת למחיר שלכם.' },
+  ];
+  const body = `
+<section class="hero"><div class="wrap narrow">${bc.html}
+  <h1>🔎 מוצא הזול</h1>
+  <p class="lead">מדביקים קישור למוצר מעליאקספרס, ואנחנו מוצאים את <strong>אותו מוצר במחיר הכי נמוך</strong> אצל מוכרים אחרים, עם משלוח לישראל.</p>
+  <form class="finder" id="finder-form" data-api="${esc(FINDER_API)}" autocomplete="off">
+    <label for="finder-url" class="calc-label">הקישור למוצר</label>
+    <div class="finder-row">
+      <input id="finder-url" name="url" type="text" inputmode="url" dir="ltr" placeholder="https://he.aliexpress.com/item/..." required>
+      <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>מצאו לי זול יותר</button>
+    </div>
+    <p class="muted finder-help">באפליקציה: עמוד המוצר ← שיתוף ← העתקת קישור. עובד גם עם קישורים מקוצרים.</p>
+    ${FINDER_API ? '' : '<p class="list-note">🚀 הפיצ\'ר עולה ממש בקרוב. בינתיים, <a href="/">כל קודי הקופון כאן</a>.</p>'}
+  </form>
+</div></section>
+<section class="section"><div class="wrap narrow">
+  <div id="finder-out" aria-live="polite"></div>
+  <div class="prose">
+    <h2>למה אותו מוצר עולה אחרת?</h2>
+    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. מוצא הזול עושה את החיפוש וההשוואה בשבילכם.</p>
+    <h2>ואחרי שמצאתם: עוד הנחה</h2>
+    <p>על המחיר הזול אפשר להוסיף <a href="/#calc">קוד קופון לפי סכום העגלה</a>, קופון של החנות וקופונים ממרכז הקופונים. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>.</p>
+  </div>
+  <h2 class="section-title">שאלות נפוצות</h2>
+  <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
+</div></section>`;
+  return layout({
+    title: `מוצא הזול: אותו מוצר בעליאקספרס במחיר הכי נמוך | ${site.name}`,
+    description: 'מדביקים קישור למוצר מעליאקספרס ומקבלים את אותו מוצר במחיר הכי נמוך אצל מוכרים אחרים, עם משלוח לישראל. חינם, בלי הרשמה.',
+    pathname, body, ld: [bc.ld, faqLd(items)], noindex: !FINDER_API,
   });
 }
 
@@ -793,6 +838,7 @@ for (const [id, target] of goTargets) await write(`go/${id}/index.html`, goPage(
 
 await page('/new-user/', newUserPage(), { lastmod: dataUpdated });
 await page('/coupon/', categoryHubPage(), { lastmod: dataUpdated });
+await page('/finder/', finderPage(), { lastmod: dataUpdated, index: !!FINDER_API });
 for (const c of categories) await page(`/coupon/${c.slug}/`, categoryPage(c), { lastmod: dataUpdated });
 
 // Atom feed of active codes: lets Telegram/WhatsApp bots and feed readers pick up new codes automatically.
@@ -808,6 +854,7 @@ await write('site.webmanifest', JSON.stringify({
   name: `${site.name} | קודי קופון לאליאקספרס`, short_name: site.name, lang: 'he', dir: 'rtl', start_url: '/', display: 'standalone',
   background_color: '#fffaf7', theme_color: '#e5122f',
   icons: [{ src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' }, { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png' }],
+  share_target: { action: '/finder/', method: 'GET', params: { title: 'title', text: 'text', url: 'url' } },
 }));
 
 await write('404.html', layout({

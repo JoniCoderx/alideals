@@ -1,0 +1,11 @@
+# Cloudflare Worker for "מוצא הזול" (cheapest-product finder).
+# Deployed by GitHub Actions when the CLOUDFLARE_API_TOKEN secret exists.
+name = "yeshdeal-api"
+main = "src/index.mjs"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://yeshdeal.com,https://www.yeshdeal.com"
+
+# Secrets (set automatically by the workflow from GitHub secrets):
+#   ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID

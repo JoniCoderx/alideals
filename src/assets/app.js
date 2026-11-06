@@ -264,6 +264,65 @@
     if (code && code === b.getAttribute('data-code')) markRevealed(id, code);
   });
 
+  /* ---------- מוצא הזול: paste a product link → cheapest same product (via the Worker API) ---------- */
+  var ff = $('finder-form');
+  if (ff) {
+    var api = ff.getAttribute('data-api') || '';
+    var fin = $('finder-url'), fout = $('finder-out'), fgo = $('finder-go');
+    var h = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var ils = function (n) { return n == null ? '' : '₪' + Number(n).toLocaleString('he-IL', { maximumFractionDigits: 2 }); };
+    var safe = function (u) { return /^https:\/\/([a-z0-9-]+\.)*(aliexpress\.(com|us|ru)|alicdn\.com|aliexpress-media\.com)\//i.test(u || '') ? u : ''; };
+    var card = function (p, kind) {
+      var img = safe(p.image) ? p.image + '_220x220.jpg' : '';
+      var link = safe(p.link) || '#';
+      var save = p.savings > 0 ? '<span class="fp-save">חוסכים ' + ils(p.savings) + (p.savingsPct ? ' (' + p.savingsPct + '%)' : '') + '</span>' : '';
+      var meta = [p.rating ? '⭐ ' + p.rating + '%' : '', p.sold ? p.sold.toLocaleString('he-IL') + ' נמכרו' : '', p.shop ? h(p.shop) : ''].filter(Boolean).join(' · ');
+      return '<div class="fp' + (kind ? ' is-' + kind : '') + '">' + (img ? '<img src="' + h(img) + '" alt="" loading="lazy" onerror="this.onerror=null;this.src=this.src.replace(/_220x220\\.jpg$/,\'\')">' : '<span></span>') +
+        '<div><h3>' + h(p.title) + '</h3><div class="fp-price"><strong>' + ils(p.price) + '</strong>' + save + '</div><div class="fp-meta">' + meta + '</div>' +
+        '<a class="btn ' + (kind === 'orig' ? 'btn-ghost' : 'btn-primary') + '" href="' + h(link) + '" rel="nofollow sponsored" data-finder="' + h(p.id) + '">' + (kind === 'orig' ? 'למוצר המקורי' : 'לקנייה בעליאקספרס') + '</a></div></div>';
+    };
+    var status = function (html, err) { fout.innerHTML = '<div class="finder-status' + (err ? ' is-err' : '') + '">' + html + '</div>'; };
+    var run = function () {
+      var v = (fin.value || '').trim();
+      if (!v) { fin.focus(); return; }
+      if (!api) { status('🚀 הפיצ\'ר עולה ממש בקרוב.'); return; }
+      fgo.disabled = true;
+      status('<span class="finder-spin"></span>מחפשים את אותו מוצר אצל מוכרים אחרים…');
+      track('finder_search');
+      var ctrl = 'AbortController' in window ? new AbortController() : null;
+      var to = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
+      fetch(api + '/api/cheapest?url=' + encodeURIComponent(v), ctrl ? { signal: ctrl.signal } : {})
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          var j = res.j || {};
+          if (!res.ok) { status(h(j.message || 'משהו השתבש. נסו שוב.'), true); return; }
+          var alts = j.alternatives || [];
+          track('finder_result', { found: alts.length });
+          var html = '';
+          if (alts.length) {
+            html += '<h2 class="section-title">מצאנו ' + alts.length + ' אפשרויות זולות יותר 🎉</h2>';
+            html += alts.map(function (a, i) { return card(a, i === 0 ? 'best' : ''); }).join('');
+          } else {
+            html += '<div class="finder-status">👍 לא מצאנו את המוצר זול יותר. המחיר שבחרתם כבר טוב.</div>';
+          }
+          html += '<h2 class="section-title">המוצר שהדבקתם</h2>' + card(j.original || {}, 'orig');
+          html += '<p class="muted">מוצרים דומים לפי שם וקטגוריה. לפני שקונים, בודקים בעמוד המוצר שזה בדיוק אותו מוצר: צבע, גרסה, מידה ומפרט. אל תשכחו להוסיף <a href="/#calc">קוד קופון</a>.</p>';
+          fout.innerHTML = html;
+          fout.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        })
+        .catch(function () { status('השרת לא ענה. בדקו את החיבור ונסו שוב.', true); })
+        .then(function () { clearTimeout(to); fgo.disabled = !api; });
+    };
+    ff.addEventListener('submit', function (e) { e.preventDefault(); run(); });
+    document.addEventListener('click', function (e) { var a = e.target.closest('[data-finder]'); if (a) track('finder_click', { product_id: a.getAttribute('data-finder') }); });
+    // Pre-fill from ?url= / ?text= (shared links, Android share target) and run straight away.
+    try {
+      var qs = new URLSearchParams(location.search);
+      var pre = qs.get('url') || qs.get('text') || '';
+      if (pre) { fin.value = pre; run(); }
+    } catch (e) {}
+  }
+
   // Countdown for upcoming sales.
   document.querySelectorAll('[data-countdown]').forEach(function (el) {
     var target = new Date(el.getAttribute('data-countdown')).getTime();
