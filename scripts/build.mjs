@@ -691,6 +691,8 @@ for (const d of deals) goTargets.set(d.id, d.id === 'coupon-center' && !safeLink
 await fs.rm(DIST, { recursive: true, force: true });
 await fs.mkdir(DIST, { recursive: true });
 await fs.cp(path.join(ROOT, 'src/assets'), path.join(DIST, 'assets'), { recursive: true });
+// Files served from the site root as-is (search-engine verification files etc.).
+await fs.cp(path.join(ROOT, 'src/root'), DIST, { recursive: true }).catch(() => {});
 
 const sitemap = [];
 const page = async (p, html, { lastmod, index = true } = {}) => {
