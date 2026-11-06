@@ -149,7 +149,8 @@ jobs:
         run: |
           npx -y wrangler@4 deploy
           for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID; do
-            v="${!k}"; [ -n "$v" ] && printf '%s' "$v" | npx -y wrangler@4 secret put "$k"
+            v="${!k}"
+            if [ -n "$v" ]; then printf '%s' "$v" | npx -y wrangler@4 secret put "$k"; fi
           done
         env:
           ALI_APP_KEY: ${{ secrets.ALI_APP_KEY }}
