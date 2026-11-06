@@ -260,7 +260,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${canonical}">
-<meta property="og:image" content="${abs('/assets/og.png')}">
+<meta property="og:image" content="${abs('/assets/og-v2.jpg')}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${esc(site.name)}: קוד קופון אליאקספרס לישראל">
@@ -650,7 +650,7 @@ function guidePage(g) {
     '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.description, inLanguage: 'he-IL',
     datePublished: g.published, dateModified: g.updated, author: { '@type': 'Organization', name: site.name, url: site.url },
     publisher: { '@type': 'Organization', name: site.name, logo: { '@type': 'ImageObject', url: abs('/assets/icon-512.png') } },
-    image: abs('/assets/og.png'), mainEntityOfPage: abs(pathname),
+    image: abs('/assets/og-v2.jpg'), mainEntityOfPage: abs(pathname),
   }];
   return layout({ title: `${g.title} | ${site.name}`, description: g.description, pathname, body, ld, ogType: 'article' });
 }
