@@ -25,7 +25,7 @@ const site = await readJSON('config/site.json');
 const manual = await readJSON('data/coupons.json');
 const gen = await readJSON('data/generated.json', {});
 
-const now = new Date();
+const now = process.env.BUILD_DATE ? new Date(`${process.env.BUILD_DATE}T10:00:00Z`) : new Date(); // BUILD_DATE=YYYY-MM-DD for testing
 const today = ymd(now);
 const monthYear = new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric', timeZone: TZ }).format(now);
 
@@ -55,9 +55,14 @@ const dataUpdated = [normDate(manual.updated), gen.updatedAt ? ymd(new Date(gen.
 const updatedHe = heLong(dataUpdated);
 
 const placeholderLink = !safeLink(DEFAULT_LINK) || /REPLACE/i.test(DEFAULT_LINK);
-const SAMPLE_MODE = !realCodes.length || placeholderLink;
+// Sample mode = never had real codes (or no affiliate link). Between sales (all real codes expired) is NOT sample mode:
+// the site stays indexable and shows the deals + "next codes" message instead of an empty list.
+const hadRealCodes = realCodes.length > 0 || expired.some((c) => !c.sample);
+const BETWEEN_SALES = !realCodes.length && hadRealCodes;
+const SAMPLE_MODE = !hadRealCodes || placeholderLink;
 for (const i of invalid) console.warn(`⚠  coupon "${i.id}" skipped: invalid ${i.field}${i.value ? ` (${i.value})` : ''}`);
-if (!realCodes.length) console.warn('⚠  No real coupon codes yet (all are sample) – edit data/coupons.json or connect a Google Sheet.');
+if (BETWEEN_SALES) console.warn('ℹ  Between sales: all real codes expired – showing the "next codes" box. Add the next codes to data/coupons.json.');
+else if (!realCodes.length) console.warn('⚠  No real coupon codes yet (all are sample) – edit data/coupons.json or connect a Google Sheet.');
 if (placeholderLink) console.warn('⚠  affiliate.defaultLink in config/site.json is not a valid AliExpress affiliate link yet.');
 if (SAMPLE_MODE && process.env.BUILD_STRICT === '1') {
   console.error('✗ BUILD_STRICT: refusing to publish sample data. Add real codes + your Portals link (see README).');
@@ -382,7 +387,19 @@ const orgLd = {
 const websiteLd = { '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, alternateName: site.nameEn, url: site.url, inLanguage: 'he-IL' };
 const faqLd = (items) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
 
+// Between sales (no active codes): say what happens next instead of showing an empty list.
+function nextCodesBox() {
+  const next = (manual.events || []).filter((e) => e.start > today).sort((a, b) => a.start.localeCompare(b.start))[0];
+  const nshort = next ? next.name.split(' –')[0] : '';
+  return `<div class="between">
+  <b>⏳ קודי המבצע הקודם הסתיימו</b>
+  <p>${next ? `קודי ${esc(nshort)} צפויים לצאת סביב ${heDate(next.start)}. נעדכן כאן ובערוץ הטלגרם זמן קצר אחרי שהם יוצאים.` : 'קודי המבצע הבא יופיעו כאן זמן קצר אחרי שעליאקספרס תפרסם אותם.'} בינתיים אפשר לחסוך עם הקופונים במרכז הקופונים של עליאקספרס.</p>
+  <div class="between-cta"><a class="btn btn-primary" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>${tgBtn('קבלו את הקודים בטלגרם')}</div>
+</div>`;
+}
+
 function calcWidget() {
+  if (!realCodes.length) return '';
   const data = coupons.filter((c) => (c.currency || 'USD') === 'USD').map((c) => ({
     id: c.id, d: c.discount, m: c.minOrder, s: c.sample || !c.code ? 1 : 0, code: c.sample ? '' : c.code,
     t: `${money(c.discount)} הנחה מעל ${money(c.minOrder)}`,
@@ -486,14 +503,15 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
     <div>
       <div class="section-head">
         <h2 class="section-title">כל קודי ההנחה הפעילים</h2>
-        <div class="filters" role="group" aria-label="סינון לפי סכום ההזמנה">
+        ${realCodes.length ? `<div class="filters" role="group" aria-label="סינון לפי סכום ההזמנה">
           <button type="button" class="chip is-on" aria-pressed="true" data-filter="all">הכל</button>
           <button type="button" class="chip" aria-pressed="false" data-filter="0-50">עד $50</button>
           <button type="button" class="chip" aria-pressed="false" data-filter="50-150">$50 עד $150</button>
           <button type="button" class="chip" aria-pressed="false" data-filter="150-99999">מעל $150</button>
-        </div>
+        </div>` : ''}
       </div>
-      ${manual.listNote ? `<p class="list-note">${esc(manual.listNote)}</p>` : ''}
+      ${manual.listNote && realCodes.length ? `<p class="list-note">${esc(manual.listNote)}</p>` : ''}
+      ${!realCodes.length ? nextCodesBox() : ''}
       <div class="coupon-list" id="coupon-list">
         ${coupons.map((c) => couponCard(c)).join('')}
       </div>
@@ -505,10 +523,10 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
       <p class="muted">קודים שקונים פרסמו בפורומים ברשת בשבועות האחרונים. לא בדקנו אותם, אז שווה לנסות רק אם הקודים למעלה לא נכנסו.</p>
       <div class="coupon-list">${community.slice(0, 12).map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
 
-      <details class="tiers-box" id="tiers"><summary><h2>איזה קוד מתאים לסכום שלי? <span>טבלת כל המדרגות</span></h2></summary>
+      ${coupons.length ? `<details class="tiers-box" id="tiers"><summary><h2>איזה קוד מתאים לסכום שלי? <span>טבלת כל המדרגות</span></h2></summary>
       ${tierTable(coupons)}
       <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
-      </details>
+      </details>` : ''}
 
       <h2 class="section-title">עוד דרכים לחסוך בעליאקספרס</h2>
       <div class="deal-grid">${deals.map(dealCard).join('')}</div>
@@ -636,8 +654,8 @@ function eventPage(ev) {
 </div></section>
 <section class="section"><div class="wrap narrow">
   ${content.intro ? `<div class="prose">${content.intro}</div>` : ''}
-  <h2 class="section-title">${own.length && live ? `קודי ${esc(short)}` : 'הקודים הפעילים כרגע'}</h2>
-  <div class="coupon-list">${evCoupons.map((c) => couponCard(c)).join('')}</div>
+  ${evCoupons.length ? `<h2 class="section-title">${own.length && live ? `קודי ${esc(short)}` : 'הקודים הפעילים כרגע'}</h2>
+  <div class="coupon-list">${evCoupons.map((c) => couponCard(c)).join('')}</div>` : nextCodesBox()}
   ${evCoupons.length ? `<h2 class="section-title">טבלת מדרגות</h2>${tierTable(evCoupons)}` : ''}
   <div class="prose">
     <h2>איך מתכוננים ${esc(le(short))}</h2>
@@ -738,6 +756,7 @@ function categoryPage(cat) {
 </div></section>
 <section class="section"><div class="wrap narrow">
   <div class="prose"><p>${esc(cat.intro)}</p></div>
+  ${!realCodes.length ? nextCodesBox() : ''}
   ${top.length ? `<h2 class="section-title">הקודים המומלצים עכשיו</h2>
   ${manual.listNote ? `<p class="list-note">${esc(manual.listNote)}</p>` : ''}
   <div class="coupon-list">${top.map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
@@ -815,8 +834,8 @@ function existingUserPage() {
 </div></section>
 <section class="section"><div class="wrap narrow">
   ${top.length ? `<h2 class="section-title">הקודים הכי משתלמים עכשיו</h2><div class="coupon-list">${top.map((c) => couponCard(c, { compact: true })).join('')}</div>` : ''}
-  <h2 class="section-title">כל המדרגות: איזה קוד מתאים לעגלה שלכם</h2>
-  ${tierTable(coupons)}
+  ${coupons.length ? `<h2 class="section-title">כל המדרגות: איזה קוד מתאים לעגלה שלכם</h2>
+  ${tierTable(coupons)}` : nextCodesBox()}
   <div class="prose">
     <h2>4 דרכים נוספות לחסוך כמשתמש קיים</h2>
     <ol>

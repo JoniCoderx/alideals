@@ -523,3 +523,8 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .fl{animation-iteration-count:4}
 .featured .f-cta::after{animation-iteration-count:3}
 .urgency.is-hot{animation-iteration-count:6}
+
+.between{margin:6px 0 14px;padding:18px;border-radius:18px;background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 25%,var(--line))}
+.between b{font-size:1.1rem}
+.between p{margin:6px 0 12px;color:var(--ink-2)}
+.between-cta{display:flex;flex-wrap:wrap;gap:10px}
