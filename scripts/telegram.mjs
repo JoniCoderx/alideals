@@ -260,6 +260,40 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
   });
 }
 
+const addDays = (d, n) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+
+/**
+ * Pure: plans the regular slots ahead of time so the Cloudflare Worker can publish them on the minute
+ * (GitHub's scheduler skips runs). Keeps already-planned items, adds the missing future slots for `days`
+ * days, drops the past. Returns the new queue + the advanced rotation state.
+ */
+export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats }) {
+  let reg = regular;
+  const keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
+  const have = new Set(keep.map((q) => q.key));
+  const out = [...keep];
+  for (let i = 0; i <= days; i++) {
+    const date = addDays(today, i);
+    const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
+    const live = coupons.filter((c) => (!c.expires || c.expires >= date) && (!c.starts || c.starts <= date));
+    for (const slot of SLOTS) {
+      const key = `${date}|${slot.id}`;
+      if (have.has(key) || (date === today && slot.from <= hour)) continue;
+      const opts = { today: date, hour: slot.from, weekday, regular: reg, events, coupons: live, siteUrl };
+      if (library) opts.library = library;
+      if (announcements) opts.announcements = announcements;
+      if (cats) opts.cats = cats;
+      const r = planRegular(opts);
+      reg = r.regular;
+      if (!r.message) continue;
+      const m = withAffiliate(r.message, { siteUrl, affLink });
+      out.push({ key, date, hour: slot.from, kind: m.kind, text: m.text, buttons: m.buttons, card: m.card, img: `${date}-${slot.id}.png` });
+    }
+  }
+  out.sort((a, b) => a.date.localeCompare(b.date) || a.hour - b.hour);
+  return { queue: out, regular: reg };
+}
+
 /**
  * Pure: folds bot updates into the code-report store.
  * Users tap "לא עבד לכם? דווחו" on the site → t.me/<bot>?start=r_CODE → the bot receives "/start r_CODE".
@@ -386,12 +420,29 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     }
     process.exit(0);
   }
+  // Worker mode: plan the next days' slots, render their images into the site (src/root/tg-queue/),
+  // and let the Cloudflare Worker publish each one at its slot time. Code posts still go out from here.
+  const viaWorker = process.env.TELEGRAM_VIA_WORKER === '1';
+  if (viaWorker) {
+    const nowHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }).format(new Date()));
+    const q = planQueue({ queue: gen.telegram?.queue || [], regular: gen.telegram?.regular || {}, today, hour: nowHour, events: manual.events || [], coupons: active, siteUrl: site.url, affLink: site.affiliate.defaultLink });
+    const dir = path.join(ROOT, 'src/root/tg-queue');
+    await fs.rm(dir, { recursive: true, force: true });
+    await fs.mkdir(dir, { recursive: true });
+    for (const item of q.queue) {
+      const png = await renderCard(item.card).catch(() => null);
+      if (png) await fs.writeFile(path.join(dir, item.img), png); else item.img = '';
+    }
+    await fs.writeFile(path.join(dir, 'queue.json'), JSON.stringify({ generated: new Date().toISOString(), items: q.queue.map(({ card, ...pub }) => pub) }));
+    gen.telegram = { ...(gen.telegram || {}), ...meta, queue: q.queue, regular: q.regular };
+    console.log(`• queued for the Worker: ${q.queue.map((i) => `${i.date} ${i.hour}:00 ${i.kind}`).join(', ')}`);
+  }
   // Regular content (tips / promotions / features): only when no code post goes out in this run.
   const tz = (o) => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', ...o }).format(new Date()));
   const hour = process.env.FORCE_HOUR ? Number(process.env.FORCE_HOUR) : tz({ hour: 'numeric', hour12: false });
   const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
   const reg = planRegular({ today, hour, weekday, regular: gen.telegram?.regular, events: manual.events || [], coupons: active, siteUrl: site.url });
-  if (!messages.length && reg.message) messages.push(aff(reg.message));
+  if (!viaWorker && !messages.length && reg.message) messages.push(aff(reg.message));
 
   let sent = 0;
   for (const m of messages) {
@@ -399,7 +450,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     catch (e) { console.error(`✗ ${e.message}`); process.exitCode = 1; break; }
   }
   if (sent === messages.length) {
-    gen.telegram = { ...meta, posted, regular: messages.some((m) => m.kind === reg.message?.kind && m.card === reg.message?.card) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
+    gen.telegram = { ...(gen.telegram || {}), ...meta, posted, regular: viaWorker ? gen.telegram.regular : messages.some((m) => m.kind === reg.message?.kind && m.card === reg.message?.card) ? reg.regular : (gen.telegram?.regular || {}), lastRun: new Date().toISOString() };
     await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n');
   }
   if (sent !== messages.length) { gen.telegram = { ...(gen.telegram || {}), ...meta }; await fs.writeFile(genFile, JSON.stringify(gen, null, 2) + '\n'); }

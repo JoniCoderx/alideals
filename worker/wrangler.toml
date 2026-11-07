@@ -7,11 +7,13 @@ compatibility_date = "2026-10-01"
 [vars]
 ALLOWED_ORIGIN = "https://yeshdeal.com,https://www.yeshdeal.com"
 GH_REPO = "JoniCoderx/alideals"
+SITE_URL = "https://yeshdeal.com"
+TG_CHAT = "@yeshdeall"
 
 # Hourly "clock": GitHub's own cron skips runs under load, so the Worker dispatches the
 # deploy workflow every hour (needs the GH_DISPATCH_TOKEN secret; does nothing without it).
 [triggers]
-crons = ["7 * * * *"]
+crons = ["2 * * * *"]   # :02 every hour – publishes the queued Telegram slot (Israel time) + dispatches the workflow
 
 # Secrets (set automatically by the workflow from GitHub secrets):
-#   ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID, GH_DISPATCH_TOKEN (fine-grained PAT: Actions read/write on this repo)
+#   ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID, TELEGRAM_BOT_TOKEN, GH_DISPATCH_TOKEN (fine-grained PAT: Actions read/write on this repo)

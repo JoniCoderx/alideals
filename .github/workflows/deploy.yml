@@ -58,6 +58,7 @@ jobs:
           ALI_APP_SECRET: ${{ secrets.ALI_APP_SECRET }}
           ALI_TRACKING_ID: ${{ secrets.ALI_TRACKING_ID }}
           GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           COUPONS_SHEET_CSV_URL: ${{ secrets.COUPONS_SHEET_CSV_URL }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
@@ -76,6 +77,8 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
           TELEGRAM_REPOST: ${{ inputs.telegram_repost && '1' || '0' }}
+          # With a deployed Worker, regular posts are queued here and published on time by the Worker.
+          TELEGRAM_VIA_WORKER: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && '1' || '0' }}
         run: node scripts/telegram.mjs
 
       - name: Save data
@@ -154,7 +157,7 @@ jobs:
         working-directory: worker
         run: |
           npx -y wrangler@4 deploy
-          for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID GH_DISPATCH_TOKEN; do
+          for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID GH_DISPATCH_TOKEN TELEGRAM_BOT_TOKEN; do
             v="${!k}"
             if [ -n "$v" ]; then printf '%s' "$v" | npx -y wrangler@4 secret put "$k"; fi
           done

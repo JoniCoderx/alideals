@@ -143,3 +143,31 @@ test('code reports: one per user per day, only active codes, replies for each', 
   assert.equal(reports.OLDCODE, undefined);
   assert.deepEqual(replies.map((r) => r.kind), ['thanks', 'thanks', 'thanks', 'unknown', 'hello']);
 });
+
+import { planQueue } from './telegram.mjs';
+import { publishQueued, israelNow } from '../worker/src/index.mjs';
+
+test('queue: plans future slots once, keeps planned items, skips past and expired codes', () => {
+  const big = Array.from({ length: 30 }, (_, i) => ({ id: 'p' + i, type: 'tip', emoji: '💡', title: 'T' + i, points: [], text: 't', buttons: [['x', '/']] }));
+  const base = { siteUrl: 'https://yeshdeal.com', affLink: 'https://s.click.aliexpress.com/e/_x', library: big, announcements: [], cats: [], coupons: codes };
+  const q1 = planQueue({ ...base, today: '2026-11-17', hour: 13, days: 1 });
+  assert.equal(q1.queue.filter((i) => i.date === '2026-11-17').length, 4); // 14, 17, 19, 21
+  assert.equal(q1.queue.filter((i) => i.date === '2026-11-18').length, 7);
+  assert.ok(q1.queue.every((i) => i.buttons.flat().some((b) => b.url === base.affLink)));
+  const q2 = planQueue({ ...base, queue: q1.queue, regular: q1.regular, today: '2026-11-17', hour: 18, days: 2 });
+  assert.equal(q2.queue.find((i) => i.key === '2026-11-17|prime').text, q1.queue.find((i) => i.key === '2026-11-17|prime').text, 'planned items are kept');
+  assert.ok(!q2.queue.some((i) => i.key === '2026-11-17|afternoon'), 'past dropped');
+  assert.ok(!q2.queue.some((i) => i.date === '2026-11-19' && i.kind === 'spot'), 'no code posts after the codes expire');
+});
+
+test('worker publishes the item for the current Israel slot', async () => {
+  const items = [{ key: '2026-11-08|noon', date: '2026-11-08', hour: 12, text: 'hi', buttons: [], img: 'a.png' }];
+  const calls = [];
+  const fakeFetch = async (url, opts) => { calls.push([url, opts && opts.body]); return url.includes('queue.json') ? { ok: true, json: async () => ({ items }) } : { json: async () => ({ ok: true }) }; };
+  const env = { TELEGRAM_BOT_TOKEN: 't', TG_CHAT: '@c', SITE_URL: 'https://yeshdeal.com' };
+  assert.deepEqual(israelNow(new Date('2026-11-08T10:02:00Z')), { date: '2026-11-08', hour: 12 }); // UTC+2 in winter
+  const r = await publishQueued(env, new Date('2026-11-08T10:02:00Z'), fakeFetch);
+  assert.equal(r.posted, '2026-11-08|noon');
+  assert.match(calls[1][0], /sendPhoto/);
+  assert.equal((await publishQueued(env, new Date('2026-11-08T11:02:00Z'), fakeFetch)).none, '2026-11-08 13');
+});

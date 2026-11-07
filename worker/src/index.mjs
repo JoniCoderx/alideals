@@ -108,8 +108,34 @@ export async function dispatchWorkflow(env, fetchImpl = fetch) {
   return { status: r.status };
 }
 
+/** Israel-time date + hour for a given instant. */
+export function israelNow(d = new Date()) {
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(d);
+  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }).format(d)) % 24;
+  return { date, hour };
+}
+
+/** Hourly: publish the Telegram post planned (by CI) for this Israel-time slot, if any. */
+export async function publishQueued(env, now = new Date(), fetchImpl = fetch) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TG_CHAT || !env.SITE_URL) return { skipped: 'not configured' };
+  const { date, hour } = israelNow(now);
+  const res = await fetchImpl(`${env.SITE_URL}/tg-queue/queue.json?t=${Date.now()}`, { cf: { cacheTtl: 0 } });
+  if (!res.ok) return { error: `queue ${res.status}` };
+  const { items = [] } = await res.json();
+  const item = items.find((i) => i.date === date && i.hour === hour);
+  if (!item) return { none: `${date} ${hour}` };
+  const api = (method, body) => fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+  const markup = { inline_keyboard: item.buttons || [] };
+  let r = item.img
+    ? await api('sendPhoto', { chat_id: env.TG_CHAT, photo: `${env.SITE_URL}/tg-queue/${item.img}?v=${encodeURIComponent(item.key)}`, caption: item.text, parse_mode: 'HTML', reply_markup: markup })
+    : { ok: false };
+  if (!r.ok) r = await api('sendMessage', { chat_id: env.TG_CHAT, text: item.text, parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: markup });
+  return { posted: item.key, ok: !!r.ok, error: r.ok ? undefined : r.description };
+}
+
 export default {
   async scheduled(event, env, ctx) {
+    ctx.waitUntil(publishQueued(env).then((r) => console.log('telegram slot', JSON.stringify(r))).catch((e) => console.log('telegram slot error', e.message)));
     ctx.waitUntil(dispatchWorkflow(env).then((r) => console.log('clock dispatch', JSON.stringify(r))).catch((e) => console.log('clock error', e.message)));
   },
   async fetch(req, env, ctx) {
