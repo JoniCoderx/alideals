@@ -513,3 +513,13 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .hero-hunter .radar{width:200px}
 @media (max-width:760px){.hunter{grid-template-columns:minmax(0,1fr)}.hunter h2{font-size:1.7rem}.ft-visual{order:-1}.radar{width:200px}.hunter-head{grid-template-columns:minmax(0,1fr)}.hero-hunter .radar{width:170px}}
 @media (prefers-reduced-motion:reduce){.radar-sweep,.blip{animation:none!important}.blip{opacity:1}}
+
+/* perf + a11y pass */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.btn-tg{background:#1777a6}
+.btn-tg:hover{background:#136591}
+.radar:not(.anim-on) .radar-sweep,.radar:not(.anim-on) .blip,.hero-deco:not(.anim-on) .fl{animation-play-state:paused}
+.radar-sweep{will-change:transform}
+.fl{animation-iteration-count:4}
+.featured .f-cta::after{animation-iteration-count:3}
+.urgency.is-hot{animation-iteration-count:6}

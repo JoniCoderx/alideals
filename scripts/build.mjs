@@ -165,9 +165,9 @@ function couponCard(c, { compact = false } = {}) {
   <div class="coupon-cta">
     ${hidden
       ? `<a class="btn btn-primary" href="/go/${c.id}/" ${OUT} data-go="${c.id}">למרכז הקופונים ${ICON.arrow}</a>`
-      : `<button class="btn btn-reveal" type="button" ${revealAttrs(c, title)} aria-label="העתק קוד: ${esc(title)}">
+      : `<button class="btn btn-reveal" type="button" ${revealAttrs(c, title)}>
           <span class="reveal-mask" aria-hidden="true">${masked}</span>
-          <span class="reveal-label" aria-hidden="true">העתק קוד</span>
+          <span class="reveal-label">העתק קוד<span class="sr-only">: ${esc(title)}</span></span>
         </button>`}
   </div>
 </article>`;

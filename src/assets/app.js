@@ -23,6 +23,13 @@
     t.querySelector('a').addEventListener('click', function () { try { localStorage.setItem('yd-promo-finder', '1'); } catch (e) {} });
     setTimeout(function () { t.hidden = false; requestAnimationFrame(function () { t.classList.add('is-in'); }); }, 9000);
   })();
+  // Decorative animations run only while visible (saves CPU/battery on phones).
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (en) { en.forEach(function (x) { x.target.classList.toggle('anim-on', x.isIntersecting); }); });
+    document.querySelectorAll('.radar,.hero-deco').forEach(function (el) { io.observe(el); });
+  } else {
+    document.querySelectorAll('.radar,.hero-deco').forEach(function (el) { el.classList.add('anim-on'); });
+  }
   document.querySelectorAll('.urgency[data-until]').forEach(function (el) {
     var until = el.getAttribute('data-until');
     var days = Math.round((Date.parse(until + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 864e5);
