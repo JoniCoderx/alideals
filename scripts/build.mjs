@@ -305,6 +305,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 ${verification.google ? `<meta name="google-site-verification" content="${esc(verification.google)}">` : ''}
 ${verification.bing ? `<meta name="msvalidate.01" content="${esc(verification.bing)}">` : ''}
 <style>${INLINE_CSS}</style>
+${site.analytics?.cfBeacon ? `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='${esc(JSON.stringify({ token: site.analytics.cfBeacon }))}'></script>` : ''}
 ${ga ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga)}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',${scriptJSON(ga)});</script>` : ''}
 ${ld.map(jsonLd).join('\n')}
 </head>
@@ -965,6 +966,7 @@ await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
 <p>התנאים של כל קוד נקבעים ע"י עליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות: איך האתר מרוויח מקישורי השותפים של עליאקספרס, ולמה זה לא משנה את המחיר שלכם ולא את סדר הקודים.'));
 await page('/privacy/', staticPage('/privacy/', 'מדיניות פרטיות', `
 <p>האתר לא דורש הרשמה ולא אוסף פרטים מזהים.</p>
+${site.analytics?.cfBeacon ? '<p>אנחנו משתמשים ב-Cloudflare Web Analytics כדי לספור ביקורים באופן אנונימי, בלי עוגיות ובלי מעקב אחרי משתמשים.</p>' : ''}
 ${site.analytics?.ga4Id ? '<p>אנחנו משתמשים ב-Google Analytics כדי להבין באופן אנונימי איך משתמשים באתר.</p>' : ''}
 <p>כשעוברים מהאתר לעליאקספרס, עליאקספרס עשויה לשמור עוגייה כדי לשייך את הרכישה לתוכנית השותפים. המדיניות של עליאקספרס חלה באתר שלה.</p>
 <p>לשאלות: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, 'מדיניות הפרטיות של האתר: אילו נתונים נאספים (בלי הרשמה ובלי פרטים מזהים), ומה קורה כשעוברים לעליאקספרס.'));

@@ -9,7 +9,8 @@
   "currency": "ILS",
   "contactEmail": "hello@yeshdeal.com",
   "analytics": {
-    "ga4Id": ""
+    "ga4Id": "",
+    "cfBeacon": ""
   },
   "affiliate": {
     "_comment": "defaultLink = קישור השותפים הכללי מ-AliExpress Portals (Tracking ID: default). כל לחיצה על קופון/כפתור באתר ובטלגרם עוברת דרכו.",

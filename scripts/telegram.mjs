@@ -123,15 +123,15 @@ export function planPosts({ coupons, events = [], posted = {}, today, siteUrl, r
 // so the channel gets a varied rhythm: code in the morning, tips, a category at noon, deals, code again, prime time, guide at night.
 export const SLOTS = [
   { id: 'morning', from: 8, to: 10, prefer: ['spot'] },
-  { id: 'midmorning', from: 10, to: 12, prefer: [] },
+  { id: 'midmorning', from: 10, to: 12, prefer: ['product'] },
   { id: 'noon', from: 12, to: 14, prefer: ['weekly', 'category'] },
-  { id: 'afternoon', from: 14, to: 16, prefer: [] },
+  { id: 'afternoon', from: 14, to: 16, prefer: ['product'] },
   { id: 'evening', from: 17, to: 19, prefer: ['spot'] },
   { id: 'prime', from: 19, to: 21, prefer: ['countdown'] },
   { id: 'night', from: 21, to: 23, prefer: ['category'] },
 ];
 
-export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, announcements = telegramAnnouncements, cats = categories, minGapDays = 8, spotGapDays = 3, catGapDays = 10 }) {
+export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, announcements = telegramAnnouncements, cats = categories, products = [], minGapDays = 8, spotGapDays = 3, catGapDays = 10 }) {
   const slot = SLOTS.find((s) => hour >= s.from && hour < s.to);
   const state = { lastSlot: regular.lastSlot || '', history: { ...(regular.history || {}) } };
   if (!slot || state.lastSlot === `${today}|${slot.id}`) return { message: null, regular: state };
@@ -174,6 +174,21 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
         card: { kind: 'weekly', title: 'הקודים הכי שווים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
         text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לעגלה ממוצעת, הקוד המשתלם בדרך כלל הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
         buttons: [[{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'weekly') }], [{ text: '🛒 לעליאקספרס', url: link(`/go/${top[0].id}/`, 'weekly') }]],
+      }];
+    },
+    // Editor-approved product (data/v2/telegram-products.json): ready-made brand image + affiliate link.
+    product() {
+      const pick = products
+        .map((x, i) => ({ x, i, id: `product|${x.id}`, last: state.history[`product|${x.id}`] || '' }))
+        .filter(({ id, x }) => x.link && x.image && fresh(id, 14))
+        .sort((a, b) => a.last.localeCompare(b.last) || a.i - b.i)[0];
+      if (!pick) return null;
+      const x = pick.x;
+      return [pick.id, {
+        kind: 'product',
+        card: { kind: 'product', image: x.image },
+        text: compactLines([`${x.emoji} <b>${esc(x.title)}</b>`, '', ...x.lines.map((l) => `• ${esc(l)}`), '', 'המחיר המעודכן בקישור. אל תשכחו קוד קופון לפי סכום העגלה 👇']),
+        buttons: [[{ text: '🛒 לצפייה במוצר', url: x.link }], [{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'product') }]],
       }];
     },
     // "Code of the moment": one code, big, with the cart range it fits.
@@ -268,7 +283,7 @@ const addDays = (d, n) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t
  * (GitHub's scheduler skips runs). Keeps already-planned items, adds the missing future slots for `days`
  * days, drops the past. Returns the new queue + the advanced rotation state.
  */
-export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats }) {
+export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats, products }) {
   let reg = regular;
   let keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
   // A new one-time announcement jumps the queue: it replaces the next planned slot.
@@ -296,6 +311,7 @@ export function planQueue({ queue = [], regular = {}, today, hour, days = 2, eve
       if (library) opts.library = library;
       if (announcements) opts.announcements = announcements;
       if (cats) opts.cats = cats;
+      if (products) opts.products = products;
       const r = planRegular(opts);
       reg = r.regular;
       if (!r.message) continue;
@@ -344,7 +360,7 @@ export function withAffiliate(msg, { siteUrl, affLink, store = STORE }) {
   const buttons = (msg.buttons || []).map((row) => row.map((b) => (b.url && b.url.startsWith(`${siteUrl}/go/`) ? { ...b, url: affLink } : b)));
   if (!buttons.flat().some((b) => isAli(b.url))) buttons.push([{ text: `🛒 ל${store}`, url: affLink }]);
   const tail = `\n\n🛒 <a href="${affLink}">כניסה ל${store}</a>`;
-  const text = msg.text.includes(affLink) || msg.text.length + tail.length > 1000 ? msg.text : msg.text + tail;
+  const text = msg.kind === 'product' || msg.text.includes(affLink) || msg.text.length + tail.length > 1000 ? msg.text : msg.text + tail;
   return { ...msg, buttons, text };
 }
 
@@ -357,7 +373,7 @@ async function api(token, method, body) {
 
 async function send(token, chat, msg) {
   const markup = JSON.stringify({ inline_keyboard: msg.buttons });
-  const png = msg.card && msg.text.length <= 1024 ? await renderCard(msg.card).catch(() => null) : null;
+  const png = msg.card?.image ? await fs.readFile(path.join(ROOT, msg.card.image)).catch(() => null) : msg.card && msg.text.length <= 1024 ? await renderCard(msg.card).catch(() => null) : null;
   if (png) {
     const fd = new FormData();
     fd.set('chat_id', chat);
@@ -449,14 +465,16 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   }
   // Worker mode: plan the next days' slots, render their images into the site (src/root/tg-queue/),
   // and let the Cloudflare Worker publish each one at its slot time. Code posts still go out from here.
+  const tgProducts = JSON.parse(await fs.readFile(path.join(ROOT, 'data/v2/telegram-products.json'), 'utf8').catch(() => '{"items":[]}')).items;
   const viaWorker = process.env.TELEGRAM_VIA_WORKER === '1';
   if (viaWorker) {
     const nowHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }).format(new Date()));
-    const q = planQueue({ queue: gen.telegram?.queue || [], regular: gen.telegram?.regular || {}, today, hour: nowHour, events: manual.events || [], coupons: active, siteUrl: site.url, affLink: site.affiliate.defaultLink });
+    const q = planQueue({ queue: gen.telegram?.queue || [], regular: gen.telegram?.regular || {}, today, hour: nowHour, events: manual.events || [], coupons: active, siteUrl: site.url, affLink: site.affiliate.defaultLink, products: tgProducts });
     const dir = path.join(ROOT, 'src/root/tg-queue');
     await fs.rm(dir, { recursive: true, force: true });
     await fs.mkdir(dir, { recursive: true });
     for (const item of q.queue) {
+      if (item.card?.image) { item.img = item.img.replace(/\.png$/, '.jpg'); await fs.copyFile(path.join(ROOT, item.card.image), path.join(dir, item.img)).catch(() => { item.img = ''; }); continue; }
       const png = await renderCard(item.card).catch(() => null);
       if (png) await fs.writeFile(path.join(dir, item.img), png); else item.img = '';
     }
@@ -468,7 +486,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const tz = (o) => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', ...o }).format(new Date()));
   const hour = process.env.FORCE_HOUR ? Number(process.env.FORCE_HOUR) : tz({ hour: 'numeric', hour12: false });
   const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
-  const reg = planRegular({ today, hour, weekday, regular: gen.telegram?.regular, events: manual.events || [], coupons: active, siteUrl: site.url });
+  const reg = planRegular({ today, hour, weekday, regular: gen.telegram?.regular, events: manual.events || [], coupons: active, siteUrl: site.url, products: tgProducts });
   if (!viaWorker && !messages.length && reg.message) messages.push(aff(reg.message));
 
   let sent = 0;

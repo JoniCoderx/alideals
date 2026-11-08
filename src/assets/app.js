@@ -222,11 +222,17 @@
 
   function runCalc() {
     if (!out || !tiers.length) return;
-    var raw = parseFloat(String(input.value).replace(/[^\d.]/g, ''));
-    if (!(raw > 0)) { out.textContent = 'הקלידו את סכום העגלה ונציג את הקוד הכי משתלם בשבילכם.'; return; }
+    // same rules as src/v2/logic.mjs parseAmount (unit-tested): decimal comma, thousands, no negatives/1e5
+    var s = String(input.value || '').trim().replace(/[₪$\s]/g, ''), raw = NaN;
+    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) raw = Number(s.replace(/,/g, ''));
+    else if (/^\d+,\d{1,2}$/.test(s)) raw = Number(s.replace(',', '.'));
+    else if (/^\d+(\.\d+)?$/.test(s)) raw = Number(s);
+    if (!s) { out.textContent = 'הקלידו את סכום העגלה ונציג את הקוד הכי משתלם בשבילכם.'; return; }
+    if (!(raw > 0) || raw > 1e6) { out.textContent = 'הקלידו סכום חיובי במספרים, למשל 60 או 45.50.'; return; }
     var usd = currency === 'ILS' ? raw / rate : raw;
+    usd = Math.round(usd * 100 + 1e-6) / 100;
     var fits = tiers.filter(function (t) { return t.m <= usd; });
-    var best = fits.sort(function (a, b) { return b.d - a.d; })[0];
+    var best = fits.sort(function (a, b) { return b.d - a.d || a.m - b.m; })[0];
     var next = tiers.filter(function (t) { return t.m > usd && (!best || t.d > best.d); }).sort(function (a, b) { return a.m - b.m; })[0];
     var approx = currency === 'ILS' ? ' (בערך ' + fmt(usd) + ')' : '';
     var html = '';
@@ -239,7 +245,7 @@
       html += '<div>הקוד הראשון מתחיל בהזמנה מעל ' + fmt(tiers.reduce(function (m, t) { return Math.min(m, t.m); }, Infinity)) + esc(approx) + '.</div>';
     }
     if (next) {
-      var gap = next.m - usd;
+      var gap = Math.round((next.m - usd) * 100) / 100;
       if (!best || gap <= Math.max(10, usd * 0.35)) {
         html += '<p class="upsell">💡 הוסיפו עוד ' + fmt(gap) + ' לעגלה וקבלו ' + fmt(next.d) + ' הנחה במקום ' + (best ? fmt(best.d) : '0') + '.</p>';
       }
