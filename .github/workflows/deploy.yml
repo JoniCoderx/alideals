@@ -16,6 +16,10 @@ on:
         description: 'Commit SHA of a stuck Pages deployment to cancel first (optional)'
         type: string
         default: ''
+      announce_now:
+        description: 'Post this one-time Telegram announcement id right now (e.g. ann-facebook)'
+        type: string
+        default: ''
       source:
         description: 'Who triggered the run (the Cloudflare Worker clock sends "clock")'
         type: string
@@ -75,6 +79,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
           TELEGRAM_REPOST: ${{ inputs.telegram_repost && '1' || '0' }}
+          ANNOUNCE_NOW: ${{ inputs.announce_now }}
           # With a deployed Worker, regular posts are queued here and published on time by the Worker.
           TELEGRAM_VIA_WORKER: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && '1' || '0' }}
         run: node scripts/telegram.mjs

@@ -433,6 +433,20 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     }
     process.exit(0);
   }
+  // Manual: post a one-time announcement right now (workflow input announce_now).
+  const annNow = (process.env.ANNOUNCE_NOW || '').trim();
+  if (annNow && token && !dry && !previewDir) {
+    const a = telegramAnnouncements.find((x) => x.id === annNow);
+    if (a) {
+      const r = planRegular({ today, hour: 12, weekday: 1, regular: { history: {} }, siteUrl: site.url, library: [], announcements: [a], cats: [], coupons: [] });
+      try {
+        console.log('  ✓ announce now:', await send(token, chat, aff(r.message)));
+        gen.telegram = { ...(gen.telegram || {}) };
+        gen.telegram.regular = { ...(gen.telegram.regular || {}), history: { ...((gen.telegram.regular || {}).history || {}), [a.id]: today } };
+        gen.telegram.queue = (gen.telegram.queue || []).filter((q) => q.annId !== a.id);
+      } catch (e) { console.error('✗ announce now:', e.message); }
+    } else console.log('• unknown announcement id', annNow);
+  }
   // Worker mode: plan the next days' slots, render their images into the site (src/root/tg-queue/),
   // and let the Cloudflare Worker publish each one at its slot time. Code posts still go out from here.
   const viaWorker = process.env.TELEGRAM_VIA_WORKER === '1';
