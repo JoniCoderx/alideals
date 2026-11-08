@@ -427,8 +427,10 @@ function faqBlock(items) {
 </div></section>`;
 }
 
-const allProducts = () => Object.values(gen.deals || {}).flat().filter((p) => safeLink(p.link) && safeLink(p.image));
-const catItems = (slugName) => (gen.deals?.[slugName] || []).filter((p) => safeLink(p.link) && safeLink(p.image));
+// Product deals stay OFF in production until explicitly approved (config: productsInProduction). The 2.0 preview at /test/ uses its own data.
+const PRODUCTS_ON = site.productsInProduction === true;
+const allProducts = () => (PRODUCTS_ON ? Object.values(gen.deals || {}).flat().filter((p) => safeLink(p.link) && safeLink(p.image)) : []);
+const catItems = (slugName) => (PRODUCTS_ON ? (gen.deals?.[slugName] || []).filter((p) => safeLink(p.link) && safeLink(p.image)) : []);
 
 // Code reports collected by the Telegram bot (scripts/telegram.mjs → generated.json).
 const BOT = gen.telegram?.bot || '';

@@ -115,6 +115,7 @@
     "google": "",
     "bing": ""
   },
+  "productsInProduction": false,
   "indexNowKey": "3c15de5a87efcd85249d3fac1cbffd17",
   "cheapest": {
     "_comment": "כתובת ה-Worker של 'צייד הדילים' (למשל https://yeshdeal-api.<account>.workers.dev). ריק = הפיצ'ר מוסתר מהתפריט והעמוד noindex.",
