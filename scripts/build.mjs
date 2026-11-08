@@ -259,7 +259,8 @@ const INLINE_CSS = minifyCSS(await fs.readFile(path.join(ROOT, 'src/assets/style
 const USD_ILS = Number(gen.fx?.usdIls) || Number(site.fx?.usdIls) || 3.7;
 const verification = site.verification || {};
 
-function layout({ title, description, pathname, body, ld = [], noindex = false, ogType = 'website' }) {
+function layout({ title, description, pathname, body, ld = [], noindex = false, ogType = 'website', share = null }) {
+  const ogTitle = share?.title || title, ogDesc = share?.description || description, ogImg = share?.image || '/assets/og-v2.jpg';
   const canonical = abs(pathname);
   const ga = site.analytics?.ga4Id;
   const robots = noindex || SAMPLE_MODE ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1';
@@ -285,10 +286,10 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
 <meta property="og:type" content="${ogType}">
 <meta property="og:locale" content="${site.locale}">
 <meta property="og:site_name" content="${esc(site.name)}">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description)}">
+<meta property="og:title" content="${esc(ogTitle)}">
+<meta property="og:description" content="${esc(ogDesc)}">
 <meta property="og:url" content="${canonical}">
-<meta property="og:image" content="${abs('/assets/og-v2.jpg')}">
+<meta property="og:image" content="${abs(ogImg)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${esc(site.name)}: קוד קופון עליאקספרס לישראל">
@@ -588,7 +589,7 @@ ${expired.length ? `<section class="section"><div class="wrap narrow"><details c
 ${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה בעליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
 <section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מעליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
-  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)] });
+  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)], share: { title: 'יש דיל! לפני שקונים בעליאקספרס, עוברים כאן', description: 'הקוד שמתאים בדיוק לסכום ההזמנה שלך, מחשבון שמראה כמה יוצא בסוף, וערוץ טלגרם עם הדילים של היום. חינם, בעברית, מתעדכן כל שעה.', image: '/assets/og-share.jpg' } });
 }
 
 function dealsIndexPage() {
