@@ -302,3 +302,15 @@ await fs.copyFile(path.join(ROOT, 'src/v2/v2.css'), path.join(OUT, 'v2.css'));
 await fs.copyFile(path.join(ROOT, 'src/v2/v2.js'), path.join(OUT, 'v2.js'));
 await fs.copyFile(path.join(ROOT, 'src/v2/logic.mjs'), path.join(OUT, 'logic.mjs'));
 console.log(`✓ /test/ preview: ${Object.keys(pages).length} pages (noindex), ${tiers.length} coupon tiers, live products ${LIVE.live}/${fixtureProducts.length}`);
+
+// Visual design system demo (/test/design/) – real renders from scripts/v2-creative.mjs
+{
+  await fs.mkdir(path.join(OUT, 'design'), { recursive: true });
+  for (const f of ['vention-20000.jpg', 'hibrew-g5.jpg']) await fs.copyFile(path.join(ROOT, 'src/v2/creative/samples', f), path.join(OUT, 'design', f));
+  await fs.writeFile(path.join(OUT, 'design/index.html'), shell({ title: 'מערכת העיצוב', body: `
+<section class="sec"><div class="wrap">
+  <h1>מערכת העיצוב של יש דיל! · תבנית "במה"</h1>
+  <p class="lead">תבנית אחת קבועה. משתנים רק התמונה, הכותרת ושורת המפרט. בלי מחירים, דירוגים או טענות.</p>
+  <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><img src="/test/design/vention-20000.jpg" alt="דוגמה: סוללה ניידת Vention" style="width:100%;border-radius:18px"><img src="/test/design/hibrew-g5.jpg" alt="דוגמה: מטחנת קפה HiBREW G5" style="width:100%;border-radius:18px"></div>
+</div></section>` }));
+}
