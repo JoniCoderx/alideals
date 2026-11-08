@@ -34,7 +34,7 @@ function backdrop(layout, T) {
   return `<div class="floor" style="background:${sheen},${g}"></div><div class="ring" style="left:-80px;top:${BOX.band.bottom - 450}px;width:1240px;height:620px;border-radius:50%"></div>`;
 }
 
-export function stageHTML({ productDataUri, aspect = 1, layout, headline, sub, spec = '', tag = '', price = '', stats = '', theme = 'light', curated = false, fonts }) {
+export function stageHTML({ productDataUri, aspect = 1, layout, headline, sub, spec = '', tag = '', price = '', stats = '', theme = 'light', big = '', accent = '', curated = false, fonts }) {
   const dark = theme === 'dark';
   const T = dark ? { ...TOKENS, bg: '#111014', ink: '#ffffff', mute: '#b9b3c2' } : TOKENS;
   const L = layout || layoutFor(aspect);
@@ -42,6 +42,10 @@ export function stageHTML({ productDataUri, aspect = 1, layout, headline, sub, s
   const B = { ...BOX[L], bottom: BOX[L].bottom - lift, h: BOX[L].h - lift };
   const pw = Math.min(B.w, B.h * aspect), ph = pw / aspect;
   const top = B.bottom - ph;
+  const bigTxt = big.split('|')[0] || '';
+  const bigBox = L === 'split' ? { l: 590, w: 420, t: 690 } : L === 'band' ? { l: 70, w: 940, t: 450 } : { l: 70, w: 940, t: 150 };
+  const bigFs = Math.min(L === 'split' ? 200 : 330, Math.floor(bigBox.w / Math.max(2, bigTxt.length * 0.62)));
+  const bigPos = `left:${bigBox.l}px;width:${bigBox.w}px;top:${bigBox.t}px;font-size:${bigFs}px;letter-spacing:${-bigFs / 40}px`;
   const sw = Math.max(200, pw * 0.82);
   const split = L === 'split';
   const copy = split
@@ -72,17 +76,21 @@ h1{font-size:${hsize}px;font-weight:800;line-height:1.05;letter-spacing:-2px}
 .price{font-size:44px;font-weight:800;color:${T.grad[1]};direction:ltr;unicode-bidi:isolate;margin-top:8px}
 .foot{position:absolute;left:${T.margin}px;right:${T.margin}px;bottom:${T.margin - 26}px;display:flex;justify-content:space-between;font-size:26px;font-weight:700;color:${T.mute}}
 .foot .url{color:${T.ink}}
-${dark ? `body::before{background:radial-gradient(760px 640px at ${B.cx}px ${B.bottom - B.h * 0.45}px,rgba(255,96,40,.42),transparent 62%),radial-gradient(1200px 500px at 50% 112%,rgba(229,18,47,.30),transparent 60%)}
+${dark ? `body::before{background:radial-gradient(1200px 500px at 50% 115%,rgba(229,18,47,.22),transparent 60%)}
 .disc{opacity:.9;filter:saturate(1.1)}.ring{border-color:rgba(255,140,90,.28)}
-.refl{position:absolute;left:${B.cx - pw / 2}px;top:${B.bottom + 2}px;width:${pw}px;height:${ph}px;transform:scaleY(-1);opacity:.16;-webkit-mask-image:linear-gradient(to top,#000,transparent 28%);pointer-events:none}
+.refl{position:absolute;left:${B.cx - pw / 2}px;top:${B.bottom + 2}px;width:${pw}px;height:${ph}px;transform:scaleY(-1);opacity:.22;-webkit-mask-image:linear-gradient(to top,#000,transparent 30%);pointer-events:none}
 .refl img{width:100%;height:100%;object-fit:contain}
 .prod img{filter:drop-shadow(0 0 1.5px rgba(255,170,120,.85)) drop-shadow(0 24px 34px rgba(0,0,0,.6))}
 .tag{background:rgba(255,255,255,.06);color:#ff8a55;border-color:rgba(255,138,85,.45)}.brand b{color:#ff5a3a}` : ''}
 .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;font-size:${split ? 24 : 28}px;font-weight:800}
 .stats span{white-space:nowrap;padding:10px 20px;border-radius:999px;background:linear-gradient(150deg,${T.grad[0]},${T.grad[1]});color:#fff;box-shadow:0 10px 24px rgba(229,18,47,.35)}
 .stats span+span{background:${dark ? 'rgba(255,255,255,.08)' : '#fff'};color:${T.ink};border:2px solid rgba(229,18,47,.3);box-shadow:none}
+.big{position:absolute;text-align:center;direction:ltr;font-weight:800;line-height:.9;color:transparent;-webkit-text-stroke:2.5px ${dark ? 'rgba(255,255,255,.22)' : 'rgba(229,18,47,.22)'};background:linear-gradient(180deg,${dark ? 'rgba(255,255,255,.16)' : 'rgba(255,122,47,.16)'},transparent 90%);-webkit-background-clip:text;background-clip:text;${bigPos}}
+.big small{display:block;font-size:34px;letter-spacing:1px;-webkit-text-stroke:0;color:${dark ? 'rgba(255,255,255,.55)' : T.mute};direction:rtl;margin-top:10px;font-weight:700}
+.halo{position:absolute;left:${B.cx - 520}px;top:${B.bottom - B.h * 0.55 - 520}px;width:1040px;height:1040px;border-radius:50%;background:radial-gradient(closest-side,${accent || 'rgba(255,96,40,.55)'},transparent)}
+.gfloor{position:absolute;left:${B.cx - 470}px;top:${B.bottom - 6}px;width:940px;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)}
 </style></head><body data-layout="${L}">
-${backdrop(L, T)}<div class="soft"></div><div class="contact"></div>
+${dark ? `<div class="halo"></div><div class="gfloor"></div>` : backdrop(L, T)}${big ? `<div class="big">${esc(big.split('|')[0])}${big.split('|')[1] ? `<small>${esc(big.split('|')[1])}</small>` : ''}</div>` : ''}<div class="soft"></div><div class="contact"></div>
 ${dark && L !== 'split' ? `<div class="refl"><img src="${productDataUri}" alt=""></div>` : ''}<div class="prod"><img src="${productDataUri}" alt=""></div>
 <div class="top"><div class="brand"><svg viewBox="0 0 64 64" width="62" height="62"><defs><linearGradient id="g" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="${T.grad[0]}"/><stop offset="1" stop-color="${T.grad[1]}"/></linearGradient></defs><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="url(#g)"/><path d="M22 39 42 19" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="#fff"/><circle cx="41" cy="37" r="5" fill="#fff"/></svg><span>יש דיל<b>!</b></span></div>${tag ? `<div class="tag">${esc(tag)}</div>` : '<span></span>'}</div>
 <div class="copy"><h1>${esc(headline)}</h1><div class="rule"></div><div class="sub">${esc(sub)}${spec ? `${split ? '<br>' : ''}<span class="spec" ${split ? 'style="margin-right:0"' : ''}>${esc(spec)}</span>` : ''}</div>${price ? `<div class="price">${esc(price)}</div>` : ''}${stats ? `<div class="stats">${stats.split('|').map((x) => `<span>${esc(x.trim())}</span>`).join('')}</div>` : ''}</div>
