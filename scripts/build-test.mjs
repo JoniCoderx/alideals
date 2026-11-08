@@ -306,11 +306,11 @@ console.log(`✓ /test/ preview: ${Object.keys(pages).length} pages (noindex), $
 // Visual design system demo (/test/design/) – real renders from scripts/v2-creative.mjs
 {
   await fs.mkdir(path.join(OUT, 'design'), { recursive: true });
-  for (const f of ['hibrew-g5.jpg', 'mijia-irrigator.jpg']) await fs.copyFile(path.join(ROOT, 'src/v2/creative/samples', f), path.join(OUT, 'design', f));
+  for (const f of ['hibrew-g5.jpg', 'mijia-vacuum.jpg', 'aula-f108.jpg']) await fs.copyFile(path.join(ROOT, 'src/v2/creative/samples', f), path.join(OUT, 'design', f));
   await fs.writeFile(path.join(OUT, 'design/index.html'), shell({ title: 'מערכת העיצוב', body: `
 <section class="sec"><div class="wrap">
   <h1>מערכת העיצוב של יש דיל! · תבנית "במה"</h1>
   <p class="lead">תבנית אחת קבועה. משתנים רק התמונה, הכותרת ושורת המפרט. בלי מחירים, דירוגים או טענות.</p>
-  <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><img src="/test/design/mijia-irrigator.jpg" alt="דוגמה: מכשיר לשטיפת שיניים MIJIA" style="width:100%;border-radius:18px"><img src="/test/design/hibrew-g5.jpg" alt="דוגמה: מטחנת קפה HiBREW G5" style="width:100%;border-radius:18px"></div>
+  <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))"><img src="/test/design/aula-f108.jpg" alt="פריסה band: מוצר רחב" style="width:100%;border-radius:18px"><img src="/test/design/mijia-vacuum.jpg" alt="פריסה stage: מוצר קומפקטי" style="width:100%;border-radius:18px"><img src="/test/design/hibrew-g5.jpg" alt="פריסה split: מוצר גבוה" style="width:100%;border-radius:18px"></div>
 </div></section>` }));
 }
