@@ -1001,12 +1001,41 @@ await write('site.webmanifest', JSON.stringify({
   share_target: { action: '/finder/', method: 'GET', params: { title: 'title', text: 'text', url: 'url' } },
 }));
 
+// Product share page + admin link maker (appended to build.mjs).
+const PRODUCT_API = site.cheapest?.apiUrl || 'https://yeshdeal-api.joni0000.workers.dev';
+await write('p/index.html', layout({
+  title: `דיל מעליאקספרס | ${site.name}`, description: 'מוצר שנבחר בשבילכם, במחיר העדכני מעליאקספרס.', pathname: '/p/', noindex: true,
+  share: { title: 'שלחו לך דיל מעליאקספרס 🎯', description: 'מוצר שנבחר בשבילך ביש דיל!, עם המחיר העדכני וקוד קופון לפי סכום ההזמנה.', image: '/assets/og-share.jpg' },
+  body: `<section class="section pp"><div class="wrap narrow"><div id="pp" class="pp-card pp-loading" aria-live="polite"><div class="pp-img sk"></div><div class="pp-body"><div class="sk sk-line"></div><div class="sk sk-line short"></div><div class="sk sk-btn"></div></div></div>
+<div class="pp-more"><p>לפני התשלום: בחרו <a href="/#calc">קוד קופון לפי סכום העגלה</a> וחסכו עוד.</p>${tgBtn('דילים כאלה כל יום בטלגרם')}</div></div></section>
+<script>(function(){var box=document.getElementById('pp');var id=(new URLSearchParams(location.search).get('i')||'').replace(/\\D/g,'');
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fail(){box.className='pp-card';box.innerHTML='<div class="pp-body"><h1>הדיל הזה כבר לא זמין</h1><p>אבל יש לנו קודי קופון פעילים לעליאקספרס.</p><a class="btn btn-primary" href="/">לקודי הקופון</a></div>'}
+if(!/^\\d{6,20}$/.test(id))return fail();
+fetch(${JSON.stringify(PRODUCT_API)}+'/api/products?ids='+id).then(function(r){return r.json()}).then(function(j){var p=j.items&&j.items[0];if(!p||!/^https:\\/\\/s\\.click\\.aliexpress\\.com\\//.test(p.link||''))return fail();
+var ils=function(n){return '₪'+(Math.round(n*100)/100).toLocaleString('he-IL')};var off=p.originalPrice>p.price?Math.round((1-p.price/p.originalPrice)*100):0;
+box.className='pp-card';box.innerHTML='<a class="pp-img" href="'+esc(p.link)+'" rel="nofollow sponsored noopener"><img src="'+esc(p.image)+'" alt="" width="480" height="480" referrerpolicy="no-referrer"></a><div class="pp-body"><span class="pp-kicker">🎯 נבחר בשבילכם ביש דיל!</span><h1>'+esc(p.title)+'</h1><p class="pp-price"><b>'+ils(p.price)+'</b>'+(off>=5?'<s>'+ils(p.originalPrice)+'</s><span class="pp-off">-'+off+'%</span>':'')+'</p><p class="pp-meta">'+(p.rating?p.rating+'% ביקורות חיוביות':'')+(p.sold?' · '+Number(p.sold).toLocaleString('he-IL')+' נמכרו':'')+'</p><a class="btn btn-primary btn-block pp-buy" href="'+esc(p.link)+'" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a><p class="pp-note">המחיר נבדק עכשיו מול עליאקספרס. משלוח ומע״מ מוצגים בקופה, והמחיר עשוי להשתנות.</p></div>';
+document.title=p.title.slice(0,60)+' | ${site.name}';}).catch(fail)})();</script>`,
+}));
+
+await write('admin/link/index.html', layout({
+  title: `יצירת קישור דיל | ${site.name}`, description: 'כלי פנימי', pathname: '/admin/link/', noindex: true,
+  body: `<section class="section"><div class="wrap narrow"><h1>יצירת קישור דיל</h1><p class="muted">מדביקים קישור של מוצר מעליאקספרס (גם מקוצר מהאפליקציה). מקבלים קישור של יש דיל לשליחה, שמוביל דרך קישור השותפים.</p>
+<div class="adm"><input id="adm-in" type="url" inputmode="url" placeholder="https://he.aliexpress.com/item/....html" dir="ltr"><button class="btn btn-primary" id="adm-go" type="button">צור קישור</button></div><div id="adm-out" aria-live="polite"></div></div></section>
+<script>(function(){var inp=document.getElementById('adm-in'),out=document.getElementById('adm-out');
+function show(id){var u=location.origin+'/p/?i='+id;out.innerHTML='<div class="adm-res"><input readonly dir="ltr" value="'+u+'"><div class="adm-btns"><button class="btn btn-primary" id="adm-copy" type="button">העתק</button><a class="btn btn-ghost" target="_blank" href="https://wa.me/?text='+encodeURIComponent('תראה מה מצאתי בעליאקספרס 👇 '+u)+'">שלח בוואטסאפ</a><a class="btn btn-ghost" target="_blank" href="'+u+'">תצוגה</a></div></div>';
+document.getElementById('adm-copy').onclick=function(){navigator.clipboard.writeText(u).then(function(){document.getElementById('adm-copy').textContent='הועתק ✓'})}}
+document.getElementById('adm-go').onclick=function(){var t=inp.value||'';var m=t.match(/\\/item\\/(\\d{6,20})\\.html/)||t.match(/productId=(\\d{6,20})/);if(m)return show(m[1]);
+if(!/https?:\\/\\/(s\\.click|a)\\.aliexpress\\.com\\//.test(t)){out.innerHTML='<p class="muted">זה לא נראה כמו קישור למוצר בעליאקספרס.</p>';return}
+out.innerHTML='<p class="muted">פותח קישור מקוצר…</p>';fetch(${JSON.stringify(PRODUCT_API)}+'/api/cheapest?url='+encodeURIComponent(t.trim())).then(function(r){return r.json()}).then(function(j){j.original&&j.original.id?show(j.original.id):out.innerHTML='<p class="muted">לא הצלחנו לזהות את המוצר. נסו את הקישור המלא מהדפדפן.</p>'}).catch(function(){out.innerHTML='<p class="muted">שגיאת רשת. נסו שוב.</p>'})}})();</script>`,
+}));
+
 await write('404.html', layout({
   title: `הדף לא נמצא | ${site.name}`, description: 'הדף לא נמצא', pathname: '/404.html', noindex: true,
   body: `<section class="hero"><div class="wrap narrow"><h1>הדף לא נמצא</h1><p class="lead">אבל הקודים כאן.</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
 }));
 await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
-await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
+await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\nDisallow: /admin/\nDisallow: /p/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 await write('.nojekyll', '');
 if (gen.telegram?.posted) await write('telegram-state.json', JSON.stringify(gen.telegram));
 if (site.indexNowKey) await write(`${site.indexNowKey}.txt`, site.indexNowKey);
