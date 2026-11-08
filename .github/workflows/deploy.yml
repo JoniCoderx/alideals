@@ -96,6 +96,11 @@ jobs:
           BUILD_STRICT: '1'
         run: npm run build
 
+      # YeshDeal 2.0 preview at /test/ (noindex, isolated: writes only into dist/test/).
+      - name: Build /test/ preview
+        continue-on-error: true
+        run: node scripts/build-test.mjs
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
