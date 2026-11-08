@@ -66,7 +66,7 @@ export async function findCheapest(env, input, fetchImpl = fetch) {
   // Try the specific query first, then broader ones (fewer keywords, then without the category).
   const query = async (keywords, cat) => {
     try {
-      const r = await aliCall(env, 'aliexpress.affiliate.product.query', { ...common, keywords, category_ids: cat || undefined, sort: 'SALE_PRICE_ASC', ship_to_country: 'IL', page_size: 50, page_no: 1 }, fetchImpl);
+      const r = await aliCall(env, 'aliexpress.affiliate.product.query', { ...common, target_language: 'EN', keywords, category_ids: cat || undefined, sort: 'SALE_PRICE_ASC', ship_to_country: 'IL', page_size: 50, page_no: 1 }, fetchImpl);
       return r?.products?.product || [];
     } catch (e) { if (/result is empty/i.test(String(e.message))) return []; throw e; }
   };
@@ -85,8 +85,19 @@ export async function findCheapest(env, input, fetchImpl = fetch) {
     const gen = await aliCall(env, 'aliexpress.affiliate.link.generate', { promotion_link_type: 0, source_values: `https://www.aliexpress.com/item/${id}.html`, tracking_id: env.ALI_TRACKING_ID }, fetchImpl).catch(() => null);
     original.link = gen?.promotion_links?.promotion_link?.[0]?.promotion_link || '';
   }
-  // v2: a wider pool (related listings, any price) so the client can classify exact / likely / similar honestly.
-  const pool = rankAlternatives(original, candidates.filter((c) => c.id !== original.id), { minSimilarity: 0.3, minRating: 0, minSold: 0, limit: 12 });
+  // v2: a wider pool (related listings, any price) classified on the sellers' ORIGINAL English titles
+  // (machine-translated Hebrew differs per listing). Hebrew titles are attached for display only.
+  original.enTitle = enTitle;
+  const pool = rankAlternatives({ ...original, title: enTitle }, candidates.filter((c) => c.id !== original.id), { minSimilarity: 0.25, minRating: 0, minSold: 0, limit: 12 })
+    .map((c) => ({ ...c, enTitle: c.title }));
+  if (pool.length) {
+    const he = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { ...common, product_ids: pool.map((c) => c.id).join(','), country: 'IL' }, fetchImpl).catch(() => null);
+    const byId = Object.fromEntries((he?.products?.product || []).map((p) => [String(p.product_id), p]));
+    for (const c of pool) {
+      const h = byId[c.id];
+      if (h) { c.title = h.product_title || c.title; c.price = Number(h.target_sale_price) || c.price; c.link = h.promotion_link || c.link; }
+    }
+  }
   return { status: 200, body: { original, alternatives: cheaper, pool, checked: candidates.length, at: new Date().toISOString() } };
 }
 

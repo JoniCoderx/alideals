@@ -47,16 +47,30 @@ export function pickCoupon(usd, tiers) {
 
 const STOP = new Set(['the', 'and', 'for', 'with', 'new', 'hot', 'sale', '2024', '2025', '2026', 'free', 'shipping', 'original', 'high', 'quality', 'pcs', 'set', 'of', 'a', 'in', 'to']);
 
-/** Extracts comparable attributes from a listing title (+ optional props). Conservative: only clear patterns. */
+const GENERIC = new Set(['new', 'mini', 'portable', 'original', 'global', 'version', 'hot', 'for', 'the', 'upgraded', 'magnetic', 'wireless', 'fast', 'type', 'usb', 'car', 'smart', 'brand', 'ccc', 'pd', 'qi2', 'gan']);
+const UNITS = { mah: 'mah', w: 'w', gb: 'gb', tb: 'tb', mm: 'mm', inch: 'inch', '"': 'inch', ml: 'ml', l: 'l', hz: 'hz' };
+const CAPACITY = new Set(['mah', 'gb', 'tb', 'ml', 'l']);
+
+/**
+ * Comparable attributes from a seller's (English) title: brand, technical specs per unit, model codes,
+ * plug type, and whether the listing bundles several variants (e.g. "1TB 2TB 4TB").
+ */
 export function attributes(title = '', props = {}) {
-  const t = ` ${String(title).toLowerCase()} `;
-  const a = {};
-  const cap = t.match(/(\d+(?:\.\d+)?)\s?(mah|gb|tb|w|l|ml|mm|cm|inch|")\b/g);
-  if (cap) a.capacity = [...new Set(cap.map((x) => x.replace(/\s/g, '').replace('"', 'inch')))].sort();
+  const t = ` ${String(title).toLowerCase().replace(/[【】[\]()]/g, ' ')} `;
+  const a = { specs: {} };
+  const words = t.trim().split(/\s+/).filter((w) => /^[a-z][a-z0-9-]+$/.test(w) && !GENERIC.has(w));
+  if (words[0]) a.brand = words[0];
+  for (const m of t.matchAll(/(\d+(?:\.\d+)?)\s?(mah|tb|gb|mm|inch|ml|hz|w|l|")(?![a-z])/g)) {
+    const unit = UNITS[m[2]];
+    (a.specs[unit] = a.specs[unit] || new Set()).add(String(Number(m[1])));
+  }
+  for (const k of Object.keys(a.specs)) a.specs[k] = [...a.specs[k]].sort();
+  if (Object.keys(a.specs).length) a.capacity = Object.entries(a.specs).flatMap(([u, v]) => v.map((x) => x + u)).sort();
+  a.multiVariant = Object.entries(a.specs).some(([u, v]) => v.length > 1 && CAPACITY.has(u));
   const plug = t.match(/\b(eu|us|uk|au|il)\s?plug\b/);
   if (plug) a.plug = plug[1];
-  const model = t.match(/\b([a-z]{1,4}-?\d{2,5}[a-z]{0,3})\b/g);
-  if (model) a.model = [...new Set(model.filter((m) => !/^(\d|mah|gb)/.test(m) && /\d/.test(m)))].sort();
+  const model = (t.match(/\b([a-z]{1,5}-?\d{2,5}[a-z]{0,3})\b/g) || []).filter((m) => !/^(\d|mah|gb|tb|pd|qc|usb|bt|iphone|galaxy)/.test(m) && !/^s\d/.test(m));
+  if (model.length) a.model = [...new Set(model)].sort();
   for (const [k, v] of Object.entries(props || {})) if (v) a[k.toLowerCase()] = String(v).toLowerCase();
   return a;
 }
@@ -82,20 +96,32 @@ export function similarity(a, b) {
  */
 export function classifyMatch(base, cand) {
   const ba = attributes(base.title, base.props), ca = attributes(cand.title, cand.props);
-  const reasons = [];
-  const conflict = [];
-  for (const k of ['capacity', 'plug', 'model', 'color', 'variant']) {
-    if (ba[k] && ca[k]) {
-      const same = JSON.stringify(ba[k]) === JSON.stringify(ca[k]);
-      if (same) reasons.push(`${k}:same`); else conflict.push(k);
-    }
-  }
   const sim = similarity(base.title, cand.title);
-  const sharedModel = ba.model && ca.model && ba.model.some((m) => ca.model.includes(m));
-  if (conflict.length) return { level: 'similar', reasons: conflict.map((k) => `${k}:different`), sim };
-  if (sharedModel && sim >= 0.6) return { level: 'exact', reasons: ['model:same', ...reasons], sim };
-  if (sim >= 0.55) return { level: 'likely', reasons: reasons.length ? reasons : ['title:similar'], sim };
-  return { level: 'similar', reasons: ['title:related'], sim };
+  const reasons = [];
+  const conflicts = [];
+  const label = (u) => (CAPACITY.has(u) ? 'capacity' : u === 'w' ? 'power' : u);
+  for (const u of new Set([...Object.keys(ba.specs), ...Object.keys(ca.specs)])) {
+    const x = ba.specs[u], y = ca.specs[u];
+    if (!x || !y) continue;
+    const multi = x.length > 1 || y.length > 1;
+    const ok = multi ? x.some((v) => y.includes(v)) : x.join() === y.join();
+    (ok ? reasons : conflicts).push(ok ? `${label(u)}:same` : label(u));
+  }
+  if (ba.plug && ca.plug && ba.plug !== ca.plug) conflicts.push('plug');
+  for (const k of ['color', 'variant']) if (ba[k] && ca[k] && ba[k] !== ca[k]) conflicts.push(k);
+  const sameBrand = !!(ba.brand && ca.brand && ba.brand === ca.brand);
+  const sharedModel = !!(ba.model && ca.model && ba.model.some((m) => ca.model.includes(m)));
+  if (sameBrand && ba.model && ca.model && !sharedModel) conflicts.push('model');
+  if (conflicts.length) return { level: 'similar', reasons: [...new Set(conflicts)].map((k) => `${k}:different`), sim };
+  if (sameBrand) reasons.unshift('brand:same');
+  if (sharedModel) reasons.unshift('model:same');
+  const multi = ba.multiVariant || ca.multiVariant;
+  if (sameBrand && sharedModel && sim >= 0.5 && !multi) return { level: 'exact', reasons, sim };
+  if ((sameBrand && sim >= 0.4) || (sharedModel && sim >= 0.4) || (!ba.brand && sim >= 0.6)) {
+    if (multi) reasons.push('variant:choose');
+    return { level: 'likely', reasons: reasons.length ? reasons : ['title:similar'], sim };
+  }
+  return { level: 'similar', reasons: [sameBrand ? 'title:related' : 'brand:different'], sim };
 }
 
 /**
