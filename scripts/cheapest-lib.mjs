@@ -68,6 +68,8 @@ export function normalizeProduct(p) {
     title: (p.product_title ?? p.title ?? '').trim(),
     image: p.product_main_image_url ?? p.image ?? '',
     price: num(p.target_sale_price ?? p.sale_price ?? p.price),
+    // App price (AliExpress often prices lower in the app). Kept separate; null when the API doesn't return it.
+    appPrice: num(p.target_app_sale_price ?? p.appPrice),
     originalPrice: num(p.target_original_price ?? p.original_price),
     currency: p.target_sale_price_currency ?? p.currency ?? 'ILS',
     rating: pct(p.evaluate_rate ?? p.rating),
