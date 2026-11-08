@@ -70,6 +70,11 @@ export function normalizeProduct(p) {
     price: num(p.target_sale_price ?? p.sale_price ?? p.price),
     // App price (AliExpress often prices lower in the app). Kept separate; null when the API doesn't return it.
     appPrice: num(p.target_app_sale_price ?? p.appPrice),
+    // USD price exactly as AliExpress shows it (coupon codes are defined in USD, so no FX rounding).
+    usd: (p.sale_price_currency ?? 'USD') === 'USD' ? num(p.sale_price ?? p.usd) : num(p.usd),
+    usdOriginal: num(p.original_price ?? p.usdOriginal),
+    shopId: p.shop_id ?? p.shopId ?? null,
+    skuId: p.sku_id ?? p.skuId ?? null,
     originalPrice: num(p.target_original_price ?? p.original_price),
     currency: p.target_sale_price_currency ?? p.currency ?? 'ILS',
     rating: pct(p.evaluate_rate ?? p.rating),

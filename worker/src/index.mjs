@@ -5,7 +5,7 @@
 import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduct, rankAlternatives } from '../../scripts/cheapest-lib.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
-const FIELDS = 'product_id,product_title,product_main_image_url,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link';
+const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link';
 const CACHE_TTL = 6 * 3600; // seconds
 const RATE = { windowMs: 60_000, max: 12 }; // per IP per minute (per isolate – a soft guard)
 const hits = new Map();
