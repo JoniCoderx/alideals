@@ -17,9 +17,9 @@ export function sign(params, secret) {
 export class AliExpressClient {
   constructor({ appKey, appSecret, trackingId, timeoutMs = 20000 }) {
     if (!appKey || !appSecret) throw new Error('Missing ALI_APP_KEY / ALI_APP_SECRET');
-    this.appKey = appKey;
-    this.appSecret = appSecret;
-    this.trackingId = trackingId;
+    this.appKey = String(appKey).trim();
+    this.appSecret = String(appSecret).trim(); // secrets pasted with a trailing space/newline break the HMAC signature
+    this.trackingId = trackingId ? String(trackingId).trim() : trackingId;
     this.timeoutMs = timeoutMs;
   }
 

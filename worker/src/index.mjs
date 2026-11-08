@@ -17,10 +17,10 @@ async function hmacHex(secret, msg) {
 }
 
 export async function aliCall(env, method, biz, fetchImpl = fetch) {
-  const params = { method, app_key: env.ALI_APP_KEY, sign_method: 'sha256', timestamp: String(Date.now()) };
+  const params = { method, app_key: String(env.ALI_APP_KEY).trim(), sign_method: 'sha256', timestamp: String(Date.now()) };
   for (const [k, v] of Object.entries(biz)) if (v !== undefined && v !== null && v !== '') params[k] = String(v);
   const base = Object.keys(params).sort().map((k) => k + params[k]).join('');
-  params.sign = await hmacHex(env.ALI_APP_SECRET, base);
+  params.sign = await hmacHex(String(env.ALI_APP_SECRET).trim(), base);
   const res = await fetchImpl(GATEWAY, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }, body: new URLSearchParams(params).toString() });
   const json = await res.json();
   if (json.error_response) throw new Error(`${method}: ${json.error_response.code} ${json.error_response.msg || ''}`);
