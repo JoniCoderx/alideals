@@ -9,6 +9,7 @@ import { mergeCoupons } from './lib.mjs';
 import { categories, categoryColors } from '../src/content/categories.mjs';
 import { fixtureProducts, fixtureCollections, hunterDemo } from '../src/v2/fixtures.mjs';
 import { classifyMatch, finalCost } from '../src/v2/logic.mjs';
+import { liveProducts } from './v2-live.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'dist', 'test');
@@ -18,7 +19,8 @@ const manual = await read('data/coupons.json', {});
 const gen = await read('data/generated.json', {});
 const today = process.env.BUILD_DATE || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
 const RATE = Number(gen.fx?.usdIls) || Number(site.fx?.usdIls) || 3.7;
-const API = site.cheapest?.apiUrl || '';
+// Preview uses the Worker directly (production config stays untouched).
+const API = process.env.V2_API || 'https://yeshdeal-api.joni0000.workers.dev';
 const AFF = site.affiliate.defaultLink; // production affiliate link, unchanged
 const { active } = mergeCoupons(manual.coupons || [], [], today);
 const codes = active.filter((c) => c.code && !c.sample).sort((a, b) => a.minOrder - b.minOrder);
@@ -29,7 +31,18 @@ const usd = (n) => `$${(Math.round(n * 100) / 100).toLocaleString('en-US')}`;
 const ils = (n) => `₪${Math.round(n * RATE).toLocaleString('he-IL')}`;
 const heDate = (d) => { const [y, m, dd] = d.split('-'); return `${Number(dd)}.${Number(m)}.${y}`; };
 const OUTLINK = 'rel="nofollow sponsored noopener"';
-const byId = Object.fromEntries(fixtureProducts.map((p) => [p.id, p]));
+// Live data from the official API at build time; any slot that fails keeps its labelled fixture.
+const LIVE = process.env.V2_OFFLINE ? { byFixtureId: {}, live: 0 } : await liveProducts(fixtureProducts);
+const merge = (f) => {
+  const l = LIVE.byFixtureId[f.id];
+  if (!l) return { ...f, live: false, priceIls: Math.round(f.price * RATE) };
+  return { ...f, id: l.id, title: l.title, image: l.image, link: l.link, price: Math.round((l.price / RATE) * 100) / 100, priceIls: l.price, originalIls: l.originalPrice, shipping: null, specs: {}, rating: l.rating, sold: l.sold, shop: l.shop, checkedAt: l.checkedAt, live: true };
+};
+const byId = Object.fromEntries(fixtureProducts.map((f) => [f.id, merge(f)]));
+const allProducts = Object.values(byId);
+const ALL_LIVE = allProducts.every((p) => p.live);
+const checkedHe = (p) => p.checkedAt ? new Intl.DateTimeFormat('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(p.checkedAt)) : '';
+const priceIls = (p) => `₪${(Math.round(p.priceIls * 100) / 100).toLocaleString('he-IL')}`;
 const catName = (slug) => categories.find((c) => c.slug === slug)?.name || (slug === 'electronics' ? 'אלקטרוניקה' : slug);
 const colors = (slug) => categoryColors[slug] || ['#ff7a2f', '#e5122f'];
 
@@ -54,13 +67,14 @@ function shell({ title, body, active: nav = '' }) {
 <footer class="ft"><div class="wrap">
   <p><b>יש דיל!</b> · קופונים, דילים ומוצרים שימושיים מעליאקספרס לישראל.</p>
   <p class="muted">גילוי נאות: חלק מהקישורים הם קישורי שותפים. אם קונים דרכם, אנחנו עשויים לקבל עמלה, בלי תוספת למחיר שלכם. האתר עצמאי ואינו קשור לעליאקספרס.</p>
-  <p class="muted">גרסת תצוגה מקדימה. מוצרים ומחירים המסומנים "נתוני תצוגה" הם להמחשה בלבד, עד חיבור ה-API הרשמי.</p>
+  <p class="muted">גרסת תצוגה מקדימה. מוצרים ומחירים מגיעים מה-API הרשמי של עליאקספרס עם זמן הבדיקה. פריטים המסומנים "נתוני תצוגה" הם להמחשה בלבד.</p>
 </div></footer>
 <script type="module" src="/test/v2.js?v=${Date.now().toString(36)}"></script>
 </body></html>`;
 }
 
 const thumb = (p, big = false) => {
+  if (p.image) return `<div class="thumb photo${big ? ' big' : ''}"><img src="${esc(p.image)}_${big ? 640 : 350}x${big ? 640 : 350}.jpg" alt="${esc(p.title)}" loading="${big ? 'eager' : 'lazy'}" decoding="async" width="${big ? 640 : 350}" height="${big ? 640 : 350}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${esc(p.image)}'"></div>`;
   const [a, b] = colors(p.cat);
   return `<div class="thumb${big ? ' big' : ''}" style="--a:${a};--b:${b}" role="img" aria-label="${esc(p.title)} – תמונה תתווסף מה-API"><span>${p.emoji}</span><small>התמונה האמיתית תגיע מה-API</small></div>`;
 };
@@ -71,8 +85,8 @@ function productCard(p, rank) {
   <div class="pc-body">
     <h3><a href="/test/p/${p.id}/">${esc(p.title)}</a></h3>
     <p class="why">${esc(p.why)}</p>
-    <div class="price"><b>${ils(p.price)}</b><span>${usd(p.price)}${p.shipping ? ` + משלוח ${usd(p.shipping)}` : ' · משלוח חינם'}</span></div>
-    <div class="pc-foot">${previewChip}<a class="btn btn-sm" href="/test/p/${p.id}/">לפרטים</a></div>
+    <div class="price"><b>${priceIls(p)}</b><span>${p.live ? `בערך ${usd(p.price)}${p.sold ? ` · ${p.sold.toLocaleString('he-IL')} נמכרו` : ''}` : `${usd(p.price)}${p.shipping ? ` + משלוח ${usd(p.shipping)}` : ' · משלוח חינם'}`}</span></div>
+    <div class="pc-foot">${p.live ? `<span class="chk" title="מחיר מה-API הרשמי של עליאקספרס">✓ נבדק ${checkedHe(p)}</span>` : previewChip}<a class="btn btn-sm" href="/test/p/${p.id}/">לפרטים</a></div>
   </div>
 </article>`;
 }
@@ -128,7 +142,7 @@ pages['index.html'] = shell({ active: 'home', title: 'יש דיל! 2.0', body: `
 </div></section>
 
 <section class="sec" id="deals"><div class="wrap">
-  <div class="sec-h"><h2>🔥 דילים שבחרנו</h2>${previewChip}</div>
+  <div class="sec-h"><h2>🔥 דילים שבחרנו</h2>${ALL_LIVE ? '<span class="chk">מחירים חיים מה-API הרשמי</span>' : previewChip}</div>
   <div class="grid">${['fx-powerbank', 'fx-earbuds', 'fx-dashcam', 'fx-tire-inflator'].map((id) => productCard(byId[id])).join('')}</div>
 </div></section>
 
@@ -164,6 +178,7 @@ pages['hunter/index.html'] = shell({ active: 'hunter', title: 'צייד הדיל
   <p class="muted small">מקבלים רק קישורים לעליאקספרס. קישורים מקוצרים מהאפליקציה עובדים.</p>
   <div id="h-state" class="h-state" aria-live="polite"></div>
 </div></section>
+<section class="sec"><div class="wrap narrow"><div id="h-results" aria-live="polite"></div></div></section>
 <section class="sec"><div class="wrap narrow">
   <h2>איך זה עובד</h2>
   <ol class="steps">
@@ -173,7 +188,7 @@ pages['hunter/index.html'] = shell({ active: 'hunter', title: 'צייד הדיל
     <li><b>מחשבים מחיר סופי משוער</b>: מוצר + משלוח − קוד קופון מתאים. מסים לא נכללים אלא אם חושבו.</li>
   </ol>
   <p><a class="btn" href="/test/hunter/result/">לראות הדגמה של עמוד תוצאות ←</a></p>
-  <div class="note">${API ? '✅ מחובר ל-API.' : '⏳ ה-API הרשמי עוד לא מחובר: חיפוש אמיתי יופעל אחרי הגדרת המפתחות. בינתיים זמינה הדגמה מסומנת.'}</div>
+  <div class="note">✅ מחובר ל-API הרשמי של עליאקספרס. החיפוש רץ בזמן אמת.</div>
 </div></section>`.replace('<form class="hunt big"', `<form class="hunt big" data-api="${esc(API)}"`) });
 
 // demo results – classified by the real matching engine
@@ -203,24 +218,24 @@ pages['hunter/index.html'] = shell({ active: 'hunter', title: 'צייד הדיל
 </div></section>` });
 }
 
-for (const p of fixtureProducts) {
+for (const p of allProducts) {
   const cost = finalCost(p, tiers);
-  const coll = fixtureCollections.find((c) => c.items.includes(p.id));
-  const related = fixtureProducts.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 4);
+  const coll = fixtureCollections.find((c) => c.items.some((fid) => byId[fid].id === p.id));
+  const related = allProducts.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 4);
   pages[`p/${p.id}/index.html`] = shell({ title: p.title, body: `
 <section class="sec"><div class="wrap">
   <nav class="crumb"><a href="/test/">ראשי</a> ‹ <a href="/test/c/${p.cat}/">${esc(catName(p.cat))}</a></nav>
   <div class="pp">
     ${thumb(p, true)}
     <div class="pp-info">
-      ${previewChip}
+      ${p.live ? '' : previewChip}
       <h1>${esc(p.title)}</h1>
       <p class="lead">${esc(p.why)}</p>
-      <div class="pp-price"><b>${ils(p.price)}</b><span>${usd(p.price)} · משלוח לישראל: ${p.shipping ? usd(p.shipping) : 'חינם'}</span></div>
+      <div class="pp-price"><b>${priceIls(p)}</b><span>${p.live ? `בערך ${usd(p.price)}${p.originalIls && p.originalIls > p.priceIls ? ` · מחיר לפני הנחה בעליאקספרס: ₪${p.originalIls}` : ''} · משלוח לישראל: מוצג בעליאקספרס` : `${usd(p.price)} · משלוח לישראל: ${p.shipping ? usd(p.shipping) : 'חינם'}`}</span></div>
       ${cost.code ? `<div class="pp-coupon">🎟️ עם קוד <b>${esc(cost.code)}</b>: ${usd(cost.total)} סה״כ משוער <button class="copy" data-code="${esc(cost.code)}">העתק</button></div>` : `<div class="pp-coupon muted">אין קוד שמתאים לסכום הזה לבד. בעגלה גדולה יותר יש קודים.</div>`}
-      <p class="muted small">מחיר נבדק: ${heDate(today)} (נתוני תצוגה) · המחיר הסופי נקבע בעליאקספרס</p>
-      <span class="btn btn-big btn-dis" title="בתצוגה אין קישור למוצר אמיתי">לרכישה בעליאקספרס (יופעל עם ה-API)</span>
-      <table class="specs">${Object.entries(p.specs).map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table>
+      <p class="muted small">${p.live ? `מחיר נבדק מול ה-API הרשמי: ${checkedHe(p)} · המחיר הסופי, המשלוח והמע״מ נקבעים בקופה של עליאקספרס` : `מחיר נבדק: ${heDate(today)} (נתוני תצוגה) · המחיר הסופי נקבע בעליאקספרס`}</p>
+      ${p.live ? `<a class="btn btn-big" href="${esc(p.link)}" ${OUTLINK}>לרכישה בעליאקספרס ←</a>` : `<span class="btn btn-big btn-dis" title="בתצוגה אין קישור למוצר אמיתי">לרכישה בעליאקספרס (יופעל עם ה-API)</span>`}
+      <table class="specs">${(p.live ? [['חנות', p.shop], ['דירוג חיובי', p.rating != null ? `${p.rating}%` : ''], ['נמכרו', p.sold ? p.sold.toLocaleString('he-IL') : '']] : Object.entries(p.specs)).filter(([, v]) => v).map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table>
     </div>
   </div>
   ${coll ? `<p class="in-coll">מופיע באוסף: <a href="/test/top/${coll.slug}/">${esc(coll.title)}</a></p>` : ''}
@@ -231,7 +246,7 @@ for (const p of fixtureProducts) {
 for (const c of fixtureCollections) {
   pages[`top/${c.slug}/index.html`] = shell({ active: 'top', title: c.title, body: `
 <section class="hero coll" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><div class="wrap narrow">
-  <span class="tag-w">⭐ Top 10 · ${previewChip}</span>
+  <span class="tag-w">⭐ Top 10${ALL_LIVE ? '' : ` · ${previewChip}`}</span>
   <h1>${esc(c.title)}</h1><p class="lead">${esc(c.intro)}</p>
   <p class="small">עודכן: ${heDate(today)}</p>
 </div></section>
@@ -242,13 +257,13 @@ for (const c of fixtureCollections) {
 }
 
 for (const cat of categories.filter((x) => ['car'].includes(x.slug))) {
-  const items = fixtureProducts.filter((p) => p.cat === cat.slug);
+  const items = allProducts.filter((p) => p.cat === cat.slug);
   pages[`c/${cat.slug}/index.html`] = shell({ active: 'cat', title: cat.name, body: `
 <section class="hero coll" style="--a:${colors(cat.slug)[0]};--b:${colors(cat.slug)[1]}"><div class="wrap">
   <h1>${cat.emoji} ${esc(cat.name)}</h1><p class="lead">${esc(cat.intro.split('. ')[0])}.</p>
 </div></section>
 <section class="sec"><div class="wrap">
-  <div class="sec-h"><h2>מוצרים</h2>${previewChip}</div>
+  <div class="sec-h"><h2>מוצרים</h2>${ALL_LIVE ? '' : previewChip}</div>
   <div class="filters"><button class="on">הכול</button><button>עד ₪50</button><button>₪50–₪150</button></div>
   <div class="grid">${items.map((p) => productCard(p)).join('')}</div>
   <h2>טיפים לקנייה</h2><ul class="tips">${cat.tips.map(([t, d]) => `<li><b>${esc(t)}.</b> ${esc(d)}</li>`).join('')}</ul>
@@ -264,4 +279,4 @@ for (const [rel, html] of Object.entries(pages)) {
 await fs.copyFile(path.join(ROOT, 'src/v2/v2.css'), path.join(OUT, 'v2.css'));
 await fs.copyFile(path.join(ROOT, 'src/v2/v2.js'), path.join(OUT, 'v2.js'));
 await fs.copyFile(path.join(ROOT, 'src/v2/logic.mjs'), path.join(OUT, 'logic.mjs'));
-console.log(`✓ /test/ preview: ${Object.keys(pages).length} pages (noindex), ${tiers.length} live coupon tiers, API ${API ? 'on' : 'off'}`);
+console.log(`✓ /test/ preview: ${Object.keys(pages).length} pages (noindex), ${tiers.length} coupon tiers, live products ${LIVE.live}/${fixtureProducts.length}`);

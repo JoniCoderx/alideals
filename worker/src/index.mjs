@@ -85,7 +85,9 @@ export async function findCheapest(env, input, fetchImpl = fetch) {
     const gen = await aliCall(env, 'aliexpress.affiliate.link.generate', { promotion_link_type: 0, source_values: `https://www.aliexpress.com/item/${id}.html`, tracking_id: env.ALI_TRACKING_ID }, fetchImpl).catch(() => null);
     original.link = gen?.promotion_links?.promotion_link?.[0]?.promotion_link || '';
   }
-  return { status: 200, body: { original, alternatives: cheaper, checked: candidates.length, at: new Date().toISOString() } };
+  // v2: a wider pool (related listings, any price) so the client can classify exact / likely / similar honestly.
+  const pool = rankAlternatives(original, candidates.filter((c) => c.id !== original.id), { minSimilarity: 0.3, minRating: 0, minSold: 0, limit: 12 });
+  return { status: 200, body: { original, alternatives: cheaper, pool, checked: candidates.length, at: new Date().toISOString() } };
 }
 
 function cors(env, req) {

@@ -1,5 +1,5 @@
 // YeshDeal 2.0 preview – tiny client (no framework). Uses the same tested logic as the build.
-import { parseAmount, toUSD, pickCoupon, parseProductInput } from './logic.mjs';
+import { parseAmount, toUSD, pickCoupon, parseProductInput, classifyMatch } from './logic.mjs';
 
 const $ = (s, r = document) => r.querySelector(s);
 const AFF = document.body.dataset.aff || '';
@@ -75,11 +75,15 @@ if (form && state) {
       state.innerHTML = `הקישור תקין${r.id ? ` (מוצר <span dir="ltr">${esc(r.id)}</span>)` : ' (קישור מקוצר)'}. החיפוש החי יופעל כשה-API הרשמי יחובר. <a href="/test/hunter/result/">לראות הדגמה ←</a>`;
       return;
     }
-    state.className = 'h-state info'; state.textContent = '🎯 הצייד סורק…';
+    state.className = 'h-state info'; state.textContent = '🎯 הצייד סורק את המוכרים…';
+    const box = document.getElementById('h-results');
+    if (box) box.innerHTML = '';
     try {
       const res = await fetch(`${api}/api/cheapest?url=${encodeURIComponent(r.url)}`);
       const j = await res.json();
-      state.textContent = res.ok ? `נמצאו ${j.alternatives?.length || 0} הצעות.` : (j.message || 'החיפוש נכשל. נסו שוב.');
+      if (!res.ok) { state.className = 'h-state err'; state.textContent = j.message || 'החיפוש נכשל. נסו שוב.'; return; }
+      state.textContent = '';
+      renderResults(j, box);
     } catch { state.className = 'h-state err'; state.textContent = 'החיפוש נכשל. נסו שוב בעוד רגע.'; }
   };
   form.addEventListener('submit', (e) => { e.preventDefault(); history.replaceState(null, '', `?url=${encodeURIComponent(inp.value)}`); handle(); });
@@ -96,3 +100,24 @@ document.querySelectorAll('.filters').forEach((f) => f.addEventListener('click',
     c.hidden = !(n >= lo && n <= hi);
   });
 }));
+
+/* live Deal Hunter results: classify the pool honestly, show savings only for exact/likely matches */
+function renderResults(j, box) {
+  if (!box) return;
+  const o = j.original || {};
+  const ils = (n) => '₪' + (Math.round(n * 100) / 100).toLocaleString('he-IL');
+  const when = new Date(j.at || Date.now()).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const pool = (j.pool || j.alternatives || []).map((c) => ({ ...c, m: classifyMatch({ title: o.title }, { title: c.title }) }));
+  const groups = [['exact', '✅ התאמה מדויקת', 'אותו דגם, בלי סתירה במאפיינים'], ['likely', '🟡 כנראה אותו מוצר – כדאי לבדוק', 'דומה מאוד. בדקו גרסה, צבע ומפרט לפני שקונים'], ['similar', '🔁 חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
+  const img = (u) => (u ? `<img src="${esc(u)}_220x220.jpg" alt="" loading="lazy" width="110" height="110" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${esc(u)}'">` : '');
+  const card = (c) => {
+    const save = o.price != null && c.m.level !== 'similar' ? Math.round((o.price - c.price) * 100) / 100 : null;
+    return `<article class="offer lvl-${c.m.level}"><div class="o-img">${img(c.image)}</div><div class="o-main"><b>${esc(c.title)}</b><span class="muted small">${esc(c.shop || '')}${c.rating != null ? ` · ${c.rating}% חיובי` : ''}${c.sold ? ` · ${c.sold.toLocaleString('he-IL')} נמכרו` : ''}</span></div>
+<div class="o-act"><b class="o-price">${ils(c.price)}</b>${save > 0 ? `<span class="save">זול ב-${ils(save)}</span>` : ''}<a class="btn btn-sm" href="${esc(c.link)}" rel="nofollow sponsored noopener">לעליאקספרס ←</a></div></article>`;
+  };
+  let h = `<div class="searched live"><div class="o-img">${img(o.image)}</div><div><span class="muted small">המוצר שחיפשתם</span><h2>${esc(o.title || '')}</h2><p><b>${o.price != null ? ils(o.price) : ''}</b> · משלוח ומע״מ מוצגים בקופה · <a href="${esc(o.link || '')}" rel="nofollow sponsored noopener">לעמוד המוצר ←</a></p><p class="muted small">נבדק מול ה-API הרשמי: ${when}</p></div></div>`;
+  const any = groups.map(([lvl, t, sub]) => { const l = pool.filter((c) => c.m.level === lvl).sort((a, b) => a.price - b.price); return l.length ? `<h3 class="grp">${t}</h3><p class="muted small">${sub}</p>${l.map(card).join('')}` : ''; }).join('');
+  h += any || '<div class="note">לא מצאנו הצעה אחרת לאותו מוצר. כנראה שהמחיר שבחרתם כבר טוב 👌 אפשר להוסיף עליו <a href="/test/#coupons">קוד קופון לפי סכום העגלה</a>.</div>';
+  h += '<div class="note small">ההשוואה מבוססת על שם המוצר ומאפיינים כמו דגם, קיבולת וסוג תקע. מחירים בשקלים לפני משלוח ומע״מ, ועשויים להשתנות עד הקנייה.</div>';
+  box.innerHTML = h;
+}
