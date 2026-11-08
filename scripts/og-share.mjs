@@ -5,7 +5,6 @@ const b = async (f) => (await fs.readFile(f)).toString('base64');
 const he = await b('src/assets/fonts/rubik-hebrew.woff2'), la = await b('src/assets/fonts/rubik-latin.woff2');
 const logo = `<svg viewBox="0 0 64 64" width="70" height="70"><defs><linearGradient id="g" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#ff7a2f"/><stop offset="1" stop-color="#e5122f"/></linearGradient></defs><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="url(#g)"/><path d="M22 39 42 19" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="#fff"/><circle cx="41" cy="37" r="5" fill="#fff"/></svg>`;
 const img = async (f) => `data:image/png;base64,${await b('src/assets/share/' + f)}`;
-const pb = await img('powerbank.png'), gr = await img('grinder.png');
 const bubble = `<svg viewBox="0 0 64 64" width="96" height="96"><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="#fff"/><path d="M22 39 42 19" stroke="#e5122f" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="#e5122f"/><circle cx="41" cy="37" r="5" fill="#e5122f"/></svg>`;
 const html = `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><style>
 @font-face{font-family:R;src:url(data:font/woff2;base64,${he}) format('woff2');font-weight:400 800;unicode-range:U+0590-05FF}
@@ -19,13 +18,22 @@ h1 span{color:#ffe0a6}
 .pill{position:absolute;right:64px;bottom:52px;display:flex;gap:12px}
 .pill b{background:#fff;color:#d40f2c;font-size:25px;font-weight:800;padding:11px 22px;border-radius:999px;box-shadow:0 10px 24px rgba(80,0,10,.25)}
 .pill i{font-style:normal;border:2px solid rgba(255,255,255,.7);font-size:25px;font-weight:700;padding:9px 22px;border-radius:999px}
-.stage{position:absolute;left:40px;top:60px;width:470px;height:510px}
-.glow{position:absolute;left:30px;top:40px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.28)}
-.p{position:absolute;filter:drop-shadow(0 26px 30px rgba(60,0,10,.45))}
-.p1{left:10px;top:80px;height:390px;transform:rotate(-6deg)}
-.p2{left:265px;top:30px;height:470px}
+.stage{position:absolute;left:30px;top:40px;width:520px;height:550px}
+.glow{position:absolute;left:40px;top:40px;width:440px;height:440px;border-radius:50%;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.28)}
+.glow2{position:absolute;left:0;top:0;width:520px;height:520px;border-radius:50%;border:2px dashed rgba(255,255,255,.22)}
+.t{position:absolute;width:380px;height:150px;background:#fff;border-radius:22px;display:flex;color:#17161c;box-shadow:0 26px 40px rgba(60,0,10,.35);overflow:hidden}
+.t .l{width:130px;background:linear-gradient(150deg,#ff7a2f,#e5122f);color:#fff;display:grid;place-items:center;font-size:62px;font-weight:800;position:relative}
+.t .l:after{content:"";position:absolute;left:-1px;top:10px;bottom:10px;border-left:4px dotted #fff}
+.t .r{flex:1;padding:24px 26px;display:flex;flex-direction:column;justify-content:center}
+.t h4{font-size:30px;font-weight:800}.t p{font-size:20px;color:#5e5a66;margin-top:4px}
+.t code{margin-top:10px;align-self:flex-start;font:800 22px R;letter-spacing:3px;border:2px dashed #e5122f;color:#e5122f;padding:3px 14px;border-radius:10px}
+.t1{left:90px;top:40px;transform:rotate(-7deg)}.t2{left:40px;top:210px;transform:rotate(3deg);z-index:2}.t3{left:110px;top:380px;transform:rotate(-3deg)}
 </style></head><body>
-<div class="stage"><div class="glow"></div><img class="p p1" src="${pb}"><img class="p p2" src="${gr}"></div>
+<div class="stage"><div class="glow2"></div><div class="glow"></div>
+<div class="t t1"><div class="l">%</div><div class="r"><h4>קוד קופון</h4><p>לפי סכום ההזמנה</p></div></div>
+<div class="t t2"><div class="l">$</div><div class="r"><h4>הנחה בקופה</h4><p>מדביקים את הקוד ומשלמים פחות</p></div></div>
+<div class="t t3"><div class="l">₪</div><div class="r"><h4>כמה יוצא בסוף</h4><p>מחשבון הנחה בשקלים</p></div></div>
+</div>
 <div class="brand">${bubble}<span>יש דיל!</span></div>
 <h1>לפני שקונים,<br>בודקים אם <span>יש דיל!</span></h1>
 <div class="sub">קופונים, מחשבון הנחה ודילים נבחרים מעליאקספרס. בעברית ובחינם.</div>
