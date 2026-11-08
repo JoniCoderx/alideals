@@ -10,6 +10,7 @@ import { categories, categoryColors } from '../src/content/categories.mjs';
 import { fixtureProducts, fixtureCollections, hunterDemo } from '../src/v2/fixtures.mjs';
 import { classifyMatch, finalCost } from '../src/v2/logic.mjs';
 import { liveProducts } from './v2-live.mjs';
+import { top200Collections } from './v2-top200.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'dist', 'test');
@@ -41,6 +42,14 @@ const merge = (f) => {
 const byId = Object.fromEntries(fixtureProducts.map((f) => [f.id, merge(f)]));
 const allProducts = Object.values(byId);
 const ALL_LIVE = allProducts.every((p) => p.live);
+// Top 10 lists from the AliExpress "Top 200 among publishers" CSV, enriched live from the API.
+const T200_CAT = { charging: 'phones', audio: 'headphones', home: 'home', gaming: 'gaming', 'outdoor-car': 'sports' };
+const T200 = process.env.V2_OFFLINE ? [] : await top200Collections(path.join(ROOT, 'data/v2/top200-publishers.csv')).catch(() => []);
+for (const c of T200) {
+  c.cat = T200_CAT[c.slug];
+  c.items = c.items.map((l) => ({ id: l.id, cat: c.cat, emoji: c.emoji, why: '', title: l.title, image: l.image, link: l.link, price: Math.round((l.price / RATE) * 100) / 100, priceIls: l.price, originalIls: l.originalPrice, shipping: null, specs: {}, rating: l.rating, sold: l.sold, shop: l.shop, checkedAt: l.checkedAt, live: true }));
+  for (const it of c.items) if (!allProducts.some((x) => x.id === it.id)) allProducts.push(it);
+}
 const checkedHe = (p) => p.checkedAt ? new Intl.DateTimeFormat('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(p.checkedAt)) : '';
 const priceIls = (p) => `₪${(Math.round(p.priceIls * 100) / 100).toLocaleString('he-IL')}`;
 const catName = (slug) => categories.find((c) => c.slug === slug)?.name || (slug === 'electronics' ? 'אלקטרוניקה' : slug);
@@ -149,8 +158,7 @@ pages['index.html'] = shell({ active: 'home', title: 'יש דיל! 2.0', body: `
 <section class="sec"><div class="wrap">
   <div class="sec-h"><h2>⭐ אוספי Top 10</h2></div>
   <div class="cols">${fixtureCollections.map((c) => `<a class="col" href="/test/top/${c.slug}/" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><span>${c.emoji}</span><b>${esc(c.title)}</b><i>לאוסף ←</i></a>`).join('')}
-  <div class="col soon"><span>🏠</span><b>10 מוצרים שימושיים לבית</b><i>בקרוב</i></div>
-  <div class="col soon"><span>✈️</span><b>10 גאדג׳טים לטיול</b><i>בקרוב</i></div></div>
+  ${T200.map((c) => `<a class="col" href="/test/top/${c.slug}/" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><span>${c.emoji}</span><b>${esc(c.title)}</b><i>לאוסף ←</i></a>`).join('')}</div>
 </div></section>
 
 <section class="sec"><div class="wrap">
@@ -253,6 +261,19 @@ for (const c of fixtureCollections) {
 <section class="sec"><div class="wrap">
   <div class="list10">${c.items.map((id, i) => productCard(byId[id], i + 1)).join('')}</div>
   <div class="note"><b>איך בחרנו:</b> ${esc(c.method)}</div>
+</div></section>` });
+}
+
+for (const c of T200) {
+  pages[`top/${c.slug}/index.html`] = shell({ active: 'top', title: c.title, body: `
+<section class="hero coll" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><div class="wrap narrow">
+  <span class="tag-w">⭐ Top 10</span>
+  <h1>${esc(c.title)}</h1><p class="lead">${esc(c.intro)}</p>
+  <p class="small">מחירים נבדקו מול ה-API הרשמי של עליאקספרס: ${heDate(today)}</p>
+</div></section>
+<section class="sec"><div class="wrap">
+  <div class="list10">${c.items.map((p, i) => productCard(p, i + 1)).join('')}</div>
+  <div class="note"><b>איך בחרנו:</b> המוצרים לקוחים מרשימת 200 המוצרים המובילים אצל מפרסמי עליאקספרס (מסמך של עליאקספרס לשותפים). השארנו רק מוצרים שנשלחים לישראל ושהדירוג החיובי שלהם 85% ומעלה (כשהנתון קיים), וסידרנו לפי כמות המכירות שעליאקספרס מדווחת. הובלה ברשימה הזו לא מעידה בהכרח על איכות. כדאי לקרוא ביקורות לפני קנייה.</div>
 </div></section>` });
 }
 
