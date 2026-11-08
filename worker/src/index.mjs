@@ -143,6 +143,17 @@ export default {
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (url.pathname === '/health') return json({ ok: true, configured: !!(env.ALI_APP_KEY && env.ALI_APP_SECRET) }, 200, h);
+    // Keyword search (Hebrew/English) – used by the 2.0 preview and for diagnostics. Short, cached, rate-limited by Cloudflare.
+    if (url.pathname === '/api/search' && req.method === 'GET') {
+      if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured' }, 503, h);
+      const q = (url.searchParams.get('q') || '').trim().slice(0, 80);
+      if (q.length < 2) return json({ error: 'bad_query' }, 400, h);
+      try {
+        const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: 'HE', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: 20, page_no: 1 });
+        const items = (r?.products?.product || []).map(normalizeProduct);
+        return json({ q, count: items.length, items, checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
+      } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
+    }
     if (url.pathname !== '/api/cheapest' || req.method !== 'GET') return json({ error: 'not_found' }, 404, h);
     if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured', message: 'השירות עוד לא הופעל.' }, 503, h);
 
