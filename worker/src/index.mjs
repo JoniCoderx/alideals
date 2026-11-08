@@ -59,7 +59,10 @@ export async function findCheapest(env, input, fetchImpl = fetch) {
   const original = normalizeProduct(raw);
 
   // English title gives far better keyword search than the machine-translated Hebrew one.
-  const en = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { ...common, target_language: 'EN', product_ids: id, country: 'IL' }, fetchImpl).catch(() => null);
+  // The API allows ~1 call/second per app ("ApiCallLimit ... ban 1 second"): retry once after a short pause.
+  const enCall = () => aliCall(env, 'aliexpress.affiliate.productdetail.get', { ...common, target_language: 'EN', product_ids: id, country: 'IL' }, fetchImpl).catch(() => null);
+  let en = await enCall();
+  if (!en?.products?.product?.[0]?.product_title) { await new Promise((r) => setTimeout(r, 1100)); en = await enCall(); }
   const enTitle = en?.products?.product?.[0]?.product_title || original.title;
 
   // AliExpress answers "405 The result is empty" for zero hits – that is a valid "no matches", not an outage.
@@ -202,7 +205,7 @@ export default {
 
     // Cache by product id (or by the raw input for short links).
     const parsed = parseProductInput(input);
-    const cacheKey = new Request(`https://cache.yeshdeal/cheapest/v3/${parsed.id || encodeURIComponent(parsed.shortUrl || input)}`);
+    const cacheKey = new Request(`https://cache.yeshdeal/cheapest/v4/${parsed.id || encodeURIComponent(parsed.shortUrl || input)}`);
     const cache = typeof caches !== 'undefined' ? caches.default : null;
     if (cache) { const hit = await cache.match(cacheKey); if (hit) { const r = new Response(hit.body, hit); for (const [k, v] of Object.entries(h)) r.headers.set(k, v); return r; } }
 

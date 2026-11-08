@@ -1,68 +1,78 @@
 {
- "at": "2026-11-08T22:38:43.103Z",
+ "at": "2026-11-08T23:50:41.631Z",
  "api": "https://yeshdeal-api.joni0000.workers.dev",
  "cases": [
   {
    "label": "popular, many sellers",
    "url": "https://he.aliexpress.com/item/1005009418411818.html",
    "status": 200,
-   "ms": 2996,
+   "ms": 5584,
    "error": null,
    "message": null,
    "original": {
     "id": "1005009418411818",
     "title": "מטען נייד Vention CCC 45W, קיבולת 20000mAh, טעינה מהירה, מתאים לאייפון 18 פרו מקס ולסמארטפונים של סמסונג גלקסי, סוללת גיבוי 3C.",
+    "enTitle": "Vention CCC 45W 20000mAh Power Bank Fast Charging Portable Charger for iPhone 18 Pro Max Samsung Galaxy Battery 3C Powerbank",
     "price": 120.02,
     "usd": 36.6,
     "affiliate": true
    },
    "checked": 3,
    "counts": {
-    "similar": 3
+    "likely": 3
    },
    "pool": [
     {
      "id": "1005013332052020",
      "title": "סוללת גיבוי ניידת Vention בעלת הסמכת CCC, קיבולת 20,000mAh, הספק 45W, טעינה מהירה, כוללת כבל מובנה, מתאימה לאייפון 18 פרו ולסמסונג S26 אולטרה.",
+     "enTitle": "Vention CCC Certified 20000mAh 45W Power Bank Fast Charging Portable Charger Built-in Cable for iPhone 18 Pro Samsung S26 Ultra",
      "price": 124.39,
      "usd": null,
      "rating": null,
      "sold": 7,
      "shop": "Vention Trend Store",
-     "similarity": 0.49,
-     "level": "similar",
+     "similarity": 0.74,
+     "level": "likely",
      "reasons": [
-      "capacity:different"
+      "brand:same",
+      "power:same",
+      "capacity:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013062397344",
      "title": "סוללת גיבוי ניידת Vention עם הסמכת CCC, הספק 45W, קיבולת 20000mAh, טעינה מהירה באמצעות חיבור Type C ו-PD, טעינה של 3 מכשירים, כולל מחשב.",
+     "enTitle": "Vention CCC Certification Powerbank 45W 20000mAh Power Bank Type C PD Fast Charging Portable Charger Battery Charge 3 Devices PC",
      "price": 142.69,
      "usd": null,
      "rating": 97.1,
      "sold": 91,
      "shop": "Vention Trend Store",
-     "similarity": 0.48,
-     "level": "similar",
+     "similarity": 0.65,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same",
+      "capacity:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013361631242",
      "title": "סוללת גיבוי ניידת Vention עם הסמכת CCC, הספק 45W, קיבולת 20000mAh, חיבור Type C, טעינה מהירה PD, טעינה של 3 מכשירים, כולל מחשב.",
+     "enTitle": "Vention CCC Certification Powerbank 45W 20000mAh Power Bank Type C PD Fast Charging Portable Charger Battery Charge 3 Devices PC",
      "price": 163.69,
      "usd": null,
      "rating": null,
      "sold": 0,
      "shop": "GadgetWave Store",
-     "similarity": 0.49,
-     "level": "similar",
+     "similarity": 0.65,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same",
+      "capacity:same"
      ],
      "affiliate": true
     }
@@ -72,64 +82,83 @@
    "label": "popular, branded",
    "url": "https://www.aliexpress.com/item/1005010724501614.html",
    "status": 200,
-   "ms": 2519,
+   "ms": 2292,
    "error": null,
    "message": null,
    "original": {
     "id": "1005010724501614",
     "title": "סוללת גיבוי Baseus 45W, קיבולת 10000mAh, כוללת כבל USB-C, בגודל קומפקטי, טעינה מהירה, ניידת, מתאימה לאייפון 18, 17 ולסמסונג S26.",
+    "enTitle": "סוללת גיבוי Baseus 45W, קיבולת 10000mAh, כוללת כבל USB-C, בגודל קומפקטי, טעינה מהירה, ניידת, מתאימה לאייפון 18, 17 ולסמסונג S26.",
     "price": 135.69,
     "usd": 41.39,
     "affiliate": true
    },
-   "checked": 3,
+   "checked": 8,
    "counts": {
-    "similar": 3
+    "similar": 4
    },
    "pool": [
     {
-     "id": "1005012886384404",
-     "title": "סוללת גיבוי Baseus Ultra Mini 20000mAh עם כבל Type-C מובנה, טעינה מהירה 45W PD3.0, סוללה חיצונית קומפקטית, מטען נייד",
-     "price": 196.39,
-     "usd": null,
-     "rating": 100,
-     "sold": 20,
-     "shop": "TechVision Hub Store",
-     "similarity": 0.36,
+     "id": "1005009644345193",
+     "title": "בסיסוס 45W 20000mAh סוללת גיבוי 10000mAh מובנית כבל USB-C & Lightning עבור iPhone 17 16 15 Samsung S25 Xiaomi Poco",
+     "enTitle": "Baseus 45W 20000mAh Power Bank 10000mAh Built-In Retractable USB-C & Lightning Cable for iPhone 17 16 15 Samsung S25 Xiaomi Poco",
+     "price": 92.39,
+     "usd": 28.18,
+     "rating": 94.1,
+     "sold": 2501,
+     "shop": "BASEUS Official Store",
+     "similarity": 0.26,
      "level": "similar",
      "reasons": [
-      "capacity:different"
+      "title:related"
      ],
      "affiliate": true
     },
     {
-     "id": "1005012383237978",
-     "title": "סוללת גיבוי Baseus AR11 10,000mAh 45W טעינה מהירה ניידת בעלת תקן 3C, קיבולת גבוהה, מאושרת לטיסה, לאייפון ולשיאומי",
-     "price": 228.99,
-     "usd": null,
-     "rating": null,
-     "sold": 8,
-     "shop": "Star River 3c Store",
-     "similarity": 0.46,
+     "id": "1005009911935835",
+     "title": "בסיסוס 10000mAh 45W סוללת גיבוי עבור Qi2.2 25W MagSafe טעינה אלחוטית מגנטית מובנית כבל USB-C עבור iPhone 17 Samsung S25",
+     "enTitle": "Baseus 10000mAh 45W Power Bank For Qi2.2 25W MagSafe Magnetic Wireless Charging Built-In USB-C Cable For iPhone 17 Samsung S25",
+     "price": 170.39,
+     "usd": 51.97,
+     "rating": 89.9,
+     "sold": 210,
+     "shop": "BASEUS Official Store",
+     "similarity": 0.26,
      "level": "similar",
      "reasons": [
-      "capacity:different",
-      "model:different"
+      "title:related"
      ],
      "affiliate": true
     },
     {
-     "id": "1005012738058334",
-     "title": "סוללת גיבוי Baseus Ultra Mini 20000mAh עם כבל Type-C מובנה, טעינה מהירה 45W PD3.0, סוללה חיצונית קומפקטית לטעינה בנסיעות",
-     "price": 263.9,
-     "usd": null,
-     "rating": 100,
-     "sold": 10,
-     "shop": "Starshuo Digital Store",
-     "similarity": 0.36,
+     "id": "1005013028541203",
+     "title": "סוללת גיבוי Baseus 45W, קיבולת 10000mAh, כוללת כבל USB-C מובנה ומתקפל, כבל נפרד, קיבולת 20000mAh, מתאים לאייפון 18, דגם Duo Pro Max, S26.",
+     "enTitle": "Baseus 45W Power Bank 10000mAh Built-in Retractable USB-C Cable Detachable Cable Charger 20000mAh For iPhone 18 Duo Pro Max S26",
+     "price": 176.39,
+     "usd": 53.79,
+     "rating": 97.1,
+     "sold": 192,
+     "shop": "BASEUS Official Store",
+     "similarity": 0.32,
      "level": "similar",
      "reasons": [
-      "capacity:different"
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005011546364090",
+     "title": "סוללת גיבוי Baseus Qi2.2 25W 10000mAh עם טעינה אלחוטית מגנטית PD 45W USB-C לאייפון 17 16 פרו מקס סמסונג S25",
+     "enTitle": "Baseus Qi2.2 25W Power Bank 10000mAh Magnetic Wireless Charging PD 45W USB-C Power Bank For iPhone 17 16 Pro Max Samsung S25",
+     "price": 180.39,
+     "usd": 55.02,
+     "rating": 95.5,
+     "sold": 1955,
+     "shop": "BASEUS Official Store",
+     "similarity": 0.26,
+     "level": "similar",
+     "reasons": [
+      "title:related"
      ],
      "affiliate": true
     }
@@ -139,145 +168,162 @@
    "label": "cheap cable, many clones",
    "url": "https://he.aliexpress.com/item/1005009738330168.html",
    "status": 200,
-   "ms": 1909,
+   "ms": 2311,
    "error": null,
    "message": null,
    "original": {
     "id": "1005009738330168",
     "title": "כבל Toocki 100W מסוג C, נשלף, לאייפון 16, 15 פרו מקס, לסמסונג, כבל טעינה מהירה, מיני, 480Mbps, כבל נתונים.",
+    "enTitle": "Toocki 100W Type C Retractable Cable For iphone 16 15 Pro Max Samsung Fast Chaerger Cable Mini Size 480Mdps Data Cable",
     "price": 19.19,
     "usd": null,
     "affiliate": true
    },
    "checked": 13,
    "counts": {
-    "similar": 7,
-    "likely": 5
+    "likely": 12
    },
    "pool": [
     {
      "id": "1005009522679303",
      "title": "כבל USB C של Toocki בהספק 100W עם טעינה מהירה וסוג C מתקפל עבור iPhone 16 15 Pro Max Samsung S24 Xiaomi 14 Huawei Macbook iPad",
+     "enTitle": "Toocki 100W USB C Cable Fast Charge Retractable Type C Cable For iPhone 16 15 Pro Max Samsung S24 Xiaomi 14 Huawei Macbook iPad",
      "price": 14.6,
      "usd": null,
      "rating": 97.6,
-     "sold": 89,
+     "sold": 90,
      "shop": "Toocki Digital Electronics Store",
-     "similarity": 0.35,
-     "level": "similar",
+     "similarity": 0.65,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005011564862414",
      "title": "כבל Toocki 3 יחידות 100W USB C לטעינה מהירה, כבל נשלף מסוג C לאייפון 17 16 15 פרו מקס, סמסונג, שיאומי, וואווי, מקבוק, אייפד",
+     "enTitle": "Toocki 3PCS 100W USB C Cable Fast Charge Retractable Type C Cable For iPhone 17 16 15 Pro Max Samsung Xiaomi Huawei Macbook iPad",
      "price": 16.09,
      "usd": null,
      "rating": 97.3,
      "sold": 873,
      "shop": "Toocki Digital Electronics Store",
-     "similarity": 0.61,
+     "similarity": 0.65,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005009466301312",
      "title": "כבל מתקפל Toocki Type C ל-USB C 100W 480Mdps כבל מהיר Chaerger גודל מיני עבור iPhone 16 15 Pro Max Samsung כבל נתונים",
+     "enTitle": "Toocki Type C To USB C 100W Retractable Cable 480Mdps Fast Chaerger Cable Mini Size  For iphone 16 15 Pro Max Samsung Data Cable",
      "price": 16.49,
      "usd": null,
      "rating": 97.9,
      "sold": 11624,
      "shop": "Toocki Digitaling Store",
-     "similarity": 0.4,
-     "level": "similar",
+     "similarity": 0.97,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013109278601",
      "title": "כבל Toocki 100W מסוג C, נשלף, לטעינה מהירה, USB-C ל-C, כבל נתונים לאייפון 16, 15 פרו מקס, סמסונג, שיאומי ומחשבים ניידים.",
+     "enTitle": "Toocki 100W Retractable Type C Cable Fast Charging USB C To Type C Data Cord For iphone 16 15 Pro Max Samsung Xiaomi Laptop",
      "price": 16.79,
      "usd": 5.12,
      "rating": null,
      "sold": 0,
      "shop": "CE KN95 FFP2 MASK Store",
-     "similarity": 0.71,
+     "similarity": 0.74,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005012992085968",
      "title": "כבל Toocki Mini Type C ל-Type C 480Mbps נשלף PD 100W לטעינה מהירה לאייפון 16 15 וסמסונג, כבל נתונים לטלפון",
+     "enTitle": "Toocki Mini Type C To Type C Cable 480Mdps Retractable PD 100W Fast Charging Cable For iphone 16 15 Samsung Phone Data Cable",
      "price": 16.99,
      "usd": 5.18,
      "rating": null,
      "sold": 2,
      "shop": "Crouch Digital Store",
-     "similarity": 0.63,
+     "similarity": 0.79,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005012978232602",
      "title": "כבל טעינה מהירה Toocki PD 100W, כבל נתונים נשלף מסוג C ל-C עבור אייפון 16, 15, סמסונג וטלפונים אחרים, כבל מיני USB C",
+     "enTitle": "Toocki PD 100W Fast Charging Data Cable Retractable Type C To Type C Cable for For iphone 16 15 Samsung Phone Mini USB C Cable",
      "price": 16.99,
      "usd": 5.18,
      "rating": null,
      "sold": 0,
      "shop": "New styles Store",
-     "similarity": 0.65,
+     "similarity": 0.73,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013336166690",
      "title": "כבל נשלף Toocki 100W Type C תומך בטעינה מהירה SFC 3.0, כבל USB C TPE מיני עבור סמסונג גלקסי S26 ואייפון 16 17",
+     "enTitle": "Toocki 100W Type C Retractable Cable Support SFC 3.0 Fast Charger Mini Size USB C TPE Cable For Samsung Galaxy S26 iPhone 16 17",
      "price": 18.39,
      "usd": null,
      "rating": 98.3,
      "sold": 493,
      "shop": "Stone's Store",
-     "similarity": 0.4,
-     "level": "similar",
+     "similarity": 0.61,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013012584387",
      "title": "כבל נשלף Toocki 100W Type C תומך בטעינה מהירה SFC 3.0, כבל USB C TPE מיני עבור סמסונג גלקסי S26 ואייפון 16 17",
+     "enTitle": "Toocki 100W Type C Retractable Cable Support SFC 3.0 Fast Charger Mini Size USB C TPE Cable For Samsung Galaxy S26 iPhone 16 17",
      "price": 20.39,
      "usd": null,
      "rating": 100,
-     "sold": 284,
+     "sold": 290,
      "shop": "Toocki Direct Choice Store",
-     "similarity": 0.4,
-     "level": "similar",
+     "similarity": 0.61,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013371329531",
      "title": "כבל Toocki 100W מסוג C, נשלף, לאייפון 16, 15 פרו מקס, לסמסונג, כבל טעינה מהירה, מיני, 480Mbps, כבל נתונים.",
+     "enTitle": "Toocki 100W Type C Retractable Cable For iphone 16 15 Pro Max Samsung Fast Chaerger Cable Mini Size 480Mdps Data Cable",
      "price": 20.59,
      "usd": null,
      "rating": 100,
@@ -286,52 +332,59 @@
      "similarity": 1,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013039460077",
      "title": "כבל נשלף Toocki Type C 100W תומך בטעינה מהירה SFC 3.0 כבל USB C TPE בגודל מיני לאייפון 16 17 סמסונג S26 שיאומי",
+     "enTitle": "Toocki Type C Retractable Cable 100W Support SFC 3.0 Fast Charger USB C TPE Cable Mini Size For iPhone 16 17 Samsung S26 Xiaomi",
      "price": 23.99,
      "usd": null,
      "rating": 96.6,
-     "sold": 201,
+     "sold": 203,
      "shop": "Toocki Digitaling Store",
-     "similarity": 0.46,
-     "level": "similar",
+     "similarity": 0.61,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013402078450",
      "title": "כבל Toocki נשלף, 100W, מסוג C ל-C, תומך ב-PPS SFC3.0, טעינה מהירה לאייפון 18, 17, 16, סמסונג גלקסי S26, S25 וטאבלטים.",
+     "enTitle": "Toocki Retractable 100W Cable Type C to Type C Support PPS SFC3.0 Fast Charge for iPhone 18 17 16 Smasung Galaxy S26 S25 Tablet",
      "price": 29.49,
      "usd": 8.99,
      "rating": null,
      "sold": 0,
      "shop": "toocki Direct Official Store",
-     "similarity": 0.51,
-     "level": "similar",
+     "similarity": 0.44,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005013386273366",
      "title": "כבל טעינה מהירה Toocki PD 100W, מסוג Type C ל-USB C, עם מנגנון נשלף, מתאים למחשב MacBook, לאייפד, לאייפון 16, 17, 18, לסדרת Duo, לשיאומי 15 ולסמסונג S23, S24.",
+     "enTitle": "Toocki PD 100W Fast Charge Type C To USB C Retractable Cable For MacBook iPad For iPhone 16 17 18Duo Xiaomi 15 Samsung S23 S24",
      "price": 40.79,
      "usd": 12.44,
      "rating": null,
      "sold": 0,
      "shop": "Toocki Co Ltd Store",
-     "similarity": 0.47,
-     "level": "similar",
+     "similarity": 0.54,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     }
@@ -341,198 +394,213 @@
    "label": "GaN charger",
    "url": "https://www.aliexpress.com/item/1005006579895295.html",
    "status": 200,
-   "ms": 3302,
+   "ms": 3363,
    "error": null,
    "message": null,
    "original": {
     "id": "1005006579895295",
     "title": "Ugreen 100w מטען gan usb c מטען qc4.0 3.0 תשלום מהיר עבור מקבוק מחשב נייד מחשב לוח מקבוק מהיר עבור iPhone 15 14 13 pro",
-    "price": 143.53,
-    "usd": 43.78,
+    "enTitle": "Ugreen 100w מטען gan usb c מטען qc4.0 3.0 תשלום מהיר עבור מקבוק מחשב נייד מחשב לוח מקבוק מהיר עבור iPhone 15 14 13 pro",
+    "price": 143.82,
+    "usd": 43.87,
     "affiliate": true
    },
    "checked": 49,
    "counts": {
-    "similar": 12
+    "likely": 1,
+    "similar": 11
    },
    "pool": [
     {
-     "id": "1005008702713918",
-     "title": "מטען UGREEN 20W 30W GaN Mini PD 3.0 USB C לטלפון iPhone 16 15 14 Pro Samsung S25 Xiaomi Tablet iPad Air",
-     "price": 26.9,
-     "usd": 8.21,
-     "rating": 96.9,
-     "sold": 3434,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.42,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005008453117301",
-     "title": "Ugen 30w מטען gan 3 יציאות pd 3.0 מטען c USB עבור iPhone 16 15 14 פרו מקס Sams25 xiaomi לוח ipad אוויר ipad",
-     "price": 28.69,
-     "usd": 8.75,
-     "rating": 97.7,
-     "sold": 445,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.43,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005008703356059",
-     "title": "מטען UGREEN 20W 30W GaN Mini PD 3.0 USB C לטלפון iPhone 16 15 14 Pro Samsung S25 Xiaomi Tablet iPad Air",
-     "price": 29.99,
-     "usd": 9.14,
-     "rating": 94,
-     "sold": 746,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.42,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005007548931493",
-     "title": "-, Surgan 45w מטען usb USB מטען pd qc 3.0 מטען מהיר מטען מהיר עבור iPhone 15 14 מטען טלפון pro עבור samsung s24 s23",
-     "price": 32.99,
-     "usd": 10.06,
-     "rating": 95.8,
-     "sold": 874,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.47,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005009101066066",
-     "title": "מטען UGREEN 45W GaN PD3.0 PPS QC3.0 עבור Samsung S25 S24 Ultra iPhone 17 16 15 Pro Max iPad Xiaomi Tablet USB C מטען מהיר",
-     "price": 42.19,
-     "usd": 12.87,
-     "rating": 98,
-     "sold": 1705,
-     "shop": "UGREEN Flagship Store",
-     "similarity": 0.44,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005008993942024",
-     "title": "מטען UGREEN 45W GaN PPS QC3.0 טעינה מהירה עבור Samsung S25 S24 Ultra iPhone 17 16 15 Pro Max iPad Tablet PD 3.0 מטען מהיר",
-     "price": 42.19,
-     "usd": 12.87,
-     "rating": 98.4,
-     "sold": 1149,
-     "shop": "UGREEN Flagship Store",
-     "similarity": 0.39,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005008472500910",
-     "title": "Ugreen 30w מטען pd 3.0 qc4.0 USB מטען עבור iphone 16 15 14 samsung pro s25 xiaomi לוח ipad אוויר pad",
-     "price": 44.39,
-     "usd": 13.54,
-     "rating": 98.1,
-     "sold": 982,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.54,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005009193456634",
-     "title": "מטען UGREEN 45W 30W 20W GaN PD 3.0 USB C לטלפון iPhone 17 16 15 Pro Samsung S25 Xiaomi Tablet iPad Air",
-     "price": 44.79,
-     "usd": 13.66,
-     "rating": 97.5,
-     "sold": 124,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.37,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005006751674291",
-     "title": "-, Surgan 45w מטען usb USB מטען pd qc 3.0 מטען מהיר מטען מהיר עבור iPhone 15 14 מטען טלפון pro עבור samsung s24 s23",
-     "price": 48.99,
-     "usd": 14.95,
-     "rating": 97.6,
-     "sold": 66,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.47,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005007548262802",
+     "id": "1005007088955772",
      "title": "Gan gen 30w מטען מהיר עם 1 מ '100w כבל עבור iPhone 15 14 13 pd3.0 מטען עבור ipad pro samsung xiaomi usb USB C",
-     "price": 52.26,
-     "usd": 15.94,
-     "rating": 97.3,
-     "sold": 144,
-     "shop": "Ugreen Official Store",
-     "similarity": 0.59,
-     "level": "similar",
-     "reasons": [
-      "capacity:different"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005009419233939",
-     "title": "מטען UGREEN 45W GaN PD3.0 PPS QC3.0 USB C מהיר עבור Samsung S25 S24 Ultra iPhone 16 15 14 Pro Max iPad Xiaomi Tablet",
-     "price": 53.79,
-     "usd": 16.41,
-     "rating": 97.1,
-     "sold": 463,
+     "enTitle": "UGREEN GaN 30W Fast Charger With 1m 100W Cable for iPhone 15 14 13 PD3.0 Charger for iPad Pro Samsung Xiaomi USB C Phone Charger",
+     "price": 63.69,
+     "usd": 19.42,
+     "rating": 96.7,
+     "sold": 62,
      "shop": "Ugreen Official Store",
      "similarity": 0.49,
-     "level": "similar",
+     "level": "likely",
      "reasons": [
-      "capacity:different"
+      "brand:same",
+      "power:same"
      ],
      "affiliate": true
     },
     {
-     "id": "1005008866166203",
-     "title": "מטען UGREEN 45W GaN, תומך ב-PD3.0, PPS ו-QC3.0, טעינה מהירה עבור Samsung S26, S25 Ultra, iPhone 18, 17, 16 Pro Max ו-iPad.",
-     "price": 57.19,
-     "usd": 17.44,
-     "rating": 98.7,
-     "sold": 2618,
+     "id": "1005009575649438",
+     "title": "מטען UGREEN 100W, 65W, 45W בטכנולוגיית GaN עם כבל USB-C נשלף, תומך ב-PPS ו-PD, טעינה מהירה למחשבים ניידים, מכביוק פרו, טאבלטים ואייפון 18, סמסונג.",
+     "enTitle": "UGREEN 100W 65W 45W GaN Charger With Retractable USB C Cable PPS PD Fast Charger For Laptop Macbook Pro Tablet iPhone 18 Samsung",
+     "price": 89.39,
+     "usd": 27.26,
+     "rating": 97.9,
+     "sold": 1343,
+     "shop": "Ugreen Official Store",
+     "similarity": 0.32,
+     "level": "similar",
+     "reasons": [
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005009575703693",
+     "title": "מטען UGREEN 100W GaN עם כבל USB C מתקפל UFCS PPS PD מהיר למחשב נייד Macbook Pro iPad Tablet iPhone Samsung",
+     "enTitle": "UGREEN 100W GaN Charger With Retractable USB C Cable UFCS PPS PD Fast Charger For Laptop Macbook Pro iPad Tablet iPhone Samsung",
+     "price": 89.39,
+     "usd": 27.26,
+     "rating": 97.3,
+     "sold": 391,
+     "shop": "UGREEN Flagship Store",
+     "similarity": 0.33,
+     "level": "similar",
+     "reasons": [
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005003803892030",
+     "title": "מטען מהיר UGREEN UK Plug GaN 100W 65W QC 4.0 3.0 למחשב מקבוק אייר, טאבלט, אייפון 18 17 16 פרו מקס, שיאומי, USB Type C PD",
+     "enTitle": "UGREEN UK Plug GaN 100W 65W Fast Charger QC 4.0 3.0  for Macbook Air Tablet iPhone 18 17 16 Pro Max Xiaomi USB Type C PD Charger",
+     "price": 98.39,
+     "usd": 30.01,
+     "rating": 96.9,
+     "sold": 194,
      "shop": "Ugreen Official Store",
      "similarity": 0.3,
      "level": "similar",
      "reasons": [
-      "capacity:different"
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005003827142444",
+     "title": "UGREEN בריטניה תקע גן 100W 65W מטען מהיר עבור Macbook tablet מהיר טעינה עבור iPhone Xiaomi USB סוג C פ\"ד תשלום עבור iPhone 13",
+     "enTitle": "UGREEN UK Plug GaN 100W 65W Fast Charger for Macbook tablet Fast Charging for iPhone Xiaomi USB Type C PD Charge for iPhone 13",
+     "price": 98.39,
+     "usd": 30.01,
+     "rating": 98.5,
+     "sold": 119,
+     "shop": "UGREEN Flagship Store",
+     "similarity": 0.33,
+     "level": "similar",
+     "reasons": [
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005004021846016",
+     "title": "UGREEN ארה\"ב תקע גן 100W 65W מטען מהיר עבור Macbook tablet מהיר טעינה עבור iPhone Xiaomi USB סוג C פ\"ד תשלום עבור iPhone 13",
+     "enTitle": "【US Plug】UGREEN 100W GaN Charger USB C Charger QC4.0 3.0 Quick Charge For Macbook Laptop Tablet PD Fast Charger For iPhone 15 14",
+     "price": 104.39,
+     "usd": 31.84,
+     "rating": 90,
+     "sold": 11,
+     "shop": "Ugreen Official Store",
+     "similarity": 0.44,
+     "level": "similar",
+     "reasons": [
+      "brand:different"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005007655180316",
+     "title": "מטען לרכב UGREEN, הספק 130W, טעינה מהירה, תומך ב-4 מכשירי USB, טכנולוגיית GaN, מתאים לאייפון 18 פרו, 17, 16, וגם למכשירי USB-C, כולל אייפד ומחשבים ניידים.",
+     "enTitle": "UGREEN Car Charger 130W Fast Charge Extender 4 USB Devices GaN Charger for iPhone 18 Pro 17 16 USB C Charger for iPad Notebook",
+     "price": 106.9,
+     "usd": 32.61,
+     "rating": 94.4,
+     "sold": 87,
+     "shop": "Ugreen Official Store",
+     "similarity": 0.29,
+     "level": "similar",
+     "reasons": [
+      "power:different"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005006990064696",
+     "title": "Ugreen 100w מחשב נייד מטען מהיר מטען 4 ב 1 מתאם עבור iphone 15 14 13 12 מטען טלפון מקס פרו xiaomi Samsung",
+     "enTitle": "UGREEN 100W 65W GaN Charger  6 in 1 Desktop Laptop Fast Charger For iPhone 17 16 15 14 Pro Max Macbook Air iPad Samsung Xiaomi",
+     "price": 107.99,
+     "usd": 32.94,
+     "rating": 98.2,
+     "sold": 1659,
+     "shop": "UGREEN Flagship Store",
+     "similarity": 0.37,
+     "level": "similar",
+     "reasons": [
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005004852449958",
+     "title": "【NEW】UGREEN 65W גן מטען מחשב שולחני מהיר מטען 4 ב 1 מתאם עבור iPhone 14 13 12 פרו מקסימום טלפון מטען Xiaomi סמסונג",
+     "enTitle": "UGREEN 65W 100W GaN Charger PPS QC4.0 PD3.0 For iPhone18 17 16 Pro Xiaomi Samsung Tablet Macbook Air iPad 5 IN 1 Desktop Charger",
+     "price": 107.99,
+     "usd": 32.94,
+     "rating": 97.8,
+     "sold": 464,
+     "shop": "Ugreen Official Store",
+     "similarity": 0.27,
+     "level": "similar",
+     "reasons": [
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005010219227059",
+     "title": "【מתאם שקע אמריקאי】מטען GaN של UGREEN בהספק 200W/100W/65W, מטען מהיר למחשב נייד ולטלפון, מתאים לאייפון 18, 17, 16 פרו מקס, מקבוק אייר פרו, אייפד וסמסונג.",
+     "enTitle": "【US Plug】UGREEN 200W/100W/65W GaN Charger Desktop Laptop Fast Charger For iPhone 18 17 16 Pro Max Macbook Air Pro iPad Samsung",
+     "price": 112.68,
+     "usd": 34.37,
+     "rating": 96.8,
+     "sold": 167,
+     "shop": "Ugreen Official Store",
+     "similarity": 0.26,
+     "level": "similar",
+     "reasons": [
+      "brand:different"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005008993866528",
+     "title": "UGREEN 65W 100W מטען GaN PPS QC4.0 PD3.0 מטען למחשב נייד לשולחן עבור iPhone17 16 15 Pro Xiaomi Samsung Tablet iPad Macbook Air",
+     "enTitle": "UGREEN 65W 100W GaN Charger PPS QC4.0 PD3.0 Desktop Laptop Charger For iPhone17 16 15 Pro Xiaomi Samsung Tablet iPad Macbook Air",
+     "price": 112.69,
+     "usd": 34.37,
+     "rating": 98,
+     "sold": 25,
+     "shop": "UGREEN Flagship Store",
+     "similarity": 0.32,
+     "level": "similar",
+     "reasons": [
+      "title:related"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005008189367210",
+     "title": "【מתאם קוריאני】מטען UGREEN 100W GaN, טעינה מהירה PD, מטען USB-C, תומך ב-QC4.0 ו-3.0, מתאים למחשבים ניידים, טאבלטים ואייפון 18 ו-17 פרו.",
+     "enTitle": "【Korean Plug】UGREEN 100W GaN Charger PD Fast USB C Charger QC4.0 3.0 Quick Charge For Macbook Laptop Tablet iPhone 18 17 Pro",
+     "price": 127.03,
+     "usd": 38.74,
+     "rating": 95.2,
+     "sold": 477,
+     "shop": "Ugreen Official Store",
+     "similarity": 0.38,
+     "level": "similar",
+     "reasons": [
+      "brand:different"
      ],
      "affiliate": true
     }
@@ -542,199 +610,212 @@
    "label": "generic car holder",
    "url": "https://he.aliexpress.com/item/1005012577847276.html",
    "status": 200,
-   "ms": 2571,
+   "ms": 3132,
    "error": null,
    "message": null,
    "original": {
     "id": "1005012577847276",
     "title": "מחזיק טלפון לרכב מגנטי אוניברסלי לרכב עבור אייפון שיאומי Huawei Samsung Dashboard מדבקת מגנט לרכב צמוד לקיר",
+    "enTitle": "Magnetic Car Phone Holder Universal Car Phone Stand for iPhone Xiaomi Huawei Samsung Dashboard Wall Mounted Car Magnet Sticker",
     "price": 2.49,
     "usd": null,
     "affiliate": true
    },
    "checked": 50,
    "counts": {
-    "similar": 10,
-    "likely": 2
+    "similar": 6,
+    "likely": 6
    },
    "pool": [
     {
+     "id": "1005006628987589",
+     "title": "תושבת טלפון רכב מגנטית אוניברסלית לרכב עבור iPhone 15 14 13 Samsung מתקן מגנטי למזגן תמיכה בטלפון נייד GPS",
+     "enTitle": "Universal Magnetic Car Phone Holder Stand in Car For iPhone 15 14 13 Samsung Magnet Air Vent Mount Cell Mobile Phone Support GPS",
+     "price": 1.31,
+     "usd": null,
+     "rating": 100,
+     "sold": 30,
+     "shop": "Awkanger Store",
+     "similarity": 0.53,
+     "level": "similar",
+     "reasons": [
+      "brand:different"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005007598639743",
+     "title": "תושבת טלפון רכב מגנטית למזגן עם קליפס לסיבוב תמיכה בסמארטפון ו-GPS לאייפון, סמסונג ושיאומי",
+     "enTitle": "Magnetic Car Phone Holder Air Vent Clip Mount Rotation Cell Smartphone GPS Support For iPhone Samsung Xiaomi Phone Stand In Car",
+     "price": 1.31,
+     "usd": null,
+     "rating": 90.8,
+     "sold": 24,
+     "shop": "Rloverae 3C Store",
+     "similarity": 0.5,
+     "level": "likely",
+     "reasons": [
+      "brand:same"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005010616393575",
+     "title": "פלטת מתכת אוניברסלית עבור תושבת טלפון רכב מגנטית עם דיסק דביק גיליון ברזל תושבת מגנטית עבור IPhone Samsung",
+     "enTitle": "Universal Metal Plate for Magnetic Car Phone Holder Stands Adhesive Disk Iron Sheet Magnetic Holder Mount for IPhone Samsung",
+     "price": 1.31,
+     "usd": null,
+     "rating": 97.3,
+     "sold": 17,
+     "shop": "Awkanger Store",
+     "similarity": 0.47,
+     "level": "similar",
+     "reasons": [
+      "brand:different"
+     ],
+     "affiliate": true
+    },
+    {
      "id": "1005010457746983",
      "title": "דיסק מתכתי למחזיק טלפון לרכב עם מגנט, גיליון ברזל לאייפון וסמסונג, מחזיק טלפון נייד מגנטי לרכב, מעמד לרכב",
+     "enTitle": "Metal Plate Disk For Magnet Car Phone Holder Iron Sheet Sticker For IPhone Samsung Magnetic Mobile Phone Holder Car Stand Mount",
      "price": 1.31,
      "usd": null,
      "rating": 100,
      "sold": 6,
      "shop": "Shop5014050 Store",
-     "similarity": 0.33,
+     "similarity": 0.58,
      "level": "similar",
      "reasons": [
-      "title:related"
+      "brand:different"
      ],
      "affiliate": true
     },
     {
      "id": "33049407168",
      "title": "מגנט פלטה מתכתית להחלפה אוניברסלית ערכת פלטה מתכתית עם דבק עבור iPhone X מחזיק טלפון מגנטי לרכב",
+     "enTitle": "Metal Plate Magnet Mobile Stand Universal Replacement Metal Plate Kit With Adhesive For iphone x Magnetic Car Mount Phone Holder",
      "price": 1.48,
      "usd": 0.45,
      "rating": 86.2,
      "sold": 3,
      "shop": "zonecy Store",
-     "similarity": 0.41,
+     "similarity": 0.53,
      "level": "similar",
      "reasons": [
-      "title:related"
+      "brand:different"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005009420955503",
+     "title": "תושבת טלפון נייד עם טבעת אצבע סובבת 360 מעלות לאייפון, סמסונג, הואווי ורדמי. מתקן מגנטי לרכב אוניברסלי עם תמיכה מתכתית",
+     "enTitle": "360 Degree Rotating Finger Ring Mobile Phone Holder for iPhone Samsung Huawei Redmi Universal Car Magnetic Mount Pad Metal Stand",
+     "price": 1.99,
+     "usd": null,
+     "rating": 100,
+     "sold": 11,
+     "shop": "Rloverae Store",
+     "similarity": 0.53,
+     "level": "similar",
+     "reasons": [
+      "brand:different"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005013473694299",
+     "title": "מעמד מגנטי לטלפון לרכב, מתאים לכל סוגי הרכבים, כולל אייפון, שיאומי, הואווי וסמסונג. ניתן להצמיד ללוח המחוונים או לקיר.",
+     "enTitle": "Magnetic Car Phone Holder Universal Car Phone Stand for iPhone Xiaomi Huawei Samsung Dashboard Wall Mounted Car Magnet Sticker",
+     "price": 1.99,
+     "usd": null,
+     "rating": null,
+     "sold": 4,
+     "shop": "Shop1105902651 Store",
+     "similarity": 1,
+     "level": "likely",
+     "reasons": [
+      "brand:same"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005013559759003",
+     "title": "מעמד מגנטי לטלפון לרכב, מתאים לכל סוגי הרכבים, כולל אייפון, שיאומי, הואווי וסמסונג. ניתן להצמיד ללוח המחוונים או לקיר.",
+     "enTitle": "Magnetic Car Phone Holder Universal Car Phone Stand for iPhone Xiaomi Huawei Samsung Dashboard Wall Mounted Car Magnet Sticker",
+     "price": 2.09,
+     "usd": null,
+     "rating": null,
+     "sold": 0,
+     "shop": "Shop1104073236 Store",
+     "similarity": 1,
+     "level": "likely",
+     "reasons": [
+      "brand:same"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005013492759369",
+     "title": "מעמד מגנטי לטלפון לרכב, מתאים לכל סוגי הרכבים, כולל אייפון, שיאומי, הואווי וסמסונג. ניתן להצמיד ללוח המחוונים או לקיר.",
+     "enTitle": "Magnetic Car Phone Holder Universal Car Phone Stand for iPhone Xiaomi Huawei Samsung Dashboard Wall Mounted Car Magnet Sticker",
+     "price": 2.09,
+     "usd": null,
+     "rating": null,
+     "sold": 0,
+     "shop": "Qi Qi Bao Store",
+     "similarity": 1,
+     "level": "likely",
+     "reasons": [
+      "brand:same"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005013250964430",
+     "title": "מעמד מגנטי לטלפון לרכב, מתחבר לפתחי האוורור, מתאים ל-GPS, לסמארטפון ולטלפון נייד, תושבת לרכב לאייפון, סמסונג, שיאומי.",
+     "enTitle": "Magnetic Car Phone Holder Stand Air Vent Magnet Car Mount GPS Smartphone Mobile Support In Car Bracket for iPhone Samsung Xiaomi",
+     "price": 2.14,
+     "usd": null,
+     "rating": null,
+     "sold": 5,
+     "shop": "Shop911130012 Store",
+     "similarity": 0.56,
+     "level": "likely",
+     "reasons": [
+      "brand:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005012148135866",
      "title": "מחזיק טלפון מגנטי לרכב לטלפון ברכב, תושבת לאוורור הרכב, מעמד אוניברסלי לסמארטפון, מחזיק מגנטי לאייפון וסמסונג",
+     "enTitle": "Magnetic Car Phone Holder For Phone In Car Air Vent Mount Universal Mobile Smartphone Stand Magnet Holder For iPhone Samsung",
      "price": 2.19,
      "usd": null,
      "rating": 82.3,
      "sold": 889,
      "shop": "Qi Qi Bao Store",
-     "similarity": 0.34,
-     "level": "similar",
+     "similarity": 0.62,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005012715377322",
      "title": "50/30/1 יחידות לוח מתכת אוניברסלי עבור מעמדי מחזיק טלפון לרכב מגנטי דיסק דבק דיסק ברזל גיליון ברזל תושבת מגנטית לאייפון סמסונג",
+     "enTitle": "50/30/1PCS Universal Metal Plate for Magnetic Car Phone Holder Stands Adhesive Disk Iron Sheet Magnetic Mount for IPhone Samsung",
      "price": 2.19,
      "usd": null,
      "rating": 60,
      "sold": 11,
      "shop": "Shop1105442905 Store",
-     "similarity": 0.34,
+     "similarity": 0.42,
      "level": "similar",
      "reasons": [
-      "title:related"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005004035267271",
-     "title": "2 יחידות / הרבה 40mm דיסק מתכתי אוניברסלי גיליון ברזל עבור אייפון zte מגנט רכב מגנטי טלפון נייד תושבת מט מבריק",
-     "price": 2.19,
-     "usd": 0.67,
-     "rating": 93.3,
-     "sold": 11,
-     "shop": "eclankon Store",
-     "similarity": 0.35,
-     "level": "similar",
-     "reasons": [
-      "title:related"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005012746654270",
-     "title": "מחזיק טלפון לרכב מגנטי אוניברסלי לרכב עבור אייפון שיאומי Huawei Samsung Dashboard מדבקת מגנט לרכב צמוד לקיר",
-     "price": 2.22,
-     "usd": null,
-     "rating": 97.8,
-     "sold": 40,
-     "shop": "Qi Qi Bao Store",
-     "similarity": 1,
-     "level": "likely",
-     "reasons": [
-      "title:similar"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005013077808358",
-     "title": "מחזיק טלפון מגנטי לרכב, מעמד אוניברסלי לטלפון לרכב עבור אייפון, שיאומי, וואווי, סמסונג, מדבקת מגנט לרכב להדבקה על לוח המחוונים או הקיר.",
-     "price": 2.39,
-     "usd": null,
-     "rating": 88,
-     "sold": 44,
-     "shop": "Cohai Store",
-     "similarity": 0.57,
-     "level": "likely",
-     "reasons": [
-      "title:similar"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005013082826499",
-     "title": "מחזיק מגנטי לרכב אוניברסלי לאוורור הרכב, אביזרים לאייפון, סמסונג, שיאומי, מעמד מגנטי לרכב לטלפון נייד",
-     "price": 2.39,
-     "usd": null,
-     "rating": null,
-     "sold": 12,
-     "shop": "Shop911130012 Store",
-     "similarity": 0.36,
-     "level": "similar",
-     "reasons": [
-      "title:related"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005012805483940",
-     "title": "יציאת אוויר לרכב מחזיק טלפון מגנטי במעמד לרכב תושבת מגנטית לטלפון סלולרי מחזיק עגול מגנטי לרכב לאייפון סמסונג Huawei",
-     "price": 2.39,
-     "usd": null,
-     "rating": 20,
-     "sold": 9,
-     "shop": "Shop1105625116 Store",
-     "similarity": 0.33,
-     "level": "similar",
-     "reasons": [
-      "title:related"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005013425587829",
-     "title": "1/2/3 יחידות – לוחית מתכת למתקן טלפון מגנטי לרכב, מדבקת ברזל דביקה, מגנט, מעמד לטלפון נייד, מתאים לאייפון.",
-     "price": 2.39,
-     "usd": null,
-     "rating": null,
-     "sold": 1,
-     "shop": "Shop1105896303 Store",
-     "similarity": 0.32,
-     "level": "similar",
-     "reasons": [
-      "title:related"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005013073187910",
-     "title": "מחזיק מגנטי לרכב אוניברסלי לאוורור הרכב, אביזרים לאייפון, סמסונג, שיאומי, מעמד מגנטי לרכב לטלפון נייד",
-     "price": 2.39,
-     "usd": null,
-     "rating": null,
-     "sold": 0,
-     "shop": "Shop1105000058 Store",
-     "similarity": 0.36,
-     "level": "similar",
-     "reasons": [
-      "title:related"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005012962191763",
-     "title": "מחזיק טלפון מגנטי לרכב, מעמד מיני מסתובב בצורת רצועה, מגנט מתכת חזק, תושבת GPS לרכב לאייפון 16, שיאומי, וואווי, סמסונג",
-     "price": 2.41,
-     "usd": null,
-     "rating": 95.7,
-     "sold": 132,
-     "shop": "Shop1105793268 Store",
-     "similarity": 0.35,
-     "level": "similar",
-     "reasons": [
-      "title:related"
+      "brand:different"
      ],
      "affiliate": true
     }
@@ -744,199 +825,249 @@
    "label": "variants (SSD capacities)",
    "url": "https://www.aliexpress.com/item/1005005445585329.html",
    "status": 200,
-   "ms": 2108,
+   "ms": 3437,
    "error": null,
    "message": null,
    "original": {
     "id": "1005005445585329",
     "title": "דיסק קשיח פנימי NVMe SSD M2 של Netac בנפח 1TB, 2TB, 500GB או 250GB במהירות 3500MB/s למחשבים ניידים ושולחניים",
+    "enTitle": "Netac NVMe SSD M2 1TB 2TB 500GB 250GB 3500MB/s SSD PCIe3.0 M.2 2280 SInternal Solid State Drives Disk NV3000 for Laptop Desktop",
     "price": 123.39,
     "usd": 37.64,
     "affiliate": true
    },
    "checked": 18,
    "counts": {
-    "likely": 8,
-    "similar": 4
+    "likely": 12
    },
    "pool": [
     {
      "id": "1005006832463652",
      "title": "דיסק קשיח פנימי NVMe M2 SSD של Netac בנפח 250GB או 500GB או 1TB או 2TB למחשבים ניידים ושולחניים",
+     "enTitle": "Netac SSD NVMe M2 250GB 500GB SSD 1TB 2TB SSD M.2 2280 PCIe3.0X4 Internal Solid State Drive Disk for Laptop Desktop",
      "price": 123.39,
      "usd": 37.63,
      "rating": 96.1,
      "sold": 7027,
      "shop": "Netac Official Store",
-     "similarity": 0.94,
+     "similarity": 0.81,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005005443088957",
      "title": "דיסק קשיח פנימי NVMe M2 של Netac בנפח 250GB או 500GB, בנפח 1TB או 2TB, מתאים למחשבים ניידים ושולחניים",
+     "enTitle": "Netac SSD NVMe M2 250GB 500GB NVMe SSD 1TB 2TB M.2 2280 PCIe Internal Solid State Hard Drive Disk for Laptop Desktop",
      "price": 123.39,
      "usd": 37.63,
      "rating": 96.2,
      "sold": 4335,
      "shop": "Netac Official Store",
-     "similarity": 0.89,
+     "similarity": 0.76,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005005442651631",
      "title": "Netac 3500MB/s M2 SSD 250GB 500GB 1TB 2TB NMVE SSD M.2 2280 PCIe3.0x4 כונני קשיחים פנימיים למחשבי שולחן וניידים",
+     "enTitle": "Netac 3500MB/s M2 SSD 250gb 500gb 1tb 2tb NMVE SSD M.2 2280 PCIe3.0x4 Internal Solid State Drives for Desktop Notebook",
      "price": 123.39,
      "usd": 37.63,
      "rating": 95.4,
      "sold": 3394,
      "shop": "Netac Official Store",
-     "similarity": 0.43,
-     "level": "similar",
+     "similarity": 0.76,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
+     ],
+     "affiliate": true
+    },
+    {
+     "id": "1005008637007198",
+     "title": "דיסק קשיח ממוצע Netac SSD NVME M2 בנפח 1TB או 2TB בנפח 250GB או 500GB עם סינק חום למחשבים ניידים ושולחניים",
+     "enTitle": "Netac SSD NVME M2 1TB 2TB SSD 250GB 500GB M2 Solid State Hard Disk Drive PCIe 3.0X4 with Heat Sink for Laptop Desktop",
+     "price": 123.39,
+     "usd": 37.63,
+     "rating": 95,
+     "sold": 2556,
+     "shop": "Netac Storage Store",
+     "similarity": 0.68,
+     "level": "likely",
+     "reasons": [
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005003794707357",
      "title": "דיסק קשיח פנימי NVMe SSD M.2 2280 PCIe בנפחים של 250GB, 500GB, 1TB ו-2TB למחשבים ניידים ושולחניים",
+     "enTitle": "Netac M2 SSD NVMe 250gb 500gb 1tb 2tb SSD M.2 2280 PCIe SSD Internal Solid State Drive Disk for Laptop Desktop",
      "price": 123.39,
      "usd": 37.63,
      "rating": 95.4,
      "sold": 272,
      "shop": "Netac Official Store",
-     "similarity": 0.74,
+     "similarity": 0.78,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005008637113849",
      "title": "דיסק קשיח פנימי SSD NVMe M2 2280 PCIE3.0X4 בנפח 1TB, 2TB, 250GB ו-500GB של Netac במהירות של 3500MB/s למחשבים ניידים ומחשבים אישיים",
+     "enTitle": "Netac 3500MB/s SSD 1TB 2TB 250GB 500GB SSD NVMe M2 2280 PCIE3.0X4 Hard Drive Internal Solid State Disk for Laptop PC",
      "price": 126.9,
      "usd": 38.7,
      "rating": 95.9,
      "sold": 2546,
      "shop": "Netac Storage Store",
-     "similarity": 0.83,
+     "similarity": 0.77,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005005486886241",
      "title": "דיסק קשיח פנימי Netac SSD NVMe M.2 בנפח 1TB או 2TB במהירות 3500MB/s, דיסק קשיח M2 2280 SSD HD בנפח 250GB או 500GB PCIe3.0 למחשבים ניידים ושולחניים",
+     "enTitle": "Netac SSD NVMe M.2 1TB 2TB HDD 3500MB/s Hard Drive M2 2280 SSD HD 250GB 500GB PCIe3.0 Internal Hard Disk for Laptop Desktop PC",
      "price": 126.9,
      "usd": 38.7,
      "rating": 97.6,
      "sold": 1000,
      "shop": "Netac Global Store",
-     "similarity": 0.9,
+     "similarity": 0.72,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005004804576024",
      "title": "דיסק קשיח פנימי Netac NV3000 M2 SSD NVMe 3500MB/s M.2 2280 PCIe3.0 בנפח 250GB 500GB 1TB 2TB למחשבים ניידים, שולחניים ולוחות אם",
+     "enTitle": "Netac NV3000 M2 SSD NVMe 3500MB/s M.2 2280 PCIe3.0 250GB 500GB 1TB 2TB Internal Solid State Drive for Laptop Desktop Motherboard",
      "price": 126.9,
      "usd": 38.7,
      "rating": 95.9,
      "sold": 731,
      "shop": "Netac Global Store",
-     "similarity": 0.75,
+     "similarity": 0.84,
      "level": "likely",
      "reasons": [
-      "capacity:same"
-     ],
-     "affiliate": true
-    },
-    {
-     "id": "1005007037682871",
-     "title": "Netac M2 SSD NVMe HD 250GB 500GB 1TB 2TB פנימי M.2 2280 SSD עבור מחשב X99 לוח אם כונן Solid State NV3000",
-     "price": 126.9,
-     "usd": 38.7,
-     "rating": 95.3,
-     "sold": 443,
-     "shop": "Netac SSD Store",
-     "similarity": 0.46,
-     "level": "similar",
-     "reasons": [
-      "title:related"
+      "model:same",
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005008637527019",
      "title": "דיסק קשיח פנימי Netac SSD NVMe M2 בנפח 500GB 250GB 2TB SSD 1TB M.2 NVME 2280 PCIE3.0 במהירות 3500MB/s למחשבים ניידים ושולחניים",
+     "enTitle": "Netac SSD NVMe M2 500GB 250GB 2TB SSD 1TB M.2 NVME 2280 PCIE3.0 3500MB/s Internal Solid State Hard Disk Drive for Laptop Desktop",
      "price": 126.9,
      "usd": 38.7,
      "rating": 94.3,
-     "sold": 423,
+     "sold": 424,
      "shop": "Netac Storage Store",
-     "similarity": 0.89,
+     "similarity": 0.84,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005004888248625",
      "title": "Netac nv3000 ssd m2 nvme 3500 mb/s/s pcie 3.0 hd 250gb 1tb 2tb m.2 כונן קשיח מצב נייד מצב מוצק עבור מחשב שולחני",
+     "enTitle": "Netac NV3000 SSD M2 NVMe 3500MB/s PCIe 3.0 HD 250GB 500GB 1TB 2TB M.2 Hard Disk Internal Solid State Drive for Desktop Laptop",
      "price": 126.9,
      "usd": 38.7,
      "rating": 94.5,
      "sold": 231,
      "shop": "Netac Global Store",
-     "similarity": 0.41,
-     "level": "similar",
+     "similarity": 0.77,
+     "level": "likely",
      "reasons": [
-      "capacity:different"
+      "model:same",
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005008636930795",
      "title": "דיסק קשיח NVME M.2 2280 PCIe3.0 בנפח 250GB או 500GB מבית Netac למחשבים ניידים ושולחניים",
+     "enTitle": "Netac SSD NVME M2 250GB 500GB SSD 1TB 2TB PCIe3.0 NVME M.2 2280 Hard Drive Disk Internal Solid State Drive for Laptop Desktop",
      "price": 126.9,
      "usd": 38.7,
      "rating": 94,
      "sold": 221,
      "shop": "Netac Storage Store",
-     "similarity": 0.67,
-     "level": "similar",
+     "similarity": 0.81,
+     "level": "likely",
      "reasons": [
-      "capacity:different"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     },
     {
      "id": "1005004254143587",
      "title": "דיסק קשיח פנימי מסוג SSD Netac M2 NVMe בנפחים של 2TB, 250GB, 500GB ו-1TB, דגם M2 2280 PCIe 3.0 Gen4 למחשבים נייחים ולמחשבים ניידים.",
+     "enTitle": "Netac M2 NVMe SSD 2TB 250GB 500GB 1TB SSD M2 2280 PCIe 3.0 Gen4 Hard Drive Internal Solid State Disk for Desktop Laptop",
      "price": 126.9,
      "usd": 38.7,
      "rating": 95.1,
      "sold": 183,
      "shop": "Netac SSD Store",
-     "similarity": 0.68,
+     "similarity": 0.74,
      "level": "likely",
      "reasons": [
-      "capacity:same"
+      "brand:same",
+      "capacity:same",
+      "capacity:same",
+      "variant:choose"
      ],
      "affiliate": true
     }
@@ -946,63 +1077,70 @@
    "label": "earbuds",
    "url": "https://he.aliexpress.com/item/1005009084986255.html",
    "status": 200,
-   "ms": 1583,
+   "ms": 1438,
    "error": null,
    "message": null,
    "original": {
     "id": "1005009084986255",
     "title": "אוזניות אלחוטיות QCY Crossky C50, דגם פתוח, בלוטות' 6.0, נוחות, עם קליפס, מתאימות לפעילות ספורטיבית, 4 מיקרופונים, טכנולוגיית AI לשיפור איכות השיחה, צליל בס משופר.",
+    "enTitle": "QCY Crossky C50 Open Ear Wireless Earbuds Bluetooth 6.0 Comfort Clip On Sports Earphone 4 Mic AI Clear Call Bass Boost Headphone",
     "price": 108.39,
     "usd": 33.06,
     "affiliate": true
    },
    "checked": 4,
    "counts": {
-    "similar": 3
+    "exact": 3
    },
    "pool": [
     {
      "id": "1005009515724546",
      "title": "אוזניות QCY Crossky C50 CT06 Clip-On Bluetooth 6.0 עם פתיחה דו-מגנטית לנהגים בס עם 4 מיקרופונים, זיהוי AI ושיחות ברורות 35H IPX5",
+     "enTitle": "QCY Crossky C50 CT06 Clip-On Earbuds Bluetooth 6.0 Open-Ear Dual-Magnet Drivers Bass Boost Headset 4 Mic AI Clear Calls 35H IPX5",
      "price": 115.99,
      "usd": 35.37,
      "rating": 95.8,
      "sold": 652,
      "shop": "QCY Factory Store",
-     "similarity": 0.37,
-     "level": "similar",
+     "similarity": 0.65,
+     "level": "exact",
      "reasons": [
-      "model:different"
+      "model:same",
+      "brand:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005009447513093",
      "title": "אוזניות קליפ און QCY Crossky C50 עם אוזניות אלחוטיות Bluetooth 6.0 עם 4 מיקרופונים זמן השמעה של 35 שעות לכושר",
+     "enTitle": "QCY Crossky C50 Clip On Earbuds Open Ear Wireless Bluetooth 6.0 Headphones 4 Mic 35H Playtime Ear Cuff Earphones for Fitness",
      "price": 116.39,
      "usd": 35.49,
      "rating": 90.4,
      "sold": 95,
      "shop": "QCY Store",
-     "similarity": 0.36,
-     "level": "similar",
+     "similarity": 0.57,
+     "level": "exact",
      "reasons": [
-      "title:related"
+      "model:same",
+      "brand:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005012831041094",
      "title": "אוזניות אלחוטיות פתוחות QCY Crossky C50 Bluetooth 6.0 עם 4 מיקרופונים, 35 שעות ניגון, אוזניות ספורט IPX5",
+     "enTitle": "QCY Open Ear Wireless Earbuds Crossky C50 Bluetooth 6.0 Headphones 4 Mic 35H Playtime Ear Cuff Earphones for Fitness IPX5",
      "price": 116.39,
      "usd": 35.49,
      "rating": 100,
      "sold": 11,
      "shop": "QCY Store",
-     "similarity": 0.38,
-     "level": "similar",
+     "similarity": 0.51,
+     "level": "exact",
      "reasons": [
-      "title:related"
+      "model:same",
+      "brand:same"
      ],
      "affiliate": true
     }
@@ -1012,12 +1150,13 @@
    "label": "short affiliate link (s.click)",
    "url": "https://s.click.aliexpress.com/e/_c3assid1",
    "status": 200,
-   "ms": 4627,
+   "ms": 5645,
    "error": null,
    "message": null,
    "original": {
     "id": "1005010724501614",
     "title": "סוללת גיבוי Baseus 45W, קיבולת 10000mAh, כוללת כבל USB-C, בגודל קומפקטי, טעינה מהירה, ניידת, מתאימה לאייפון 18, 17 ולסמסונג S26.",
+    "enTitle": "Baseus 45W Mini Power Bank 10000mAh Built-In USB-C Cable Pocket-Sized Smaller Fast Charge Portable For iPhone 18 17 Samsung S26",
     "price": 135.69,
     "usd": 41.39,
     "affiliate": true
@@ -1030,12 +1169,13 @@
     {
      "id": "1005012886384404",
      "title": "סוללת גיבוי Baseus Ultra Mini 20000mAh עם כבל Type-C מובנה, טעינה מהירה 45W PD3.0, סוללה חיצונית קומפקטית, מטען נייד",
+     "enTitle": "Baseus Ultra Mini 20000mAh Power Bank Built-in Type-C Cable 45W PD3.0 Fast Charging External Battery Pack Compact Travel Charger",
      "price": 196.39,
      "usd": null,
      "rating": 100,
-     "sold": 20,
+     "sold": 21,
      "shop": "TechVision Hub Store",
-     "similarity": 0.36,
+     "similarity": 0.41,
      "level": "similar",
      "reasons": [
       "capacity:different"
@@ -1045,28 +1185,29 @@
     {
      "id": "1005012383237978",
      "title": "סוללת גיבוי Baseus AR11 10,000mAh 45W טעינה מהירה ניידת בעלת תקן 3C, קיבולת גבוהה, מאושרת לטיסה, לאייפון ולשיאומי",
+     "enTitle": "Baseus AR11 Power Bank 10,000mAh 45W Fast Charging Portable 3C Certified High-Capacity Mini Airline-Approved for iPhone Xiaomi,",
      "price": 228.99,
      "usd": null,
      "rating": null,
      "sold": 8,
      "shop": "Star River 3c Store",
-     "similarity": 0.46,
+     "similarity": 0.42,
      "level": "similar",
      "reasons": [
-      "capacity:different",
-      "model:different"
+      "capacity:different"
      ],
      "affiliate": true
     },
     {
      "id": "1005012738058334",
      "title": "סוללת גיבוי Baseus Ultra Mini 20000mAh עם כבל Type-C מובנה, טעינה מהירה 45W PD3.0, סוללה חיצונית קומפקטית לטעינה בנסיעות",
+     "enTitle": "Baseus Ultra Mini 20000mAh Power Bank Built-in Type-C Cable 45W PD3.0 Fast Charging External Battery Pack Compact Travel Charger",
      "price": 263.9,
      "usd": null,
      "rating": 100,
      "sold": 10,
      "shop": "Starshuo Digital Store",
-     "similarity": 0.36,
+     "similarity": 0.41,
      "level": "similar",
      "reasons": [
       "capacity:different"
@@ -1079,33 +1220,36 @@
    "label": "niche product (expect no match)",
    "url": "https://www.aliexpress.com/item/1005012335597217.html",
    "status": 200,
-   "ms": 2196,
+   "ms": 2036,
    "error": null,
    "message": null,
    "original": {
     "id": "1005012335597217",
     "title": "ידית גלגלת גומקסוס אלומיניום 120mm Finesse עבור Shimano Bantam Metanium Daiwa Steez Abu Okuma Kastking Baitcasting AH-A24A",
+    "enTitle": "ידית גלגלת גומקסוס אלומיניום 120mm Finesse עבור Shimano Bantam Metanium Daiwa Steez Abu Okuma Kastking Baitcasting AH-A24A",
     "price": 159.99,
     "usd": null,
     "affiliate": true
    },
    "checked": 1,
    "counts": {
-    "similar": 1
+    "likely": 1
    },
    "pool": [
     {
      "id": "1005012921753330",
      "title": "ידית גלגלת גומקסוס מאלומיניום 120 מ\"מ פיינס עבור שימנו בנטם מטאניום דייווה סטיז אבו אוקומה קסטקינג בייטקסטינג AH-A24A",
+     "enTitle": "Gomexus Reel Handle Aluminum 120mm Finesse For Shimano Bantam Metanium Daiwa Steez Abu Okuma Kastking Baitcasting AH-A24A",
      "price": 194.99,
      "usd": null,
      "rating": null,
      "sold": 8,
      "shop": "GOMEXUS Store",
-     "similarity": 0.33,
-     "level": "similar",
+     "similarity": 0.74,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "model:same",
+      "mm:same"
      ],
      "affiliate": true
     }
@@ -1115,64 +1259,51 @@
    "label": "link with tracking params + text",
    "url": "תראו את זה https://he.aliexpress.com/item/1005007476166643.html?spm=a2g0o.home&pdp_npi=6 שווה?",
    "status": 200,
-   "ms": 1840,
+   "ms": 2988,
    "error": null,
    "message": null,
    "original": {
     "id": "1005007476166643",
     "title": "עכבר אלחוטי UGREEN Hyper-Fast Scroll Bluetooth 5.4 2.4G ארגונומי 5000DPI למחשבי MacBook, טאבלטים, מחשבים ניידים ומחשבים",
+    "enTitle": "UGREEN Hyper-Fast Scroll Wireless Mouse Bluetooth 5.4 2.4G Ergonomic 5000DPI for MacBook Tablet Laptops Computer PC Mice",
     "price": 61.39,
     "usd": 18.72,
     "affiliate": true
    },
    "checked": 3,
    "counts": {
-    "likely": 1,
-    "similar": 2
+    "likely": 2
    },
    "pool": [
     {
-     "id": "1005007532654249",
-     "title": "עכבר אלחוטי UGREEN Hyper-Fast Scroll Bluetooth 5.4 2.4G ארגונומי 5000DPI עבור MacBook Tablet מחשבים ניידים PC Mice",
-     "price": 58.88,
-     "usd": 17.96,
-     "rating": 97,
-     "sold": 267,
-     "shop": "UGREEN Digital Store",
-     "similarity": 0.79,
-     "level": "likely",
-     "reasons": [
-      "title:similar"
-     ],
-     "affiliate": true
-    },
-    {
      "id": "1005007592535777",
      "title": "Uירוק hyper-מהיר גלילה אלחוטי bluetooth 5.4 2.4g ארגונומי 5000dpi עבור מקבוק מחשב נייד מחשב עכבר",
+     "enTitle": "UGREEN Hyper-Fast Scroll Wireless Mouse Bluetooth 5.4 2.4G Ergonomic 5000DPI for MacBook Tablet Laptops Computer PC Mice",
      "price": 74.99,
      "usd": 22.87,
      "rating": 94.5,
      "sold": 241,
      "shop": "Ugreen Official Store",
-     "similarity": 0.47,
-     "level": "similar",
+     "similarity": 1,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same"
      ],
      "affiliate": true
     },
     {
      "id": "1005008121528128",
      "title": "Uירוק hyper-מהיר גלילה אלחוטי bluetooth 5.4 2.4g ארגונומי 5000dpi עבור מקבוק מחשב נייד מחשב עכבר",
+     "enTitle": "UGREEN Hyper-Fast Scroll Wireless Mouse Bluetooth 5.4 2.4G Ergonomic 5000DPI for MacBook Tablet Laptops Computer PC Mice",
      "price": 89.08,
      "usd": 27.17,
      "rating": 92.8,
      "sold": 322,
      "shop": "Ugreen Official Store",
-     "similarity": 0.47,
-     "level": "similar",
+     "similarity": 1,
+     "level": "likely",
      "reasons": [
-      "title:related"
+      "brand:same"
      ],
      "affiliate": true
     }
@@ -1182,7 +1313,7 @@
    "label": "non-existent product id",
    "url": "https://www.aliexpress.com/item/1005000000000001.html",
    "status": 404,
-   "ms": 742,
+   "ms": 747,
    "error": "not_found",
    "message": "המוצר לא נמצא או שאינו זמין למשלוח לישראל.",
    "original": null,
@@ -1194,7 +1325,7 @@
    "label": "not AliExpress (must be rejected)",
    "url": "https://example.com/item/1005009418411818.html",
    "status": 400,
-   "ms": 68,
+   "ms": 64,
    "error": "bad_link",
    "message": "לא זיהינו קישור למוצר מעליאקספרס. הדביקו קישור לעמוד מוצר.",
    "original": null,

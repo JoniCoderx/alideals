@@ -1,0 +1,19 @@
+{
+ "_readme": "Hand-labelled pairs from the real hunter test (2026-11-08). same=true: same product (other seller/listing); same=false: different product. Used by scripts/v2.test.mjs to measure precision and false positives.",
+ "pairs": [
+  ["Vention CCC 45W 20000mAh Power Bank Fast Charging Portable Charger for", "Vention CCC Certified 20000mAh 45W Power Bank Fast Charging Portable C", true],
+  ["Vention CCC 45W 20000mAh Power Bank Fast Charging Portable Charger for", "Vention CCC Certification Powerbank 45W 20000mAh Power Bank Type C PD", true],
+  ["QCY Crossky C50 Open Ear Wireless Earbuds Bluetooth 6.0 Comfort Clip", "QCY Crossky C50 CT06 Clip-On Earbuds Bluetooth 6.0 Open-Ear Dual-Magne", true],
+  ["QCY Crossky C50 Open Ear Wireless Earbuds Bluetooth 6.0 Comfort Clip", "QCY Open Ear Wireless Earbuds Crossky C50 Bluetooth 6.0 Headphones 4 M", true],
+  ["Toocki 100W Type C Retractable Cable For iphone 16 15 Pro Max Samsung", "Toocki 100W USB C Cable Fast Charge Retractable Type C Cable For iPhon", true],
+  ["UGREEN Hyper-Fast Scroll Wireless Mouse Bluetooth 5.4 2.4G Ergonomic 5", "UGREEN Hyper-Fast Scroll Wireless Mouse Bluetooth 5.4 2.4G Ergonomic 5", true],
+  ["Gomexus Reel Handle Aluminum 120mm Finesse For Shimano Bantam Metanium", "Gomexus Reel Handle Aluminum 120mm Finesse For Shimano Bantam Metanium", true],
+  ["Toocki 100W Type C Retractable Cable For iphone 16 15 Pro Max Samsung", "Toocki 3PCS 100W USB C Cable Fast Charge Retractable Type C Cable For", false],
+  ["UGREEN 100W GaN Charger USB C QC4.0 Fast Charging for MacBook", "UGREEN GaN 30W Fast Charger With 1m 100W Cable for iPhone 15 14 13 PD3", false],
+  ["Magnetic Car Phone Holder Universal Car Phone Stand for iPhone Xiaomi", "Magnetic Car Phone Holder Air Vent Clip Mount Rotation Cell Smartphone", false],
+  ["Baseus 45W Mini Power Bank 10000mAh Built-In USB-C Cable Pocket-Sized", "Baseus Ultra Mini 20000mAh Power Bank Built-in Type-C Cable", false],
+  ["Baseus 45W 10000mAh Power Bank with USB-C Cable Compact", "Baseus 10000mAh 45W Power Bank For Qi2.2 25W MagSafe Magnetic", false],
+  ["Vention CCC 45W 20000mAh Power Bank Fast Charging Portable Charger for", "Baseus 45W 20000mAh Power Bank Built-In Retractable", false],
+  ["Netac NVMe SSD M2 1TB 2TB 500GB 250GB 3500MB/s SSD PCIe3.0 M.2 2280", "Netac SSD NVMe M2 250GB 500GB SSD 1TB 2TB SSD M.2 2280 PCIe3.0X4", true]
+ ]
+}

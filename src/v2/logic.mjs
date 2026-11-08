@@ -47,7 +47,7 @@ export function pickCoupon(usd, tiers) {
 
 const STOP = new Set(['the', 'and', 'for', 'with', 'new', 'hot', 'sale', '2024', '2025', '2026', 'free', 'shipping', 'original', 'high', 'quality', 'pcs', 'set', 'of', 'a', 'in', 'to']);
 
-const GENERIC = new Set(['new', 'mini', 'portable', 'original', 'global', 'version', 'hot', 'for', 'the', 'upgraded', 'magnetic', 'wireless', 'fast', 'type', 'usb', 'car', 'smart', 'brand', 'ccc', 'pd', 'qi2', 'gan']);
+const GENERIC = new Set(['phone', 'holder', 'stand', 'mount', 'cable', 'charger', 'power', 'bank', 'powerbank', 'wireless', 'universal', 'cell', 'mobile', 'mouse', 'keyboard', 'earbuds', 'headphones', 'case', 'cover', 'adapter', 'bluetooth', 'led', 'electric', 'new', 'mini', 'portable', 'original', 'global', 'version', 'hot', 'for', 'the', 'upgraded', 'magnetic', 'wireless', 'fast', 'type', 'usb', 'car', 'smart', 'brand', 'ccc', 'pd', 'qi2', 'gan']);
 const UNITS = { mah: 'mah', w: 'w', gb: 'gb', tb: 'tb', mm: 'mm', inch: 'inch', '"': 'inch', ml: 'ml', l: 'l', hz: 'hz' };
 const CAPACITY = new Set(['mah', 'gb', 'tb', 'ml', 'l']);
 
@@ -56,7 +56,7 @@ const CAPACITY = new Set(['mah', 'gb', 'tb', 'ml', 'l']);
  * plug type, and whether the listing bundles several variants (e.g. "1TB 2TB 4TB").
  */
 export function attributes(title = '', props = {}) {
-  const t = ` ${String(title).toLowerCase().replace(/[【】[\]()]/g, ' ')} `;
+  const t = ` ${String(title).toLowerCase().replace(/[【】[\]()]/g, ' ').replace(/(\d),(\d{3})(?!\d)/g, '$1$2')} `;
   const a = { specs: {} };
   const words = t.trim().split(/\s+/).filter((w) => /^[a-z][a-z0-9-]+$/.test(w) && !GENERIC.has(w));
   if (words[0]) a.brand = words[0];
@@ -67,6 +67,8 @@ export function attributes(title = '', props = {}) {
   for (const k of Object.keys(a.specs)) a.specs[k] = [...a.specs[k]].sort();
   if (Object.keys(a.specs).length) a.capacity = Object.entries(a.specs).flatMap(([u, v]) => v.map((x) => x + u)).sort();
   a.multiVariant = Object.entries(a.specs).some(([u, v]) => v.length > 1 && CAPACITY.has(u));
+  const pack = t.match(/\b(\d{1,2})\s?(pcs|pack|pieces|pc)\b/);
+  a.pack = pack ? Number(pack[1]) : 1;
   const plug = t.match(/\b(eu|us|uk|au|il)\s?plug\b/);
   if (plug) a.plug = plug[1];
   const model = (t.match(/\b([a-z]{1,5}-?\d{2,5}[a-z]{0,3})\b/g) || []).filter((m) => !/^(\d|mah|gb|tb|pd|qc|usb|bt|iphone|galaxy)/.test(m) && !/^s\d/.test(m));
@@ -103,11 +105,12 @@ export function classifyMatch(base, cand) {
   for (const u of new Set([...Object.keys(ba.specs), ...Object.keys(ca.specs)])) {
     const x = ba.specs[u], y = ca.specs[u];
     if (!x || !y) continue;
-    const multi = x.length > 1 || y.length > 1;
+    const multi = u !== 'w' && (x.length > 1 || y.length > 1);
     const ok = multi ? x.some((v) => y.includes(v)) : x.join() === y.join();
     (ok ? reasons : conflicts).push(ok ? `${label(u)}:same` : label(u));
   }
   if (ba.plug && ca.plug && ba.plug !== ca.plug) conflicts.push('plug');
+  if (ba.pack !== ca.pack) conflicts.push('pack');
   for (const k of ['color', 'variant']) if (ba[k] && ca[k] && ba[k] !== ca[k]) conflicts.push(k);
   const sameBrand = !!(ba.brand && ca.brand && ba.brand === ca.brand);
   const sharedModel = !!(ba.model && ca.model && ba.model.some((m) => ca.model.includes(m)));

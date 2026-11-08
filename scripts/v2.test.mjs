@@ -73,3 +73,18 @@ test('URL input: only AliExpress hosts, ids extracted, short links flagged', () 
   assert.equal(parseProductInput('javascript:alert(1)').reason, 'no_url');
   assert.equal(parseProductInput('http://169.254.169.254/latest').reason, 'not_aliexpress');
 });
+
+// Precision on hand-labelled real pairs: "exact"/"likely" must never be shown for a different product.
+test('matching: no false positives on labelled real pairs', async () => {
+  const { pairs } = JSON.parse(await (await import('node:fs/promises')).readFile(new URL('../data/v2/match-pairs.json', import.meta.url), 'utf8'));
+  let tp = 0, fp = 0, fn = 0;
+  const fps = [];
+  for (const [a, b, same] of pairs) {
+    const { level } = classifyMatch({ title: a }, { title: b });
+    const pos = level === 'exact' || level === 'likely';
+    if (pos && same) tp++; else if (pos && !same) { fp++; fps.push(b); } else if (!pos && same) fn++;
+    if (level === 'exact') assert.ok(same, `exact on different product: ${b}`);
+  }
+  console.log(`# matching precision ${tp}/${tp + fp}, recall ${tp}/${tp + fn}, false positives ${fp}`);
+  assert.deepEqual(fps, []);
+});
