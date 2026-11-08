@@ -202,7 +202,7 @@ export default {
 
     // Cache by product id (or by the raw input for short links).
     const parsed = parseProductInput(input);
-    const cacheKey = new Request(`https://cache.yeshdeal/cheapest/${parsed.id || encodeURIComponent(parsed.shortUrl || input)}`);
+    const cacheKey = new Request(`https://cache.yeshdeal/cheapest/v3/${parsed.id || encodeURIComponent(parsed.shortUrl || input)}`);
     const cache = typeof caches !== 'undefined' ? caches.default : null;
     if (cache) { const hit = await cache.match(cacheKey); if (hit) { const r = new Response(hit.body, hit); for (const [k, v] of Object.entries(h)) r.headers.set(k, v); return r; } }
 
