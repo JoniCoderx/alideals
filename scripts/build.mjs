@@ -588,6 +588,12 @@ ${faqBlock(faq)}
 ${expired.length ? `<section class="section"><div class="wrap narrow"><details class="expired"><summary>קודים שפג תוקפם (${expired.length})</summary><ul>${expired.slice(0, 20).map((c) => `<li><s>${esc(c.code)}</s>: ${money(c.discount, c.currency)} מעל ${money(c.minOrder, c.currency)} (עד ${heDate(c.expires)})</li>`).join('')}</ul></details></div></section>` : ''}
 
 ${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה בעליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
+${site.social.telegram || site.social.facebook ? `<section class="section community"><div class="wrap"><div class="comm-box">
+  <div class="comm-text"><span class="comm-kicker">הקהילה של יש דיל</span>
+  ${gen.telegramMembers?.count >= 100 ? `<p class="comm-count"><b>${Math.floor(gen.telegramMembers.count / 100) * 100 >= 1000 ? (Math.floor(gen.telegramMembers.count / 100) * 100).toLocaleString('en-US') + '+' : gen.telegramMembers.count}</b> חברים בערוץ הטלגרם</p>` : '<p class="comm-count"><b>הצטרפו לקהילה</b></p>'}
+  <p>קודים חדשים, דילים נבחרים וטיפים לקנייה בעליאקספרס, ישר לטלפון. בלי ספאם.</p></div>
+  <div class="comm-btns">${tgBtn('לערוץ הטלגרם', 'btn-block')}${site.social.facebook ? `<a class="btn btn-fb btn-block" href="${esc(site.social.facebook)}" rel="noopener" target="_blank"><span>לעמוד הפייסבוק</span><svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></a>` : ''}</div>
+</div></div></section>` : ''}
 <section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מעליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
   return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)], share: { title: 'יש דיל! לפני שקונים בעליאקספרס, עוברים כאן', description: 'הקוד שמתאים בדיוק לסכום ההזמנה שלך, מחשבון שמראה כמה יוצא בסוף, וערוץ טלגרם עם הדילים של היום. חינם, בעברית, מתעדכן כל שעה.', image: '/assets/og-share.jpg' } });

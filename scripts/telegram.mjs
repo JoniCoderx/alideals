@@ -426,6 +426,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
       }
     } catch (e) { console.log(`• bot updates skipped: ${e.message}`); }
   }
+  // Real community size for the site's counter (Bot API getChatMemberCount).
+  if (token && chat) {
+    try {
+      const r = await (await fetch(`https://api.telegram.org/bot${token}/getChatMemberCount?chat_id=${encodeURIComponent(chat)}`)).json();
+      if (r.ok && r.result > 0) { gen.telegramMembers = { count: r.result, at: new Date().toISOString() }; console.log(`• telegram members: ${r.result}`); }
+    } catch (e) { console.log(`• member count skipped: ${e.message}`); }
+  }
   const repost = process.env.TELEGRAM_REPOST === '1' || process.env.TELEGRAM_REPOST === 'true';
   // Safety net: if the CI cache was lost, recover what was already posted from the live site.
   if (!gen.telegram?.posted || !Object.keys(gen.telegram.posted).length) {

@@ -529,3 +529,9 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .between p{margin:6px 0 12px;color:var(--ink-2)}
 .between-cta{display:flex;flex-wrap:wrap;gap:10px}
 .foot-fb{display:inline-flex!important;align-items:center;gap:6px}.foot-fb .tg-ico{width:16px;height:16px;color:#4f8cff}
+.btn-fb{background:#1877F2;color:#fff;box-shadow:0 6px 18px rgba(24,119,242,.28)}.btn-fb:hover{background:#1466d6;color:#fff}
+.comm-box{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:28px;border-radius:24px;background:linear-gradient(135deg,#ff7a2f,#e5122f);color:#fff;box-shadow:0 18px 40px rgba(229,18,47,.22)}
+.comm-text{flex:1 1 320px}.comm-kicker{font-size:.9rem;font-weight:700;opacity:.85}
+.comm-count{font-size:1.25rem;margin:6px 0}.comm-count b{font-size:2.6rem;font-weight:800;margin-left:8px;letter-spacing:-1px}
+.comm-text p{margin:4px 0 0}.comm-btns{display:grid;gap:10px;flex:0 1 260px;width:100%}
+.comm-btns .btn{justify-content:center;gap:8px}
