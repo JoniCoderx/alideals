@@ -167,8 +167,12 @@ export default {
       const ids = (url.searchParams.get('ids') || '').split(',').filter((x) => /^\d{6,20}$/.test(x)).slice(0, 20);
       if (!ids.length) return json({ error: 'bad_ids' }, 400, h);
       try {
-        const r = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: 'HE', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, product_ids: ids.join(','), country: 'IL' });
-        return json({ items: (r?.products?.product || []).map(normalizeProduct), checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
+        const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
+        const raw = url.searchParams.get('raw') === '1' && ids.length <= 3; // diagnostics: every field the API returns
+        const r = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, ...(raw ? {} : { fields: FIELDS }), product_ids: ids.join(','), country: 'IL' });
+        const list = r?.products?.product || [];
+        if (raw) return json({ raw: list, checkedAt: new Date().toISOString() }, 200, h);
+        return json({ items: list.map(normalizeProduct), checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
     }
     if (url.pathname !== '/api/cheapest' || req.method !== 'GET') return json({ error: 'not_found' }, 404, h);
