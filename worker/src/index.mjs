@@ -62,16 +62,20 @@ export async function findCheapest(env, input, fetchImpl = fetch) {
   const en = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { ...common, target_language: 'EN', product_ids: id, country: 'IL' }, fetchImpl).catch(() => null);
   const enTitle = en?.products?.product?.[0]?.product_title || original.title;
 
-  const search = await aliCall(env, 'aliexpress.affiliate.product.query', {
-    ...common,
-    keywords: keywordsFromTitle(enTitle),
-    category_ids: original.categoryId || undefined,
-    sort: 'SALE_PRICE_ASC',
-    ship_to_country: 'IL',
-    page_size: 50,
-    page_no: 1,
-  }, fetchImpl);
-  const candidates = (search?.products?.product || []).map(normalizeProduct);
+  // AliExpress answers "405 The result is empty" for zero hits – that is a valid "no matches", not an outage.
+  // Try the specific query first, then broader ones (fewer keywords, then without the category).
+  const query = async (keywords, cat) => {
+    try {
+      const r = await aliCall(env, 'aliexpress.affiliate.product.query', { ...common, keywords, category_ids: cat || undefined, sort: 'SALE_PRICE_ASC', ship_to_country: 'IL', page_size: 50, page_no: 1 }, fetchImpl);
+      return r?.products?.product || [];
+    } catch (e) { if (/result is empty/i.test(String(e.message))) return []; throw e; }
+  };
+  const kw = keywordsFromTitle(enTitle);
+  const short = kw.split(' ').slice(0, 4).join(' ');
+  let found = await query(kw, original.categoryId);
+  if (!found.length && short !== kw) found = await query(short, original.categoryId);
+  if (!found.length) found = await query(short, null);
+  const candidates = found.map(normalizeProduct);
   // Compare against the English title too (candidates come back in Hebrew/English depending on availability).
   const ranked = rankAlternatives({ ...original, title: `${original.title} ${enTitle}` }, candidates);
   const cheaper = ranked.filter((c) => original.price == null || c.price < original.price);
