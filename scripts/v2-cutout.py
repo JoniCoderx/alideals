@@ -1,28 +1,54 @@
-# Usage: python3 -I scripts/v2-cutout.py <in.jpg> <out.png> [<in2> <out2> ...]   (pip install "rembg[cpu]" scipy)
-# Product isolation for the YeshDeal visual system (free, local; no paid AI).
-# 1) remove background (rembg isnet)  2) keep only the largest connected object (drops seller text/logos)
-# 3) score the result (how dominant the main object is) so the engine can pick the cleanest gallery photo.
+# YeshDeal product cut-out (free, local, no paid AI). Usage:
+#   python3 -I scripts/v2-cutout.py <in.jpg> <out.png> [<in2> <out2> ...]
+#   needs: pip install "rembg[cpu]" scipy   (models download once, then run offline)
+#
+# Pipeline (designed to keep the product 100% original – only background pixels are removed):
+#  1. Segment with BiRefNet (best edge quality for cables/hoses); fallback ISNet.
+#  2. Clean the mask: drop thin attached strokes (seller text/arrows) with a small morphological opening,
+#     keep only the largest connected object, fill interior holes.
+#  3. Restore soft edges: use the model's own alpha only inside a 2px band around the cleaned mask (no halo, no jaggies).
+#  4. Trim to content + tiny padding. Report quality metrics so the engine can rank gallery photos.
 import sys, json
 import numpy as np
 from scipy import ndimage
 from rembg import remove, new_session
 from PIL import Image
-sess = new_session('isnet-general-use')
-res = []
+
+def session():
+    for name in ('birefnet-general-lite', 'isnet-general-use'):
+        try:
+            return name, new_session(name)
+        except Exception:
+            continue
+    raise SystemExit('no segmentation model available')
+
+MODEL, SESS = session()
+out = []
 for src, dst in zip(sys.argv[1::2], sys.argv[2::2]):
     im = Image.open(src).convert('RGB')
-    out = remove(im, session=sess, post_process_mask=True)
-    a = np.array(out)[:, :, 3] > 40
-    lab, n = ndimage.label(ndimage.binary_closing(a, iterations=3))
-    if n == 0: res.append({'src': src, 'score': 0}); continue
-    sizes = ndimage.sum(a, lab, range(1, n + 1))
-    k = int(np.argmax(sizes)) + 1
-    keep = lab == k
-    total = a.sum(); main = sizes[k - 1]
-    arr = np.array(out); arr[:, :, 3] = np.where(keep, arr[:, :, 3], 0)
-    o = Image.fromarray(arr); bb = o.getbbox(); o = o.crop(bb)
-    o.save(dst)
     w, h = im.size
-    res.append({'src': src, 'dst': dst, 'dominance': round(float(main / total), 3), 'coverage': round(float(main / (w * h)), 3), 'parts': n,
-                'score': round(float(main / total) * min(1.0, float(main / (w * h)) / 0.12), 3)})
-print(json.dumps(res))
+    cut = remove(im, session=SESS)
+    alpha = np.array(cut)[:, :, 3].astype(np.float32) / 255
+    hard = alpha > 0.5
+    k = max(2, round(min(w, h) / 220))                       # stroke size relative to image
+    opened = ndimage.binary_opening(hard, structure=np.ones((k, k)))
+    lab, n = ndimage.label(opened)
+    if n == 0:
+        out.append({'src': src, 'ok': False, 'reason': 'empty'}); continue
+    sizes = ndimage.sum(opened, lab, range(1, n + 1))
+    main = lab == (int(np.argmax(sizes)) + 1)
+    main = ndimage.binary_fill_holes(ndimage.binary_dilation(main, iterations=k))  # give back the edge the opening took
+    band = ndimage.binary_dilation(main, iterations=2) & ~ndimage.binary_erosion(main, iterations=2)
+    a = np.where(main & ~band, 1.0, 0.0)
+    a = np.where(band, alpha * ndimage.binary_dilation(main, iterations=2), a)
+    rgba = np.dstack([np.array(im), (np.clip(a, 0, 1) * 255).astype(np.uint8)])
+    o = Image.fromarray(rgba, 'RGBA')
+    bb = o.getbbox()
+    pad = round(0.01 * max(w, h))
+    o = o.crop((max(0, bb[0] - pad), max(0, bb[1] - pad), min(w, bb[2] + pad), min(h, bb[3] + pad)))
+    o.save(dst)
+    total = hard.sum()
+    kept = float(main.sum())
+    out.append({'src': src, 'dst': dst, 'model': MODEL, 'size': o.size, 'dominance': round(kept / max(total, 1), 3),
+                'coverage': round(kept / (w * h), 3), 'aspect': round(o.size[0] / o.size[1], 3), 'parts': int(n)})
+print(json.dumps(out))
