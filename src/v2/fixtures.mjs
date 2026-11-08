@@ -5,18 +5,18 @@
 export const PREVIEW = true;
 
 export const fixtureProducts = [
-  { id: 'fx-car-holder', cat: 'car', emoji: '📱', title: 'מחזיק טלפון מגנטי לרכב', en: 'Magnetic car phone holder for air vent', price: 6.5, shipping: 0, specs: { 'חיבור': 'פתח מיזוג', 'תאימות': 'טלפונים עד 7 אינץ׳' }, why: 'פתרון פשוט שמשאיר את הניווט בגובה העיניים.' },
-  { id: 'fx-dashcam', cat: 'car', emoji: '🎥', title: 'מצלמת דרך קדמית עם מסך', en: 'Dash cam 1080p front camera with screen', price: 29, shipping: 3, specs: { 'רזולוציה': '1080p', 'אחסון': 'כרטיס microSD (לא כלול)' }, why: 'תיעוד נסיעה, שימושי במקרה של תאונה.' },
-  { id: 'fx-car-vac', cat: 'car', emoji: '🧹', title: 'שואב אבק נטען לרכב', en: 'Cordless handheld car vacuum cleaner', price: 18, shipping: 2, specs: { 'טעינה': 'USB-C' }, why: 'ניקוי פירורים וחול בלי לחפש שקע.' },
-  { id: 'fx-trunk-org', cat: 'car', emoji: '🧳', title: 'ארגונית מתקפלת לתא מטען', en: 'Foldable trunk organizer', price: 12, shipping: 2.5, specs: { 'תאים': '3' }, why: 'מסדרת קניות וציוד שלא יתגלגלו בנסיעה.' },
-  { id: 'fx-seat-gap', cat: 'car', emoji: '🪢', title: 'אוטם רווח בין המושבים (זוג)', en: 'Car seat gap filler 2 pcs', price: 4.2, shipping: 0, specs: { 'כמות': '2' }, why: 'נגמרו הימים של טלפון שנופל בין המושבים.' },
-  { id: 'fx-tire-inflator', cat: 'car', emoji: '🛞', title: 'משאבת אוויר חשמלית לצמיגים', en: 'Portable electric tire inflator', price: 26, shipping: 3, specs: { 'הפעלה': 'סוללה נטענת', 'תצוגה': 'דיגיטלית' }, why: 'בדיקה ומילוי לחץ אוויר בלי לחפש תחנת דלק.' },
-  { id: 'fx-sunshade', cat: 'car', emoji: '☀️', title: 'מגן שמש מתקפל לשמשה קדמית', en: 'Foldable windshield sun shade umbrella', price: 9, shipping: 1.5, specs: { 'מידה': 'לבחור לפי הרכב' }, why: 'מוריד את החום ברכב בקיץ הישראלי.' },
-  { id: 'fx-hud', cat: 'car', emoji: '🧭', title: 'תצוגת מהירות לשמשה (HUD)', en: 'Car HUD speed display', price: 15, shipping: 2, specs: { 'חיבור': 'OBD2 / GPS – לבדוק בעמוד המוצר' }, why: 'מהירות מול העיניים, פחות מבטים למטה.' },
-  { id: 'fx-charger', cat: 'car', emoji: '🔌', title: 'מטען מהיר לרכב USB-C כפול', en: 'Dual USB-C fast car charger', price: 7, shipping: 0, specs: { 'יציאות': '2× USB-C' }, why: 'טעינה מהירה לשני טלפונים בבת אחת.' },
-  { id: 'fx-led', cat: 'car', emoji: '💡', title: 'תאורת LED פנימית לרכב', en: 'Car interior LED strip light', price: 8, shipping: 1, specs: { 'הפעלה': 'USB' }, why: 'תאורה נעימה ושימושית בלילה.' },
-  { id: 'fx-powerbank', cat: 'electronics', emoji: '🔋', title: 'סוללה ניידת 20000mAh עם טעינה מהירה', en: 'Power bank 20000mAh PD 65W', price: 24, shipping: 0, specs: { 'קיבולת': '20000mAh', 'הספק': '65W' }, why: 'מספיקה ליום שלם, גם ללפטופ קטן.' },
-  { id: 'fx-earbuds', cat: 'electronics', emoji: '🎧', title: 'אוזניות אלחוטיות עם ביטול רעשים', en: 'Wireless earbuds ANC', price: 22, shipping: 0, specs: { 'חיבור': 'Bluetooth 5.3' }, why: 'מחיר נגיש לאוזניות עם ביטול רעשים.' },
+  { id: 'fx-car-holder', must: ['phone', 'holder'], cat: 'car', emoji: '📱', title: 'מחזיק טלפון מגנטי לרכב', en: 'Magnetic car phone holder for air vent', price: 6.5, shipping: 0, specs: { 'חיבור': 'פתח מיזוג', 'תאימות': 'טלפונים עד 7 אינץ׳' }, why: 'פתרון פשוט שמשאיר את הניווט בגובה העיניים.' },
+  { id: 'fx-dashcam', must: ['dash'], cat: 'car', emoji: '🎥', title: 'מצלמת דרך קדמית עם מסך', en: 'Dash cam 1080p front camera with screen', price: 29, shipping: 3, specs: { 'רזולוציה': '1080p', 'אחסון': 'כרטיס microSD (לא כלול)' }, why: 'תיעוד נסיעה, שימושי במקרה של תאונה.' },
+  { id: 'fx-car-vac', must: ['vacuum'], cat: 'car', emoji: '🧹', title: 'שואב אבק נטען לרכב', en: 'Cordless handheld car vacuum cleaner', price: 18, shipping: 2, specs: { 'טעינה': 'USB-C' }, why: 'ניקוי פירורים וחול בלי לחפש שקע.' },
+  { id: 'fx-trunk-org', must: ['trunk', 'organizer'], cat: 'car', emoji: '🧳', title: 'ארגונית מתקפלת לתא מטען', en: 'Foldable trunk organizer', price: 12, shipping: 2.5, specs: { 'תאים': '3' }, why: 'מסדרת קניות וציוד שלא יתגלגלו בנסיעה.' },
+  { id: 'fx-seat-gap', must: ['seat', 'gap'], cat: 'car', emoji: '🪢', title: 'אוטם רווח בין המושבים (זוג)', en: 'Car seat gap filler 2 pcs', price: 4.2, shipping: 0, specs: { 'כמות': '2' }, why: 'נגמרו הימים של טלפון שנופל בין המושבים.' },
+  { id: 'fx-tire-inflator', must: ['tire'], cat: 'car', emoji: '🛞', title: 'משאבת אוויר חשמלית לצמיגים', en: 'Portable electric tire inflator', price: 26, shipping: 3, specs: { 'הפעלה': 'סוללה נטענת', 'תצוגה': 'דיגיטלית' }, why: 'בדיקה ומילוי לחץ אוויר בלי לחפש תחנת דלק.' },
+  { id: 'fx-sunshade', must: ['windshield', 'sun'], cat: 'car', emoji: '☀️', title: 'מגן שמש מתקפל לשמשה קדמית', en: 'Foldable windshield sun shade umbrella', price: 9, shipping: 1.5, specs: { 'מידה': 'לבחור לפי הרכב' }, why: 'מוריד את החום ברכב בקיץ הישראלי.' },
+  { id: 'fx-hud', must: ['hud'], cat: 'car', emoji: '🧭', title: 'תצוגת מהירות לשמשה (HUD)', en: 'Car HUD speed display', price: 15, shipping: 2, specs: { 'חיבור': 'OBD2 / GPS – לבדוק בעמוד המוצר' }, why: 'מהירות מול העיניים, פחות מבטים למטה.' },
+  { id: 'fx-charger', must: ['charger'], cat: 'car', emoji: '🔌', title: 'מטען מהיר לרכב USB-C כפול', en: 'Dual USB-C fast car charger', price: 7, shipping: 0, specs: { 'יציאות': '2× USB-C' }, why: 'טעינה מהירה לשני טלפונים בבת אחת.' },
+  { id: 'fx-led', must: ['led'], cat: 'car', emoji: '💡', title: 'תאורת LED פנימית לרכב', en: 'Car interior LED strip light', price: 8, shipping: 1, specs: { 'הפעלה': 'USB' }, why: 'תאורה נעימה ושימושית בלילה.' },
+  { id: 'fx-powerbank', must: ['power', 'bank'], cat: 'electronics', emoji: '🔋', title: 'סוללה ניידת 20000mAh עם טעינה מהירה', en: 'Power bank 20000mAh PD 65W', price: 24, shipping: 0, specs: { 'קיבולת': '20000mAh', 'הספק': '65W' }, why: 'מספיקה ליום שלם, גם ללפטופ קטן.' },
+  { id: 'fx-earbuds', must: ['earbuds'], cat: 'electronics', emoji: '🎧', title: 'אוזניות אלחוטיות עם ביטול רעשים', en: 'Wireless earbuds ANC', price: 22, shipping: 0, specs: { 'חיבור': 'Bluetooth 5.3' }, why: 'מחיר נגיש לאוזניות עם ביטול רעשים.' },
 ];
 
 export const fixtureCollections = [

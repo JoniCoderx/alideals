@@ -155,9 +155,20 @@ export default {
       const q = (url.searchParams.get('q') || '').trim().slice(0, 80);
       if (q.length < 2) return json({ error: 'bad_query' }, 400, h);
       try {
-        const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: 'HE', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: 20, page_no: 1 });
+        const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
+        const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: 20, page_no: 1 });
         const items = (r?.products?.product || []).map(normalizeProduct);
         return json({ q, count: items.length, items, checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
+      } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
+    }
+    // Hebrew details for a short list of product ids (digits only, max 20).
+    if (url.pathname === '/api/products' && req.method === 'GET') {
+      if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured' }, 503, h);
+      const ids = (url.searchParams.get('ids') || '').split(',').filter((x) => /^\d{6,20}$/.test(x)).slice(0, 20);
+      if (!ids.length) return json({ error: 'bad_ids' }, 400, h);
+      try {
+        const r = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: 'HE', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, product_ids: ids.join(','), country: 'IL' });
+        return json({ items: (r?.products?.product || []).map(normalizeProduct), checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
     }
     if (url.pathname !== '/api/cheapest' || req.method !== 'GET') return json({ error: 'not_found' }, 404, h);

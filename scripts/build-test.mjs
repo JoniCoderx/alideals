@@ -36,7 +36,7 @@ const LIVE = process.env.V2_OFFLINE ? { byFixtureId: {}, live: 0 } : await liveP
 const merge = (f) => {
   const l = LIVE.byFixtureId[f.id];
   if (!l) return { ...f, live: false, priceIls: Math.round(f.price * RATE) };
-  return { ...f, id: l.id, title: l.title, image: l.image, link: l.link, price: Math.round((l.price / RATE) * 100) / 100, priceIls: l.price, originalIls: l.originalPrice, shipping: null, specs: {}, rating: l.rating, sold: l.sold, shop: l.shop, checkedAt: l.checkedAt, live: true };
+  return { ...f, why: '', id: l.id, title: l.title, image: l.image, link: l.link, price: Math.round((l.price / RATE) * 100) / 100, priceIls: l.price, originalIls: l.originalPrice, shipping: null, specs: {}, rating: l.rating, sold: l.sold, shop: l.shop, checkedAt: l.checkedAt, live: true };
 };
 const byId = Object.fromEntries(fixtureProducts.map((f) => [f.id, merge(f)]));
 const allProducts = Object.values(byId);
@@ -84,7 +84,7 @@ function productCard(p, rank) {
   <a class="pc-link" href="/test/p/${p.id}/">${thumb(p)}${rank ? `<b class="rank">${rank}</b>` : ''}</a>
   <div class="pc-body">
     <h3><a href="/test/p/${p.id}/">${esc(p.title)}</a></h3>
-    <p class="why">${esc(p.why)}</p>
+    ${p.why ? `<p class="why">${esc(p.why)}</p>` : ""}
     <div class="price"><b>${priceIls(p)}</b><span>${p.live ? `בערך ${usd(p.price)}${p.sold ? ` · ${p.sold.toLocaleString('he-IL')} נמכרו` : ''}` : `${usd(p.price)}${p.shipping ? ` + משלוח ${usd(p.shipping)}` : ' · משלוח חינם'}`}</span></div>
     <div class="pc-foot">${p.live ? `<span class="chk" title="מחיר מה-API הרשמי של עליאקספרס">✓ נבדק ${checkedHe(p)}</span>` : previewChip}<a class="btn btn-sm" href="/test/p/${p.id}/">לפרטים</a></div>
   </div>
@@ -230,7 +230,7 @@ for (const p of allProducts) {
     <div class="pp-info">
       ${p.live ? '' : previewChip}
       <h1>${esc(p.title)}</h1>
-      <p class="lead">${esc(p.why)}</p>
+      ${p.why ? `<p class="lead">${esc(p.why)}</p>` : ""}
       <div class="pp-price"><b>${priceIls(p)}</b><span>${p.live ? `בערך ${usd(p.price)}${p.originalIls && p.originalIls > p.priceIls ? ` · מחיר לפני הנחה בעליאקספרס: ₪${p.originalIls}` : ''} · משלוח לישראל: מוצג בעליאקספרס` : `${usd(p.price)} · משלוח לישראל: ${p.shipping ? usd(p.shipping) : 'חינם'}`}</span></div>
       ${cost.code ? `<div class="pp-coupon">🎟️ עם קוד <b>${esc(cost.code)}</b>: ${usd(cost.total)} סה״כ משוער <button class="copy" data-code="${esc(cost.code)}">העתק</button></div>` : `<div class="pp-coupon muted">אין קוד שמתאים לסכום הזה לבד. בעגלה גדולה יותר יש קודים.</div>`}
       <p class="muted small">${p.live ? `מחיר נבדק מול ה-API הרשמי: ${checkedHe(p)} · המחיר הסופי, המשלוח והמע״מ נקבעים בקופה של עליאקספרס` : `מחיר נבדק: ${heDate(today)} (נתוני תצוגה) · המחיר הסופי נקבע בעליאקספרס`}</p>
