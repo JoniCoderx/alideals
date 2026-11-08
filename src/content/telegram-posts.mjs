@@ -330,6 +330,13 @@ export const telegramPosts = [
 // One-time announcements: each is posted once (in the next free slot), before the regular rotation.
 export const telegramAnnouncements = [
   {
+    id: 'ann-facebook', type: 'feature', emoji: '📣', badge: '🎉 חדש',
+    title: 'יש דיל! עכשיו גם בפייסבוק',
+    points: ['טיפים, דילים וקודים חדשים', 'שאלות? כותבים לנו שם', 'עשו לייק ועקבו 👍'],
+    text: 'פתחנו עמוד פייסבוק רשמי! 🎉\nשם נעלה טיפים, דילים וקודים חדשים לעליאקספרס, ואפשר גם לשאול אותנו שאלות.\n\nעשו לייק לעמוד, ושתפו עם חברים שקונים בעליאקספרס 🙏',
+    buttons: [['👍 לעמוד הפייסבוק שלנו', 'https://www.facebook.com/yeshdeal'], ['🔥 הקודים של עכשיו', '/']],
+  },
+  {
     id: 'ann-hunter', type: 'feature', emoji: '🎯', badge: '👀 בקרוב',
     title: 'בקרוב: צייד הדילים',
     points: ['שולחים לו קישור למוצר', 'הוא סורק את המוכרים בעליאקספרס', 'ומחפש הצעות זולות יותר'],

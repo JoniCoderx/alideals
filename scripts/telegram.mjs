@@ -137,6 +137,7 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
   if (!slot || state.lastSlot === `${today}|${slot.id}`) return { message: null, regular: state };
   const host = new URL(siteUrl).host;
   const link = (p, campaign) => {
+    if (/^https?:/.test(p)) return p;
     const [pathPart, hash] = p.split('#');
     return `${siteUrl}${pathPart}?utm_source=telegram&utm_medium=social&utm_campaign=${campaign}${hash ? `#${hash}` : ''}`;
   };
@@ -269,7 +270,19 @@ const addDays = (d, n) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t
  */
 export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats }) {
   let reg = regular;
-  const keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
+  let keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
+  // A new one-time announcement jumps the queue: it replaces the next planned slot.
+  const annList = announcements || telegramAnnouncements;
+  const pending = annList.find((a) => !(reg.history || {})[a.id] && !keep.some((q) => q.annId === a.id));
+  if (pending) {
+    const next = keep.find((q) => q.date > today || q.hour > hour);
+    if (next) {
+      const r = planRegular({ today: next.date, hour: next.hour, weekday: new Date(next.date + 'T12:00:00Z').getUTCDay(), regular: { ...reg, lastSlot: '' }, siteUrl, library: [], announcements: [pending], cats: [], coupons: [] });
+      reg = { ...reg, history: r.regular.history };
+      const m = withAffiliate(r.message, { siteUrl, affLink });
+      keep = keep.map((q) => (q === next ? { ...q, annId: pending.id, kind: m.kind, text: m.text, buttons: m.buttons, card: m.card } : q));
+    }
+  }
   const have = new Set(keep.map((q) => q.key));
   const out = [...keep];
   for (let i = 0; i <= days; i++) {
