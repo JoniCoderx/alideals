@@ -107,7 +107,7 @@ function renderResults(j, box) {
   const o = j.original || {};
   const ils = (n) => '₪' + (Math.round(n * 100) / 100).toLocaleString('he-IL');
   const when = new Date(j.at || Date.now()).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const pool = (j.pool || j.alternatives || []).map((c) => ({ ...c, m: classifyMatch({ title: o.title }, { title: c.title }) }));
+  const pool = (j.pool || j.alternatives || []).map((c) => ({ ...c, m: classifyMatch({ title: o.enTitle || o.title }, { title: c.enTitle || c.title }) }));
   const groups = [['exact', '✅ התאמה מדויקת', 'אותו דגם, בלי סתירה במאפיינים'], ['likely', '🟡 כנראה אותו מוצר – כדאי לבדוק', 'דומה מאוד. בדקו גרסה, צבע ומפרט לפני שקונים'], ['similar', '🔁 חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
   const img = (u) => (u ? `<img src="${esc(u)}_220x220.jpg" alt="" loading="lazy" width="110" height="110" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${esc(u)}'">` : '');
   const card = (c) => {
