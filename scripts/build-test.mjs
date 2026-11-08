@@ -94,7 +94,7 @@ function productCard(p, rank) {
   <div class="pc-body">
     <h3><a href="/test/p/${p.id}/">${esc(p.title)}</a></h3>
     ${p.why ? `<p class="why">${esc(p.why)}</p>` : ""}
-    <div class="price"><b>${priceIls(p)}</b><span>${p.live ? `בערך ${usd(p.price)}${p.sold ? ` · ${p.sold.toLocaleString('he-IL')} נמכרו` : ''}` : `${usd(p.price)}${p.shipping ? ` + משלוח ${usd(p.shipping)}` : ' · משלוח חינם'}`}</span></div>
+    <div class="price"><b>${priceIls(p)}</b><span>${p.live && p.originalIls > p.priceIls ? `<s>₪${Math.round(p.originalIls)}</s> · ` : ''}${p.live ? `בערך ${usd(p.price)}${p.sold ? ` · ${p.sold.toLocaleString('he-IL')} נמכרו` : ''}` : `${usd(p.price)}${p.shipping ? ` + משלוח ${usd(p.shipping)}` : ' · משלוח חינם'}`}</span></div>
     <div class="pc-foot">${p.live ? `<span class="chk" title="מחיר מה-API הרשמי של עליאקספרס">✓ נבדק ${checkedHe(p)}</span>` : previewChip}<a class="btn btn-sm" href="/test/p/${p.id}/">לפרטים</a></div>
   </div>
 </article>`;
@@ -241,7 +241,8 @@ for (const p of allProducts) {
       ${p.why ? `<p class="lead">${esc(p.why)}</p>` : ""}
       <div class="pp-price"><b>${priceIls(p)}</b><span>${p.live ? `בערך ${usd(p.price)}${p.originalIls && p.originalIls > p.priceIls ? ` · מחיר לפני הנחה בעליאקספרס: ₪${p.originalIls}` : ''} · משלוח לישראל: מוצג בעליאקספרס` : `${usd(p.price)} · משלוח לישראל: ${p.shipping ? usd(p.shipping) : 'חינם'}`}</span></div>
       ${cost.code ? `<div class="pp-coupon">🎟️ עם קוד <b>${esc(cost.code)}</b>: ${usd(cost.total)} סה״כ משוער <button class="copy" data-code="${esc(cost.code)}">העתק</button></div>` : `<div class="pp-coupon muted">אין קוד שמתאים לסכום הזה לבד. בעגלה גדולה יותר יש קודים.</div>`}
-      <p class="muted small">${p.live ? `מחיר נבדק מול ה-API הרשמי: ${checkedHe(p)} · המחיר הסופי, המשלוח והמע״מ נקבעים בקופה של עליאקספרס` : `מחיר נבדק: ${heDate(today)} (נתוני תצוגה) · המחיר הסופי נקבע בעליאקספרס`}</p>
+      <p class="muted small">${p.live ? `מחיר מבצע מה-API הרשמי, נבדק: ${checkedHe(p)}` : `מחיר נבדק: ${heDate(today)} (נתוני תצוגה) · המחיר הסופי נקבע בעליאקספרס`}</p>
+      ${p.live ? `<div class="note small">💡 <b>באפליקציה ייתכן שתראו "Discounted" עם מחיר נמוך יותר.</b> זה מחיר אישי שעליאקספרס מחשבת לחשבון שלכם אחרי כל הקופונים שיש לכם (כולל קופוני משתמש חדש, קופוני חנות ומטבעות), ולכן הוא שונה מאדם לאדם. כדי להגיע אליו: אוספים את קופוני החנות בעמוד המוצר ומדביקים את הקוד שלנו בתשלום.</div>` : ''}
       ${p.live ? `<a class="btn btn-big" href="${esc(p.link)}" ${OUTLINK}>לרכישה בעליאקספרס ←</a>` : `<span class="btn btn-big btn-dis" title="בתצוגה אין קישור למוצר אמיתי">לרכישה בעליאקספרס (יופעל עם ה-API)</span>`}
       <table class="specs">${(p.live ? [['חנות', p.shop], ['דירוג חיובי', p.rating != null ? `${p.rating}%` : ''], ['נמכרו', p.sold ? p.sold.toLocaleString('he-IL') : '']] : Object.entries(p.specs)).filter(([, v]) => v).map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table>
     </div>
