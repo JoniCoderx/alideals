@@ -528,3 +528,4 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .between b{font-size:1.1rem}
 .between p{margin:6px 0 12px;color:var(--ink-2)}
 .between-cta{display:flex;flex-wrap:wrap;gap:10px}
+.foot-fb{display:inline-flex!important;align-items:center;gap:6px}.foot-fb .tg-ico{width:16px;height:16px;color:#4f8cff}

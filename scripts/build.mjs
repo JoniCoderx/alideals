@@ -351,6 +351,7 @@ ${body}
       <a href="/finder/">🎯 צייד הדילים${FINDER_API ? '' : ' (בקרוב)'}</a>
       ${site.social.telegram ? `<a class="foot-tg" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">ערוץ טלגרם ${ICON.telegram}</a>` : ''}
       ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">ערוץ וואטסאפ</a>` : ''}
+      ${site.social.facebook ? `<a class="foot-fb" href="${esc(site.social.facebook)}" rel="noopener" target="_blank">עמוד פייסבוק <svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></a>` : ''}
     </div>
   </div>
   <div class="wrap footer-legal">© ${now.getFullYear()} ${esc(site.name)} · חלק מהקישורים באתר הם קישורי שותפים. <a href="/disclosure/">פרטים</a></div>
