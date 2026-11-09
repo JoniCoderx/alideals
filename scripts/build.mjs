@@ -440,8 +440,21 @@ const PRODUCTS_ON = site.productsInProduction === true;
 const allProducts = () => (PRODUCTS_ON ? Object.values(gen.deals || {}).flat().filter((p) => safeLink(p.link) && safeLink(p.image)) : []);
 const catItems = (slugName) => (PRODUCTS_ON ? (gen.deals?.[slugName] || []).filter((p) => safeLink(p.link) && safeLink(p.image)) : []);
 
+// Reviews + code reports: the real-time bot (Worker webhook → KV) is the source; generated.json is the fallback.
+if (site.cheapest?.apiUrl && !SAMPLE_MODE) {
+  try {
+    const r = await fetch(`${site.cheapest.apiUrl.replace(/\/$/, '')}/api/bot-state`, { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const st = await r.json();
+      gen.telegram = { ...(gen.telegram || {}), bot: gen.telegram?.bot || 'yeshdeall_bot' };
+      if (Array.isArray(st.reviews)) gen.telegram.reviews = st.reviews;
+      if (st.reports && typeof st.reports === 'object') gen.telegram.reports = st.reports;
+      console.log(`• bot state: ${(st.reviews || []).length} reviews`);
+    }
+  } catch (e) { console.log(`• bot state skipped: ${e.message}`); }
+}
 // Code reports collected by the Telegram bot (scripts/telegram.mjs → generated.json).
-const BOT = gen.telegram?.bot || '';
+const BOT = gen.telegram?.bot || 'yeshdeall_bot';
 const reports = Object.fromEntries(Object.entries(gen.telegram?.reports || {}).map(([code, list]) => [code, { recent: new Set((list || []).filter((r) => r && r.d && daysBetween(r.d, today) <= 3).map((r) => r.u)).size }]));
 
 const soonestExpiry = realCodes.map((c) => c.expires).filter(Boolean).sort()[0] || '';

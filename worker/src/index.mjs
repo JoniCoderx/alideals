@@ -4,6 +4,7 @@
 // Vars (wrangler.toml): ALLOWED_ORIGIN
 import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduct, rankAlternatives } from '../../scripts/cheapest-lib.mjs';
 import { classifyMatch } from '../../src/v2/logic.mjs';
+import { collectReports, collectReviews } from '../../scripts/telegram-bot.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
 const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link';
@@ -177,6 +178,45 @@ export async function publishQueued(env, now = new Date(), fetchImpl = fetch) {
   return { posted: item.key, ok: !!r.ok, error: r.ok ? undefined : r.description };
 }
 
+
+/* ---------------- Telegram bot (real time, via webhook) ----------------
+ * Telegram POSTs every message to /tg/webhook (set by the deploy workflow when the BOT KV namespace exists).
+ * Reviews and code reports are stored in KV ("state") and the site pulls them from /api/bot-state on each build. */
+async function webhookSecret(token) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(token)));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+const ilToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+async function handleBot(req, env) {
+  if (!env.BOT || !env.TELEGRAM_BOT_TOKEN) return new Response('off', { status: 503 });
+  if (req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== await webhookSecret(env.TELEGRAM_BOT_TOKEN)) return new Response('forbidden', { status: 403 });
+  const update = await req.json().catch(() => null);
+  if (!update?.message) return new Response('ok');
+  const today = ilToday();
+  const state = (await env.BOT.get('state', 'json')) || { reviews: [], pending: {}, reports: {} };
+  const rep = collectReports([update], { reports: state.reports || {}, codes: null, today });
+  const rv = collectReviews([update], { reviews: state.reviews || [], pending: state.pending || {}, today });
+  const next = { reviews: rv.reviews, pending: rv.pending, reports: rep.reports, at: new Date().toISOString() };
+  await env.BOT.put('state', JSON.stringify(next));
+  const site = env.SITE_URL || 'https://yeshdeal.com';
+  const TXT = {
+    thanks: (c) => `תודה על הדיווח! 🙏\nרשמנו שהקוד ${c} לא עבד לכם. אם כמה גולשים מדווחים על אותו קוד, נסמן אותו באתר ונבדוק אותו.\n\nבינתיים כדאי לנסות קוד ממדרגה אחרת: ${site}/#codes`,
+    unknown: () => `תודה! הקודים העדכניים כאן: ${site}/#codes`,
+    hello: () => `היי! 👋 אני הבוט של יש דיל!\nכל הקודים העדכניים לעליאקספרס: ${site}\n\n✍️ רוצים לכתוב לנו ביקורת? שלחו /review`,
+    reviewAsk: () => 'תודה שאתם כותבים ביקורת! 🙏\nשלחו עכשיו בהודעה אחת דירוג מ־1 עד 5 ואחריו כמה מילים, למשל:\n5 חסכתי 30 שקל בהזמנה עם הקוד מהאתר\n\nהביקורת תופיע באתר עם השם הפרטי שלכם.',
+    reviewThanks: () => `קיבלנו, תודה! ✨ הביקורת תעלה לאתר בעדכון הקרוב (עד שעה): ${site}/#reviews`,
+    reviewBad: () => 'לא הצלחנו לקלוט את הביקורת 😅\nשלחו שוב /review ואחריו הודעה אחת: דירוג 1–5 וטקסט קצר (10–400 תווים, בלי קישורים).',
+  };
+  const replies = [...rep.replies, ...rv.replies];
+  // A plain message that isn't a review gets a friendly pointer instead of silence.
+  const text = (update.message.text || '').trim();
+  if (!replies.length && update.message.chat?.type === 'private' && !/^\/start/.test(text)) replies.push({ chat: update.message.chat.id, kind: 'hello' });
+  for (const r of replies.slice(0, 2)) {
+    await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: r.chat, text: TXT[r.kind](r.code), disable_web_page_preview: true }) }).catch(() => {});
+  }
+  return new Response('ok');
+}
+
 export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(publishQueued(env).then((r) => console.log('telegram slot', JSON.stringify(r))).catch((e) => console.log('telegram slot error', e.message)));
@@ -186,6 +226,13 @@ export default {
     const url = new URL(req.url);
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
+    if (url.pathname === '/tg/webhook' && req.method === 'POST') return handleBot(req, env);
+    // Reviews + code reports for the site build (public data only: first names, texts, hashes).
+    if (url.pathname === '/api/bot-state' && req.method === 'GET') {
+      if (!env.BOT) return json({ error: 'off' }, 503, h);
+      const st = (await env.BOT.get('state', 'json')) || {};
+      return json({ reviews: st.reviews || [], reports: st.reports || {}, at: st.at || null }, 200, { ...h, 'Cache-Control': 'no-store' });
+    }
     if (url.pathname === '/health') return json({ ok: true, configured: !!(env.ALI_APP_KEY && env.ALI_APP_SECRET) }, 200, h);
     // Keyword search (Hebrew/English) – used by the 2.0 preview and for diagnostics. Short, cached, rate-limited by Cloudflare.
     if (url.pathname === '/api/search' && req.method === 'GET') {

@@ -164,6 +164,10 @@ jobs:
         if: env.CLOUDFLARE_API_TOKEN != ''
         working-directory: worker
         run: |
+          # KV namespace for the Telegram bot (reviews + code reports). Created once; skipped if the token can't manage KV.
+          KV_ID=$(npx -y wrangler@4 kv namespace list 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const a=JSON.parse(s.slice(s.indexOf("[")));const n=a.find(x=>x.title==="yeshdeal-bot"||x.title.endsWith("-yeshdeal-bot"));console.log(n?n.id:"")}catch{console.log("")}})')
+          if [ -z "$KV_ID" ]; then KV_ID=$(npx -y wrangler@4 kv namespace create yeshdeal-bot 2>&1 | grep -oE '[0-9a-f]{32}' | head -1 || true); fi
+          if [ -n "$KV_ID" ]; then printf '\n[[kv_namespaces]]\nbinding = "BOT"\nid = "%s"\n' "$KV_ID" >> wrangler.toml; echo "bot KV: $KV_ID"; else echo "bot KV unavailable (token lacks Workers KV permission)"; fi
           npx -y wrangler@4 deploy
           for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID GH_DISPATCH_TOKEN TELEGRAM_BOT_TOKEN; do
             v="${!k}"
@@ -174,4 +178,15 @@ jobs:
           ALI_APP_SECRET: ${{ secrets.ALI_APP_SECRET }}
           ALI_TRACKING_ID: ${{ secrets.ALI_TRACKING_ID }}
           GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      - name: Connect Telegram bot webhook
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: worker
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && { grep -q 'binding = "BOT"' wrangler.toml 2>/dev/null || npx -y wrangler@4 kv namespace list 2>/dev/null | grep -q yeshdeal-bot; }; then
+            S=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-32)
+            curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" --data-urlencode "url=https://yeshdeal-api.joni0000.workers.dev/tg/webhook" -d "secret_token=$S" --data-urlencode 'allowed_updates=["message"]' | head -c 200; echo
+            curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" -H 'Content-Type: application/json' -d '{"commands":[{"command":"review","description":"כתיבת ביקורת על יש דיל"}]}' | head -c 100; echo
+          else echo "no bot KV – webhook not set"; fi
+        env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
