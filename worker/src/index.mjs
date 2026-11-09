@@ -187,6 +187,75 @@ export async function publishQueued(env, now = new Date(), fetchImpl = fetch) {
 }
 
 
+
+/* ---------------- Price tracking (KV) → "today's deals" + price-drop alerts ----------------
+ * Every 6 hours: the tracked products (site /tracked.json) get their live price recorded (one point per Israel day,
+ * the lowest seen). Every 3 hours: products people asked to watch are checked; a drop of 5%+ sends a bot message. */
+const ilDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+async function livePrices(env, ids) {
+  const out = {};
+  for (let i = 0; i < ids.length; i += 20) {
+    const chunk = ids.slice(i, i + 20);
+    const r = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: 'HE', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, product_ids: chunk.join(','), country: 'IL' }).catch(() => null);
+    for (const p of r?.products?.product || []) { const n = normalizeProduct(p); if (n.price) out[n.id] = n; }
+    await new Promise((ok) => setTimeout(ok, 1100));
+  }
+  return out;
+}
+async function trackPrices(env) {
+  if (!env.BOT) return { skipped: 'no kv' };
+  const site = env.SITE_URL || 'https://yeshdeal.com';
+  const ids = ((await (await fetch(`${site}/tracked.json`, { cf: { cacheTtl: 600 } })).json().catch(() => ({}))).ids || []).slice(0, 120);
+  if (!ids.length) return { skipped: 'no ids' };
+  const live = await livePrices(env, ids);
+  const hist = (await env.BOT.get('prices', 'json')) || {};
+  const day = ilDay();
+  for (const [id, p] of Object.entries(live)) {
+    const h = (hist[id]?.h || []).filter((x) => x.d !== day || x.p <= p.price);
+    if (!h.some((x) => x.d === day)) h.push({ d: day, p: p.price });
+    hist[id] = { t: p.title, img: p.image, l: p.link, r: p.rating, s: p.sold, o: p.originalPrice, h: h.slice(-21) };
+  }
+  await env.BOT.put('prices', JSON.stringify(hist));
+  return { tracked: Object.keys(live).length };
+}
+// Real drops: today's price vs the highest price we recorded in the previous 7 days.
+async function dealsToday(env) {
+  const hist = (await env.BOT?.get('prices', 'json')) || {};
+  const day = ilDay();
+  const items = [];
+  for (const [id, x] of Object.entries(hist)) {
+    const now = x.h.find((p) => p.d === day) || x.h[x.h.length - 1];
+    const before = x.h.filter((p) => p.d < now.d).slice(-7);
+    if (!before.length) continue;
+    const max = Math.max(...before.map((p) => p.p));
+    const drop = Math.round((1 - now.p / max) * 100);
+    if (drop >= 3) items.push({ id, title: x.t, image: x.img, link: x.l, rating: x.r, sold: x.s, price: now.p, was: max, drop, since: before[0].d });
+  }
+  return items.sort((a, b) => b.drop - a.drop).slice(0, 24);
+}
+async function checkWatches(env) {
+  if (!env.BOT || !env.TELEGRAM_BOT_TOKEN) return { skipped: true };
+  let watches = (await env.BOT.get('watch', 'json')) || [];
+  const day = ilDay();
+  watches = watches.filter((w) => w.until >= day);
+  if (!watches.length) { await env.BOT.put('watch', '[]'); return { watches: 0 }; }
+  const live = await livePrices(env, [...new Set(watches.map((w) => w.id))].slice(0, 100));
+  let sent = 0;
+  for (const w of watches) {
+    const p = live[w.id];
+    if (!p || !(p.price <= w.price * 0.95)) continue;
+    const link = await shortAff(env, w.id, p.link);
+    await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      chat_id: w.chat, parse_mode: 'HTML', disable_web_page_preview: true,
+      text: `🔔 <b>המחיר ירד!</b>\n\n${escH(String(p.title || w.title).slice(0, 90))}\n<b>${ilsT(p.price)}</b> במקום ${ilsT(w.price)} (−${Math.round((1 - p.price / w.price) * 100)}%)\n\nמחירים לפני משלוח ומע״מ. אל תשכחו קוד קופון לפי סכום העגלה.`,
+      reply_markup: { inline_keyboard: [[{ text: '🛒 לקנייה במחיר הזה', url: link }], [{ text: '🔕 להפסיק לעקוב', callback_data: `al:rm:${w.id}` }]] },
+    }) }).catch(() => {});
+    w.price = p.price; sent++;
+  }
+  await env.BOT.put('watch', JSON.stringify(watches));
+  return { watches: watches.length, sent };
+}
+
 /* ---------------- Telegram bot (real time, via webhook) ----------------
  * Telegram POSTs every message to /tg/webhook (set by the deploy workflow when the BOT KV namespace exists).
  * Reviews and code reports are stored in KV ("state") and the site pulls them from /api/bot-state on each build. */
@@ -239,7 +308,7 @@ export async function hunterReply(env, text) {
   if (fit) msg += `\n\n💰 עם הקוד <code>${escH(fit.code)}</code> זה יוצא בערך <b>${ilsT(Math.max(0, Math.round((t.price - fit.d * rate) * 100) / 100))}</b> (ההנחה של $${fit.d} יורדת בקופה, לחיצה על הקוד מעתיקה אותו)`;
   else if (codes.length) { const first = codes.slice().sort((a, b) => a.m - b.m)[0]; msg += `\n\n💡 הוסיפו לעגלה עוד כ־${ilsT(Math.ceil((first.m - usd) * rate))} ותוכלו להשתמש בקוד <code>${escH(first.code)}</code> ($${first.d} הנחה).`; }
   msg += '\n\nמחירים לפני משלוח ומע״מ, ועשויים להשתנות.';
-  return { text: msg, html: true, buttons: [[{ text: cheaper ? '🛒 לקנייה במחיר הזה' : '🛒 לקנייה בעליאקספרס', url: link }], [{ text: '🔎 כל התוצאות באתר', url: `${site}/finder/?url=${encodeURIComponent(`https://www.aliexpress.com/item/${o.id}.html`)}` }]] };
+  return { text: msg, html: true, buttons: [[{ text: cheaper ? '🛒 לקנייה במחיר הזה' : '🛒 לקנייה בעליאקספרס', url: link }], [{ text: '🔔 תודיעו לי כשהמחיר יורד', callback_data: `al:add:${t.id}:${Math.round(t.price * 100)}` }], [{ text: '🔎 כל התוצאות באתר', url: `${site}/finder/?url=${encodeURIComponent(`https://www.aliexpress.com/item/${o.id}.html`)}` }]] };
 }
 
 async function handleBot(req, env, ctx) {
@@ -262,6 +331,28 @@ async function handleBot(req, env, ctx) {
       await tg('sendMessage', { chat_id: chatId, text: r.text, disable_web_page_preview: true, ...(r.html ? { parse_mode: 'HTML' } : {}), ...(r.buttons ? { reply_markup: { inline_keyboard: r.buttons } } : {}) });
     })();
     if (ctx?.waitUntil) ctx.waitUntil(work); else await work;
+    return new Response('ok');
+  }
+  // 0b) price-alert buttons
+  const cbd = update.callback_query?.data || '';
+  if (/^al:(add|rm):\d{6,20}/.test(cbd)) {
+    const [, act, id, cents] = cbd.split(':');
+    const chatId = update.callback_query.message?.chat?.id;
+    let watches = (await env.BOT.get('watch', 'json')) || [];
+    let note;
+    if (act === 'add') {
+      const mine = watches.filter((w) => w.chat === chatId);
+      if (mine.some((w) => w.id === id)) note = 'כבר עוקבים אחרי המוצר הזה 👍';
+      else if (mine.length >= 10) note = 'אפשר לעקוב אחרי עד 10 מוצרים בו זמנית.';
+      else {
+        const until = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+        watches.push({ chat: chatId, id, price: Number(cents) / 100, until });
+        note = '🔔 סגור! נודיע לכם כאן אם המחיר יורד ב־5% או יותר (מעקב ל־30 יום).';
+      }
+    } else { watches = watches.filter((w) => !(w.chat === chatId && w.id === id)); note = '🔕 הפסקנו לעקוב אחרי המוצר.'; }
+    await env.BOT.put('watch', JSON.stringify(watches));
+    await tg('answerCallbackQuery', { callback_query_id: update.callback_query.id });
+    if (chatId) await tg('sendMessage', { chat_id: chatId, text: note });
     return new Response('ok');
   }
   // 1) the review conversation (buttons + text)
@@ -292,12 +383,20 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(publishQueued(env).then((r) => console.log('telegram slot', JSON.stringify(r))).catch((e) => console.log('telegram slot error', e.message)));
     ctx.waitUntil(dispatchWorkflow(env).then((r) => console.log('clock dispatch', JSON.stringify(r))).catch((e) => console.log('clock error', e.message)));
+    const hr = new Date(event.scheduledTime || Date.now()).getUTCHours();
+    if (hr % 6 === 3) ctx.waitUntil(trackPrices(env).then((r) => console.log('prices', JSON.stringify(r))).catch((e) => console.log('prices error', e.message)));
+    if (hr % 3 === 1) ctx.waitUntil(checkWatches(env).then((r) => console.log('watches', JSON.stringify(r))).catch((e) => console.log('watch error', e.message)));
   },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (url.pathname === '/tg/webhook' && req.method === 'POST') return handleBot(req, env, ctx);
+    if (url.pathname === '/api/deals-today' && req.method === 'GET') return json({ items: await dealsToday(env), at: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'no-store' });
+    if (url.pathname === '/api/track-now' && req.method === 'POST') {
+      if (!env.TELEGRAM_BOT_TOKEN || req.headers.get('X-Key') !== await webhookSecret(env.TELEGRAM_BOT_TOKEN)) return json({ error: 'forbidden' }, 403, h);
+      return json(await trackPrices(env), 200, h);
+    }
     // Preview of the bot's Deal Hunter answer (same text/buttons the bot sends) – for QA.
     if (url.pathname === '/api/hunter-preview' && req.method === 'GET') {
       if (limited(req, 'cheapest', RATE.max)) return json(RATE_LIMITED, 429, h);

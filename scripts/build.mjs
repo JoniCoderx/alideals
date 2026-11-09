@@ -273,6 +273,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
     ...(FINDER_API ? [['/finder/', '🎯 צייד הדילים']] : []),
     ['/coupon/', 'קטגוריות'],
     ['/top/', 'מומלצים'],
+    ['/deals-today/', 'דילים של היום'],
     ...(allProducts().length ? [['/deals/', 'דילים']] : []),
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
     ['/guides/', 'מדריכים'],
@@ -343,6 +344,7 @@ ${body}
       <a href="/existing-user/">קוד קופון למשתמש קיים</a>
       <a href="/coupon/">קופונים לפי קטגוריה</a>
       <a href="/top/">מוצרים מומלצים</a>
+      <a href="/deals-today/">דילים של היום</a>
       ${categories.map((c) => `<a href="/coupon/${c.slug}/">קופון ל${esc(c.short)}</a>`).join('')}
       ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ${esc(le(e.name.split(' –')[0]))}</a>`).join('')}
     </div>
@@ -997,6 +999,14 @@ const topItems = {};
   }
   console.log(`• curated lists: ${Object.values(topItems).filter((x) => x.live).length}/${ids.length} live prices`);
 }
+let dealsToday = [];
+if (site.cheapest?.apiUrl && !SAMPLE_MODE) {
+  try {
+    const r = await fetch(`${site.cheapest.apiUrl.replace(/\/$/, '')}/api/deals-today`, { signal: AbortSignal.timeout(8000) });
+    dealsToday = ((await r.json()).items || []).filter((x) => safeLink(x.link) && x.price > 0);
+    console.log(`• deals today: ${dealsToday.length} real price drops`);
+  } catch (e) { console.log(`• deals today skipped: ${e.message}`); }
+}
 const topAt = new Intl.DateTimeFormat('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date());
 const ilsFmt = (n) => `₪${Number(n).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const topAnyLive = () => Object.values(topItems).some((x) => x.live);
@@ -1016,6 +1026,26 @@ function picksSection() {
     return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-ctx="picks"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async"><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s><i>-${off}%</i>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
   }).join('')}</div>
 </div></section>`;
+}
+
+
+function dealsTodayPage() {
+  const pathname = '/deals-today/';
+  const bc = breadcrumbs([{ name: 'דילים של היום', url: pathname }]);
+  const list = dealsToday;
+  const body = `
+<section class="hero hero-sm"><div class="wrap narrow">${bc.html}
+  <h1>דילים של היום בעליאקספרס: מוצרים שהמחיר שלהם ירד</h1>
+  <p class="lead">אנחנו עוקבים אחרי המחירים של מאות מוצרים נבחרים כמה פעמים ביום. כאן מופיעים רק מוצרים שהמחיר שלהם היום <strong>נמוך באמת</strong> מהמחיר הגבוה שלהם בשבוע האחרון, לא "הנחה" מול מחיר מקורי מנופח.</p>
+  <p class="muted small">מחירים בשקלים לפני משלוח ומע״מ, לפי עליאקספרס. עודכן: ${esc(topAt)}.</p>
+</div></section>
+<section class="section"><div class="wrap narrow">
+  ${list.length ? `<ol class="top-list">${list.map((x, i) => `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(String(x.title).slice(0, 90))}</h2><p class="top-meta">${x.rating ? `${Math.round(x.rating)}% ביקורות חיוביות · ` : ''}${x.sold ? `${Number(x.sold).toLocaleString('he-IL')} נמכרו` : ''}</p><p class="top-price"><b>${ilsFmt(x.price)}</b><s>${ilsFmt(x.was)}</s><span class="pp-off">ירד ${x.drop}%</span></p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="deals-today">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`).join('')}</ol>`
+    : `<div class="between"><b>📉 מתחילים לעקוב</b><p>מעקב המחירים התחיל עכשיו. ברגע שנזהה מוצר שהמחיר שלו ירד באמת לעומת השבוע האחרון, הוא יופיע כאן (ובערוץ הטלגרם). בינתיים: <a href="/top/">המוצרים הנבחרים שלנו</a> ו<a href="/#codes">כל קודי הקופון</a>.</p>${tgBtn('קבלו דילים בטלגרם')}</div>`}
+  <p class="muted">רוצים לדעת כשמוצר מסוים יורד במחיר? שלחו את הקישור שלו ל<a href="https://t.me/${BOT}" rel="noopener" target="_blank">בוט שלנו בטלגרם</a> ולחצו "🔔 תודיעו לי כשהמחיר יורד".</p>
+  ${affCta('deals-today')}
+</div></section>`;
+  return layout({ title: `דילים של היום בעליאקספרס: ירידות מחיר אמיתיות | ${site.name}`, description: 'מוצרים מעליאקספרס שהמחיר שלהם ירד היום לעומת השבוע האחרון, לפי מעקב מחירים אוטומטי. מחירים בשקלים, דירוג ומספר מכירות, וקישור ישיר.', pathname, body, ld: [bc.ld], noindex: list.length < 3 });
 }
 
 function topIndexPage() {
@@ -1131,6 +1161,7 @@ for (const c of site.dealCategories) {
   await page(`/deals/${c.slug}/`, dealCategoryPage(c), { index: has, lastmod: has ? dataUpdated : undefined });
 }
 for (const e of manual.events || []) await page(`/sale/${e.slug}/`, eventPage(e), { lastmod: dataUpdated });
+await page('/deals-today/', dealsTodayPage(), { index: dealsToday.length >= 3, lastmod: today });
 if (catalog.collections.some((c) => topList(c).length)) {
   await page('/top/', topIndexPage(), { lastmod: today });
   for (const c of catalog.collections) if (topList(c).length) await page(`/top/${c.slug}/`, topPage(c), { lastmod: today });
@@ -1221,6 +1252,8 @@ await write('404.html', layout({
 await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
 await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\nDisallow: /admin/\nDisallow: /p/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 await write('.nojekyll', '');
+const trackedIds = [...new Set([...Object.values(topItems).map((x) => x.id), ...productPool.filter((p) => p.rating >= (catalog.criteria?.minRating || 92) && p.sold >= (catalog.criteria?.minSold || 300)).map((p) => p.id)])].slice(0, 120);
+await write('tracked.json', JSON.stringify({ at: new Date().toISOString(), ids: trackedIds }));
 // Live coupon tiers for the Telegram bot's Deal Hunter (the codes are public on the site anyway).
 await write('codes.json', JSON.stringify({ at: new Date().toISOString(), codes: realCodes.filter((c) => c.code && (c.currency || 'USD') === 'USD').map((c) => ({ code: c.code, d: c.discount, m: c.minOrder, x: c.expires || '' })) }));
 if (gen.telegram?.posted) await write('telegram-state.json', JSON.stringify(gen.telegram));
