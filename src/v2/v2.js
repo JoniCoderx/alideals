@@ -122,9 +122,11 @@ function renderResults(j, box) {
   const best = same.slice().sort((a, b) => a.price - b.price)[0];
   if (o.price != null && o.link) {
     const cheaper = best && best.price < o.price - 0.5 ? best : null;
-    h += cheaper
+    h += !same.length
+      ? `<div class="verdict"><span class="v-emoji">🔎</span><div><b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b><p class="small">אין עם מה להשוות. אפשר לקנות כאן ולהוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="${esc(safeUrl(o.link))}" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a></div>`
+      : cheaper
       ? `<div class="verdict win"><span class="v-emoji">🎯</span><div><b>מצאנו זול יותר ב־${ils(o.price - cheaper.price)}</b><p class="small">${cheaper.m.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע'} אצל ${esc(cheaper.shop || 'מוכר אחר')}: ${ils(cheaper.price)}</p></div><a class="btn btn-primary" href="${esc(safeUrl(cheaper.link))}" rel="nofollow sponsored noopener">לקנייה במחיר הזה ←</a></div>`
-      : `<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p class="small">בדקנו ${j.checked ?? pool.length} הצעות ולא מצאנו את אותו מוצר בפחות. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="${esc(safeUrl(o.link))}" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a></div>`;
+      : `<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p class="small">השווינו ל־${same.length} הצעות של אותו מוצר, ואף אחת לא זולה יותר. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="${esc(safeUrl(o.link))}" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a></div>`;
   }
   const any = groups.map(([lvl, t, sub]) => { const l = pool.filter((c) => c.m.level === lvl).sort((a, b) => a.price - b.price); return l.length ? `<h3 class="grp">${t}</h3><p class="muted small">${sub}</p>${l.map(card).join('')}` : ''; }).join('');
   h += any || '<div class="note">לא מצאנו הצעה אחרת לאותו מוצר. כנראה שהמחיר שבחרתם כבר טוב 👌 אפשר להוסיף עליו <a href="/test/#coupons">קוד קופון לפי סכום העגלה</a>.</div>';

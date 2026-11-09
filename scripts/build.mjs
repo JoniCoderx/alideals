@@ -975,7 +975,8 @@ const topItems = {};
 }
 const topAt = new Intl.DateTimeFormat('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date());
 const ilsFmt = (n) => `₪${Number(n).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && safeLink(x.link) && x.price > 0 && x.rating >= (catalog.criteria?.minRating || 0) && x.sold >= (catalog.criteria?.minSold || 0));
+const topAnyLive = () => Object.values(topItems).some((x) => x.live);
+const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && (!topAnyLive() || x.live) && safeLink(x.link) && x.price > 0 && x.rating >= (catalog.criteria?.minRating || 0) && x.sold >= (catalog.criteria?.minSold || 0));
 
 function topIndexPage() {
   const pathname = '/top/';
@@ -1002,7 +1003,7 @@ function topPage(c) {
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
   <h1>${esc(title)}</h1>
   <p class="lead">${esc(c.intro || '')}</p>
-  <p class="muted small">איך בחרנו: דירוג של ${catalog.criteria?.minRating || 92}% ומעלה, לפחות ${catalog.criteria?.minSold || 300} מכירות, ומשלוח לישראל. המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}, לפני משלוח ומע״מ, ועשויים להשתנות.</p>
+  <p class="muted small">איך בחרנו: דירוג של ${catalog.criteria?.minRating || 92}% ומעלה, לפחות ${catalog.criteria?.minSold || 300} מכירות, ומשלוח לישראל. ${topAnyLive() ? `המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}` : 'המחירים מהבדיקה הקודמת שלנו'}, לפני משלוח ומע״מ, ועשויים להשתנות.</p>
 </div></section>
 <section class="section"><div class="wrap narrow"><ol class="top-list">
   ${list.map((x, i) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="top">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; }).join('')}

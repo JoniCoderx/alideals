@@ -573,3 +573,5 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .pp-off{background:#c20e28;color:#fff;font-weight:800;border-radius:8px;padding:2px 8px;font-size:.8rem}
 @media(max-width:560px){.top-item{grid-template-columns:auto 84px minmax(0,1fr);gap:10px;padding:10px}.top-img img{width:84px;height:84px}.top-body .btn{width:100%;justify-content:center}}
 .top-thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.top-thumbs img{width:100%;height:auto;aspect-ratio:1}
+.top-price{flex-wrap:wrap;row-gap:4px}.top-body{min-width:0}
+@media(max-width:420px){.top-item{grid-template-columns:28px 72px minmax(0,1fr);gap:8px}.top-rank{width:26px;height:26px;font-size:.85rem}.top-img img{width:72px;height:72px}.top-body .btn{white-space:normal;font-size:.9rem;padding:10px 12px;line-height:1.2}}

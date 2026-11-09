@@ -40,7 +40,14 @@ async function hmacHex(secret, msg) {
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 
+// AliExpress allows ~1 call/second per app and answers "ApiCallLimit … ban 1 second" beyond it: wait and retry (max 2).
 export async function aliCall(env, method, biz, fetchImpl = fetch) {
+  for (let i = 0; ; i++) {
+    try { return await aliCallOnce(env, method, biz, fetchImpl); }
+    catch (e) { if (i >= 2 || !/ApiCallLimit|call limit|frequency|ban \d/i.test(String(e.message))) throw e; await new Promise((r) => setTimeout(r, 1100 * (i + 1))); }
+  }
+}
+async function aliCallOnce(env, method, biz, fetchImpl = fetch) {
   const params = { method, app_key: String(env.ALI_APP_KEY).trim(), sign_method: 'sha256', timestamp: String(Date.now()) };
   for (const [k, v] of Object.entries(biz)) if (v !== undefined && v !== null && v !== '') params[k] = String(v);
   const base = Object.keys(params).sort().map((k) => k + params[k]).join('');

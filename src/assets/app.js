@@ -10,6 +10,9 @@
     try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date()); }
     catch (e) { return new Date().toISOString().slice(0, 10); }
   })();
+  // Codes end at 23:00 Israel time on their expiry day (as the site says), not at midnight.
+  var ilHour = (function () { try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }).format(new Date())); } catch (e) { return 0; } })();
+  var expired = function (d) { return !!d && (d < today || (d === today && ilHour >= 23)); };
 
   // Hide codes that expired since the last build (in case a scheduled build was missed).
   (function () {
@@ -41,8 +44,18 @@
     if (days <= 3) el.classList.add('is-hot');
   });
   document.querySelectorAll('.coupon[data-expires]').forEach(function (card) {
-    if (card.getAttribute('data-expires') < today) { card.hidden = true; card.setAttribute('data-expired', ''); }
+    if (expired(card.getAttribute('data-expires'))) { card.hidden = true; card.setAttribute('data-expired', ''); }
   });
+  (function () {
+    var all = document.querySelectorAll('.coupon[data-expires]');
+    if (!all.length || [].some.call(all, function (c) { return !c.hidden; })) return;
+    var list = all[0].parentElement;
+    var note = document.createElement('div');
+    note.className = 'between';
+    note.innerHTML = '<b>⏳ הקודים של המבצע הסתיימו</b><p>קודים חדשים יעלו כאן ובערוץ הטלגרם זמן קצר אחרי שעליאקספרס תפרסם אותם.</p>';
+    list.parentElement.insertBefore(note, list);
+    document.querySelectorAll('.featured-row, .tiers-box, #sticky-cta').forEach(function (el) { el.hidden = true; });
+  })();
 
   /** Resolves true if the text reached the clipboard. */
   function copy(text) {
@@ -203,7 +216,7 @@
   var calc = $('calc'), input = $('calc-amount'), out = $('calc-out');
   var tiers = [];
   try { tiers = JSON.parse(($('calc-data') || {}).textContent || '[]'); } catch (e) {}
-  tiers = tiers.filter(function (t) { return !t.x || t.x >= today; });
+  tiers = tiers.filter(function (t) { return !expired(t.x); });
   var currency = 'USD';
   try { currency = localStorage.getItem('calc-cur') || 'USD'; } catch (e) {}
   var rate = calc ? Number(calc.getAttribute('data-rate')) || 3.7 : 3.7;
@@ -343,8 +356,10 @@
           var html = '';
           if (cheaper) {
             html += '<div class="verdict win"><span class="v-emoji">🎯</span><div><b>מצאנו זול יותר ב־' + ils(Math.round((o.price - cheaper.price) * 100) / 100) + '</b><p>' + (cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע') + ' אצל ' + h(cheaper.shop || 'מוכר אחר') + ': ' + ils(cheaper.price) + '</p></div><a class="btn btn-primary" href="' + h(safe(cheaper.link)) + '" rel="nofollow sponsored" data-finder="' + h(cheaper.id) + '">לקנייה במחיר הזה</a></div>';
+          } else if (safe(o.link) && !same.length) {
+            html += '<div class="verdict"><span class="v-emoji">🔎</span><div><b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b><p>אין לנו עם מה להשוות את המחיר הזה. אפשר לקנות כאן ולהוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a></div>';
           } else if (safe(o.link)) {
-            html += '<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p>בדקנו ' + h(j.checked || pool.length) + ' הצעות ולא מצאנו את אותו מוצר בפחות. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a></div>';
+            html += '<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p>השווינו ל־' + same.length + ' הצעות של אותו מוצר, ואף אחת לא זולה יותר. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a></div>';
           }
           var groups = [['exact', '✅ אותו דגם', 'שם דגם זהה, בלי סתירה במאפיינים'], ['likely', '🟡 כנראה אותו מוצר', 'דומה מאוד. בודקים גרסה, צבע ומפרט לפני שקונים'], ['similar', '🔁 חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
           groups.forEach(function (g) {
