@@ -640,10 +640,22 @@ function renderSettings() {
 // ---------- משחק ----------
 let answers = [];
 let sendTimer = null;
-const ansKey = () => `eretzir:ans:${S.code}:${S.round}`;
+const ANS_PREFIX = 'eretzir:ans:';
+const ansKey = () => `${ANS_PREFIX}${S.code}:${S.roundId || S.round}`;
+function clearOldAnswers() {
+  // תשובות שמורות של סיבובים/משחקים קודמים לא אמורות לחזור אף פעם
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith(ANS_PREFIX) && k !== ansKey()) sessionStorage.removeItem(k);
+    }
+  } catch {}
+}
 
 function buildGame() {
   const inRound = S.participants.includes(S.you);
+  clearOldAnswers();
+  lastBeepSec = -1;
   let local = null;
   try { local = JSON.parse(sessionStorage.getItem(ansKey()) || 'null'); } catch {}
   const server = S.myAnswers || [];

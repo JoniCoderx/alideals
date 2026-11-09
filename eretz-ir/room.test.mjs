@@ -64,3 +64,19 @@ test('room: bye drops the connection right away', (t) => {
   assert.ok(!room.isOnline(b));
   assert.ok(room.isOnline(a));
 });
+
+test('room: every round gets a fresh roundId, also after "play again"', (t) => {
+  const room = new Room('8888');
+  t.after(() => room.dispose());
+  const a = room.addPlayer('A');
+  room.connect(a, { send() {} });
+  room.act(a, { type: 'start' });
+  const first = room.roundId;
+  assert.equal(room.round, 1);
+  room.phase = 'final';
+  room.act(a, { type: 'playAgain' });
+  assert.equal(room.roundId, null);
+  room.act(a, { type: 'start' });
+  assert.equal(room.round, 1);
+  assert.notEqual(room.roundId, first);
+});

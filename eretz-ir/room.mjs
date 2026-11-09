@@ -26,6 +26,7 @@ export class Room {
     this.settings = defaultSettings(lang);
     this.phase = 'lobby'; // lobby | countdown | playing | collecting | review | scores | final
     this.round = 0;
+    this.roundId = null;
     this.letter = null;
     this.usedLetters = [];
     this.startsAt = 0;
@@ -149,6 +150,7 @@ export class Room {
       settings: this.settings,
       phase: this.phase,
       round: this.round,
+      roundId: this.roundId || null,
       letter: this.phase === 'countdown' ? null : this.letter,
       startsAt: this.startsAt,
       endsAt: this.endsAt,
@@ -190,6 +192,7 @@ export class Room {
     const online = [...this.players.values()].filter((p) => this.isOnline(p));
     if (!online.length) return;
     this.round += 1;
+    this.roundId = rid(6); // מזהה ייחודי לסיבוב: לא חוזר גם במשחק חדש באותו חדר
     this.letter = pickLetter(this.settings.letters, this.usedLetters);
     this.usedLetters.push(this.letter);
     this.categories = [...this.settings.categories];
@@ -257,7 +260,7 @@ export class Room {
     this.clearTimer();
     for (const p of this.players.values()) p.score = 0;
     Object.assign(this, {
-      phase: 'lobby', round: 0, letter: null, usedLetters: [], startsAt: 0, endsAt: 0, stoppedBy: null,
+      phase: 'lobby', round: 0, roundId: null, letter: null, usedLetters: [], startsAt: 0, endsAt: 0, stoppedBy: null,
       categories: [], participants: [], answers: {}, votes: {}, ready: new Set(), result: null, history: [],
     });
     for (const [id, p] of this.players) if (!this.isOnline(p)) this.players.delete(id);
