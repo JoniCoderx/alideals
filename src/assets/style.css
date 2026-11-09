@@ -603,3 +603,4 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .pick-price{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
 .pick-price s{overflow:hidden;text-overflow:ellipsis}
 .pick-cta{align-self:end;padding-top:4px}
+.ft-error{margin:6px 0 0;padding:8px 12px;border-radius:10px;background:#fff1ea;color:#a40d22;font-weight:700;font-size:.92rem}

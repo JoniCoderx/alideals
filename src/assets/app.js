@@ -316,6 +316,26 @@
     if (code && code === b.getAttribute('data-code')) markRevealed(id, code);
   });
 
+  /* ---------- Deal Hunter input check (homepage form + finder): only AliExpress product links or ids ---------- */
+  var isAliInput = function (v) {
+    v = String(v || '').trim();
+    return /^\d{10,20}$/.test(v) || /(^|\/\/|\s|\.)((?:[a-z0-9-]+\.)*aliexpress\.(com|us|ru)|s\.click\.aliexpress\.com|a\.aliexpress\.com)\//i.test(v);
+  };
+  var aliHint = 'זה לא נראה כמו קישור למוצר בעליאקספרס. העתיקו את הקישור מעמוד המוצר (באפליקציה: שיתוף ← העתקת קישור) ונסו שוב.';
+  var showHint = function (form, msg) {
+    var hint = form.querySelector('.ft-error');
+    if (!hint) { hint = document.createElement('p'); hint.className = 'ft-error'; hint.setAttribute('role', 'alert'); form.appendChild(hint); }
+    hint.textContent = msg || '';
+    hint.hidden = !msg;
+  };
+  document.querySelectorAll('.ft-form').forEach(function (f) {
+    var inp = f.querySelector('input[name="url"]');
+    f.addEventListener('submit', function (e) {
+      if (!isAliInput(inp.value)) { e.preventDefault(); showHint(f, aliHint); inp.focus(); track('hunter_invalid_input'); }
+    });
+    inp.addEventListener('input', function () { showHint(f, ''); });
+  });
+
   /* ---------- צייד הדילים: paste a product link → cheapest same product (via the Worker API) ---------- */
   var ff = $('finder-form');
   if (ff) {
@@ -358,6 +378,7 @@
     var run = function () {
       var v = (fin.value || '').trim();
       if (!v) { fin.focus(); return; }
+      if (!isAliInput(v)) { status(aliHint, true); fin.focus(); return; }
       if (!api) { status('🎯 הצייד יוצא לדרך ממש בקרוב.'); return; }
       fgo.disabled = true;
       status('<span class="finder-spin"></span>מחפשים את אותו מוצר אצל מוכרים אחרים…');
