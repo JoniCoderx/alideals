@@ -250,7 +250,7 @@ function topbar() {
   const short = activeEvent.name.split(' –')[0];
   const days = daysBetween(today, activeEvent.start);
   const text = live
-    ? `🔥 קודי ${esc(short)} לישראל בתוקף עכשיו${activeEvent.end ? `, עד ${heDate(activeEvent.end)}` : ''}. לכל הקודים`
+    ? `קודי ${esc(short)} בתוקף${activeEvent.end ? ` עד ${heShort(activeEvent.end)}` : ' עכשיו'} 🔥 לכל הקודים`
     : activeEvent.start <= today ? `⏳ ${esc(short)} כאן. הקודים לישראל יעלו לכאן ברגע שעליאקספרס תפרסם אותם` : `⏳ ${esc(short)} מתחיל ${days === 1 ? 'מחר' : `בעוד ${days} ימים`}. כך מתכוננים`;
   return `<div class="topbar"><a href="/sale/${activeEvent.slug}/">${text} ←</a></div>`;
 }
@@ -490,8 +490,8 @@ function homePage() {
         <a class="btn btn-primary" href="#codes">לכל הקודים ↓</a>
         ${tgBtn('קודים חדשים בטלגרם')}
         ${fbBtn('פייסבוק')}
+        ${activeEvent ? `<a class="hero-event-chip" href="/sale/${activeEvent.slug}/">קודי ${esc(activeEvent.name.split(' –')[0])} 🔥</a>` : ''}
       </div>
-      ${activeEvent ? `<p class="hero-event"><a href="/sale/${activeEvent.slug}/">🔥 קודי ${esc(activeEvent.name.split(' –')[0])} ←</a></p>` : ''}
     </div>
     ${calcWidget()}
     ${featuredCoupons.length ? `<div class="featured-row">${featuredCoupons.map((c, i) => `
@@ -531,7 +531,7 @@ ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wr
     <h2>יש לכם מוצר בעגלה? בואו&nbsp;נבדוק&nbsp;אותו</h2>
     <p class="hunter-tag">מדביקים קישור, ותוך שניות יודעים אם יש אותו מוצר בזול יותר וכמה הוא יעלה עם קוד קופון.</p>
     <form class="ft-form" action="/finder/" method="get" autocomplete="off">
-      <input name="url" type="text" inputmode="url" dir="ltr" placeholder="הדביקו קישור מעליאקספרס" aria-label="קישור למוצר מעליאקספרס" required>
+      <input name="url" type="text" inputmode="url" dir="rtl" placeholder="הדביקו כאן קישור מ־AliExpress" aria-label="קישור למוצר מ־AliExpress" required>
       <button class="btn btn-primary" type="submit">שלחו את הצייד 🎯</button>
     </form>
     <p class="ft-note">עובד גם עם קישור מקוצר מהאפליקציה (שיתוף ← העתקת קישור).</p>
@@ -607,7 +607,14 @@ ${hotProducts.length ? `
 <section class="section">
   <div class="wrap info-grid info-stack">
     <div class="info-card"><h2>מתי יוצאים הקודים הכי שווים?</h2>
-    <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של עליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p></div>
+    <p>הקודים הגבוהים ביותר יוצאים במבצעים הגדולים של עליאקספרס. אלה המועדים שכדאי לסמן ביומן:</p>
+    <ul class="sale-timeline">
+      <li><b>סוף מרץ</b><span>יום ההולדת של עליאקספרס</span></li>
+      <li><b>יוני</b><span>מבצע אמצע השנה</span></li>
+      <li><b>סוף אוקטובר – 11.11</b><span>המבצע הגדול של השנה</span></li>
+      <li><b>סוף נובמבר</b><span>בלאק פריידי וסייבר מאנדיי</span></li>
+    </ul>
+    <p class="muted small">המועדים המדויקים מתפרסמים קרוב לכל מבצע. ב<a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> יש את הפירוט המלא, וב<a href="/guides/stacking-aliexpress-discounts/">מדריך לשילוב הנחות</a> מוסבר איך לצבור כמה הנחות באותה הזמנה.</p></div>
     <div class="info-card"><h2>מדריכים פופולריים</h2>
     <ul>
       <li><a href="/guides/first-time-aliexpress/">איך קונים בעליאקספרס בפעם הראשונה</a></li>
@@ -777,7 +784,7 @@ function finderPage() {
   <form class="finder" id="finder-form" data-api="${esc(FINDER_API)}" data-rate="${USD_ILS}" data-tiers="${esc(JSON.stringify(realCodes.filter((c) => (c.currency || 'USD') === 'USD' && c.code).map((c) => ({ d: c.discount, m: c.minOrder, code: c.code, x: c.expires || '' }))))}" autocomplete="off">
     <label for="finder-url" class="calc-label">הקישור למוצר</label>
     <div class="finder-row">
-      <input id="finder-url" name="url" type="text" inputmode="url" dir="ltr" placeholder="https://he.aliexpress.com/item/..." required>
+      <input id="finder-url" name="url" type="text" inputmode="url" dir="rtl" placeholder="הדביקו כאן קישור מ־AliExpress" required>
       <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>שלחו את הצייד 🎯</button>
     </div>
     <p class="muted finder-help">באפליקציה: עמוד המוצר ← שיתוף ← העתקת קישור. עובד גם עם קישורים מקוצרים.</p>
@@ -1023,7 +1030,7 @@ function picksSection() {
   if (list.length < 3) return '';
   return `<section class="section picks" id="picks"><div class="wrap">
   <div class="section-head"><h2 class="section-title">נבחרי יש דיל ⭐</h2><a class="more" href="/top/">לכל ההמלצות ←</a></div>
-  <p class="muted picks-sub">מוצרים שבחרנו ידנית: דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחיר נבדק מול עליאקספרס ב־${esc(topAt)}. המחיר המחוק והאחוז הם לפי המחיר המקורי שעליאקספרס מציגה.</p>
+  <p class="muted picks-sub">בחירה ידנית: דירוג גבוה ואלפי מכירות. מחירים מעליאקספרס, ${esc(topAt)}.<span class="picks-note">המחיר המחוק לפי עליאקספרס.</span></p>
   <div class="picks-row" tabindex="0" aria-label="מוצרים נבחרים">${list.map((x) => {
     const o = x.live; const off = o.orig > o.price ? Math.round((1 - o.price / o.orig) * 100) : 0;
     return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-ctx="picks"><span class="pick-media"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async">${off >= 5 ? `<i class="pick-off">-${off}%</i>` : ''}</span><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
@@ -1044,8 +1051,17 @@ function dealsTodayPage() {
 </div></section>
 <section class="section"><div class="wrap narrow">
   ${list.length ? `<ol class="top-list">${list.map((x, i) => `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(String(x.title).slice(0, 90))}</h2><p class="top-meta">${x.rating ? `${Math.round(x.rating)}% ביקורות חיוביות · ` : ''}${x.sold ? `${Number(x.sold).toLocaleString('he-IL')} נמכרו` : ''}</p><p class="top-price"><b>${ilsFmt(x.price)}</b><s>${ilsFmt(x.was)}</s><span class="pp-off">ירד ${x.drop}%</span></p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="deals-today">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`).join('')}</ol>`
-    : `<div class="between"><b>📉 מתחילים לעקוב</b><p>מעקב המחירים התחיל עכשיו. ברגע שנזהה מוצר שהמחיר שלו ירד באמת לעומת השבוע האחרון, הוא יופיע כאן (ובערוץ הטלגרם). בינתיים: <a href="/top/">המוצרים הנבחרים שלנו</a> ו<a href="/#codes">כל קודי הקופון</a>.</p>${tgBtn('קבלו דילים בטלגרם')}</div>`}
-  <p class="muted">רוצים לדעת כשמוצר מסוים יורד במחיר? שלחו את הקישור שלו ל<a href="https://t.me/${BOT}" rel="noopener" target="_blank">בוט שלנו בטלגרם</a> ולחצו "🔔 תודיעו לי כשהמחיר יורד".</p>
+    : `<div class="dt-empty"><b>מעקב המחירים התחיל, והירידות הראשונות יופיעו כאן בימים הקרובים 📉</b><p>כדי לזהות ירידה אמיתית אנחנו צריכים לפחות כמה ימים של מחירים לכל מוצר. בינתיים, אלה המוצרים שאנחנו עוקבים אחריהם, במחיר של היום:</p></div>
+  <ol class="top-list">${Object.values(topItems).filter((x) => x.live && x.price > 0 && safeLink(x.link) && x.rating >= (catalog.criteria?.minRating || 92) && x.sold >= (catalog.criteria?.minSold || 300)).sort((a, b2) => b2.sold - a.sold).slice(0, 12).map((x, i) => `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b><span class="muted small">המחיר היום</span></p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="deals-today">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`).join('')}</ol>`}
+  <div class="dt-how">
+    <h2>איך זה עובד</h2>
+    <ol>
+      <li><b>עוקבים</b> אחרי המחירים של המוצרים הנבחרים שלנו כמה פעמים ביום, ישירות מעליאקספרס.</li>
+      <li><b>משווים</b> את המחיר של היום למחיר הגבוה של אותו מוצר בשבוע האחרון.</li>
+      <li><b>מציגים</b> רק ירידות אמיתיות של 3% ומעלה, בלי "הנחות" מול מחיר מקורי מנופח.</li>
+    </ol>
+    <p class="muted">רוצים לדעת כשמוצר מסוים יורד במחיר? שלחו את הקישור שלו ל<a href="https://t.me/${BOT}" rel="noopener" target="_blank">בוט שלנו בטלגרם</a> ולחצו "תודיעו לי כשהמחיר יורד".</p>
+  </div>
   ${affCta('deals-today')}
 </div></section>`;
   return layout({ title: `דילים של היום בעליאקספרס: ירידות מחיר אמיתיות | ${site.name}`, description: 'מוצרים מעליאקספרס שהמחיר שלהם ירד היום לעומת השבוע האחרון, לפי מעקב מחירים אוטומטי. מחירים בשקלים, דירוג ומספר מכירות, וקישור ישיר.', pathname, body, ld: [bc.ld], noindex: list.length < 3 });
@@ -1095,10 +1111,11 @@ function topIndexPage() {
   <h1>מוצרים מומלצים מעליאקספרס</h1>
   <p class="lead">רשימות שבחרנו ידנית: מוצרים עם דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחירים מתעדכנים אוטומטית.</p>
 </div></section>
-<section class="section"><div class="wrap"><div class="top-grid">
-  ${catalog.collections.map((c) => { const l = topList(c); return l.length ? `<a class="top-card" href="/top/${c.slug}/"><span class="top-emoji" aria-hidden="true">${c.emoji}</span><h2>${esc(l.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${l.length} `))}</h2><div class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</div><span class="top-more">לרשימה ←</span></a>` : ''; }).join('')}
-</div>
-<div class="top-grid" style="margin-top:14px">${PRICE_BANDS.filter((b) => bandList(b).length >= 5).map((b) => `<a class="top-card" href="/top/${b.slug}/"><span class="top-emoji" aria-hidden="true">${b.emoji}</span><h2>${esc(b.title.replace(' מעליאקספרס', ''))}</h2><span class="muted">${bandList(b).length} מוצרים, מחירים מעודכנים</span><span class="top-more">לרשימה ←</span></a>`).join('')}</div>
+<section class="section"><div class="wrap">
+  ${PRICE_BANDS.some((b) => bandList(b).length >= 5) ? `<h2 class="section-title">לפי תקציב</h2>
+  <div class="top-grid top-grid-2">${PRICE_BANDS.filter((b) => bandList(b).length >= 5).map((b) => { const l = bandList(b); return `<a class="top-card" href="/top/${b.slug}/"><span class="top-card-head"><span class="top-emoji" aria-hidden="true">${b.emoji}</span><span class="top-count">${l.length} מוצרים</span></span><h3>${esc(b.title.replace(' מעליאקספרס', ''))}</h3><span class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</span><span class="top-more">לרשימה ←</span></a>`; }).join('')}</div>` : ''}
+  <h2 class="section-title">לפי קטגוריה</h2>
+  <div class="top-grid top-grid-5">${catalog.collections.map((c) => { const l = topList(c); return l.length ? `<a class="top-card" href="/top/${c.slug}/"><span class="top-card-head"><span class="top-emoji" aria-hidden="true">${c.emoji}</span><span class="top-count">${l.length} מוצרים</span></span><h3>${esc((l.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${l.length} `)).replace(/^\d+\s/, ''))}</h3><span class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</span><span class="top-more">לרשימה ←</span></a>` : ''; }).join('')}</div>
 <div class="prose" style="margin-top:22px">
   <h2>איך אנחנו בוחרים</h2>
   <ol>

@@ -321,7 +321,7 @@
     v = String(v || '').trim();
     return /^\d{10,20}$/.test(v) || /(^|\/\/|\s|\.)((?:[a-z0-9-]+\.)*aliexpress\.(com|us|ru)|s\.click\.aliexpress\.com|a\.aliexpress\.com)\//i.test(v);
   };
-  var aliHint = 'זה לא נראה כמו קישור למוצר בעליאקספרס. העתיקו את הקישור מעמוד המוצר (באפליקציה: שיתוף ← העתקת קישור) ונסו שוב.';
+  var aliHint = 'זה לא קישור של AliExpress. העתיקו את הקישור מעמוד המוצר ונסו שוב.';
   var showHint = function (form, msg) {
     var hint = form.querySelector('.ft-error');
     if (!hint) { hint = document.createElement('p'); hint.className = 'ft-error'; hint.setAttribute('role', 'alert'); form.appendChild(hint); }

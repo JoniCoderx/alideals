@@ -604,3 +604,32 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .pick-price s{overflow:hidden;text-overflow:ellipsis}
 .pick-cta{align-self:end;padding-top:4px}
 .ft-error{margin:6px 0 0;padding:8px 12px;border-radius:10px;background:#fff1ea;color:#a40d22;font-weight:700;font-size:.92rem}
+.hero-cta{align-items:center;flex-wrap:wrap}
+.hero-event-chip{display:inline-flex;align-items:center;gap:6px;font-weight:800;color:#c20e28;background:#fff1ea;border:2px solid rgba(229,18,47,.25);padding:10px 16px;border-radius:999px;text-decoration:none!important;white-space:nowrap}
+.hero-event-chip:hover{background:#ffe4d8}
+.ft-form input[dir=auto]:placeholder-shown,#finder-url:placeholder-shown{text-align:right}
+
+/* /top/ hub – one card template */
+.top-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.top-grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.top-grid+.section-title{margin-top:30px}
+.top-card{min-height:100%}
+.top-card-head{display:flex;justify-content:space-between;align-items:center}
+.top-count{font-size:.8rem;font-weight:700;color:#5e5a66;background:#f6f1ec;border-radius:999px;padding:3px 10px}
+.top-card h3{font-size:1.05rem;margin:0;line-height:1.35;min-height:2.7em}
+.top-card .top-more{margin-top:auto}
+@media(max-width:1100px){.top-grid-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.top-grid-5,.top-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.top-card{padding:14px}.top-card h3{font-size:.95rem}}
+@media(max-width:380px){.top-grid-5,.top-grid-2{grid-template-columns:minmax(0,1fr)}}
+/* sale timeline */
+.sale-timeline{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.sale-timeline li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:12px;background:#fff6f1;border:1px solid #f6e3d8}
+.sale-timeline b{color:#c20e28;white-space:nowrap}.sale-timeline span{color:#2a2830;text-align:left}
+/* smaller disclosure */
+.disclosure{font-size:.74rem;line-height:1.5;opacity:.85}
+.dt-empty{padding:18px 20px;border-radius:18px;background:linear-gradient(135deg,#fff4ec,#ffe9ec);border:2px solid rgba(229,18,47,.18);margin-bottom:16px}.dt-empty p{margin:6px 0 0}
+.dt-how{margin-top:26px;padding:20px;border-radius:18px;background:#fff;border:1px solid #f0e8e2}.dt-how h2{margin-top:0}
+.ft-form input:not(:placeholder-shown),#finder-url:not(:placeholder-shown){direction:ltr;text-align:left}
+.hero-deco .fl4{display:none}
+.ft-error{font-size:.88rem;padding:7px 12px}
+.picks-note{margin-inline-start:6px;opacity:.8}
