@@ -593,3 +593,13 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .coupon-est b{color:#c20e28;font-size:1.1rem}.coupon-est .lbl{font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#fff1d6;color:#8a5a00}
 .coupon-est button{border:0;background:#17161c;color:#fff;border-radius:10px;padding:6px 12px;font:inherit;font-weight:700;cursor:pointer}
 .verdict .coupon-est{flex:1 1 100%}.coupon-est small{flex-basis:100%}
+/* picks: one fixed template – equal heights, title 2 lines, price on one line, CTA pinned to the bottom, discount on the image */
+.picks-row{align-items:stretch}
+.pick{height:100%}
+.pick-media{position:relative;display:block}
+.pick-off{position:absolute;top:10px;left:10px;font-style:normal;font-weight:800;font-size:.85rem;color:#fff;background:#e5122f;border-radius:999px;padding:4px 10px;box-shadow:0 4px 12px rgba(0,0,0,.35);direction:ltr}
+.pick-info{flex:1;display:grid;grid-template-rows:auto auto 1fr;gap:8px}
+.pick-title{min-height:2.7em}
+.pick-price{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+.pick-price s{overflow:hidden;text-overflow:ellipsis}
+.pick-cta{align-self:end;padding-top:4px}

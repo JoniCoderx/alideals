@@ -1026,7 +1026,7 @@ function picksSection() {
   <p class="muted picks-sub">מוצרים שבחרנו ידנית: דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחיר נבדק מול עליאקספרס ב־${esc(topAt)}.</p>
   <div class="picks-row" tabindex="0" aria-label="מוצרים נבחרים">${list.map((x) => {
     const o = x.live; const off = o.orig > o.price ? Math.round((1 - o.price / o.orig) * 100) : 0;
-    return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-ctx="picks"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async"><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s><i>-${off}%</i>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
+    return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-ctx="picks"><span class="pick-media"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async">${off >= 5 ? `<i class="pick-off">-${off}%</i>` : ''}</span><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
   }).join('')}</div>
 </div></section>`;
 }
