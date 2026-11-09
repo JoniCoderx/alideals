@@ -120,3 +120,4 @@ a{color:var(--r2)}h1,h2,h3{line-height:1.2;margin:0 0 .4em;letter-spacing:-.01em
 .verdict{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:16px 18px;border-radius:18px;margin:14px 0;background:linear-gradient(135deg,#fff4ec,#ffe6e9);border:2px solid rgba(229,18,47,.25)}
 .verdict .v-emoji{font-size:34px}.verdict div{flex:1;min-width:200px}.verdict b{font-size:1.15rem}.verdict p{margin:4px 0 0}
 .verdict.win{background:linear-gradient(135deg,#ecfff3,#e3f7ff);border-color:rgba(20,150,80,.3)}
+.lbl{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#fff1d6;color:#8a5a00;margin-inline-end:6px;vertical-align:middle}.lbl-ok{background:#e3f7ea;color:#146c35}
