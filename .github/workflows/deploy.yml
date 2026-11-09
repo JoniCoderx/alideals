@@ -186,7 +186,7 @@ jobs:
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && { grep -q 'binding = "BOT"' wrangler.toml 2>/dev/null || npx -y wrangler@4 kv namespace list 2>/dev/null | grep -q yeshdeal-bot; }; then
             S=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-32)
             T="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN"
-            curl -s "$T/setWebhook" --data-urlencode "url=https://yeshdeal-api.joni0000.workers.dev/tg/webhook" -d "secret_token=$S" --data-urlencode 'allowed_updates=["message","callback_query"]' | head -c 200; echo
+            curl -s "$T/setWebhook" --data-urlencode "url=https://yeshdeal-api.joni0000.workers.dev/tg/webhook?v=2" -d "secret_token=$S" --data-urlencode 'allowed_updates=["message","callback_query"]' | head -c 200; echo
             # Bot profile (shown on the bot's page and before /start)
             curl -s "$T/setMyName" -H 'Content-Type: application/json' -d '{"name":"יש דיל! | קופונים לעליאקספרס"}' | head -c 120; echo
             curl -s "$T/setMyShortDescription" -H 'Content-Type: application/json' -d '{"short_description":"הבוט הרשמי של yeshdeal.com: דיווח על קוד שלא עבד וכתיבת ביקורת. הקודים: yeshdeal.com"}' | head -c 120; echo
