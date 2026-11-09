@@ -272,6 +272,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
     ['/', 'קודי קופון'],
     ...(FINDER_API ? [['/finder/', '🎯 צייד הדילים']] : []),
     ['/coupon/', 'קטגוריות'],
+    ['/top/', 'מומלצים'],
     ...(allProducts().length ? [['/deals/', 'דילים']] : []),
     ...(activeEvent ? [[`/sale/${activeEvent.slug}/`, activeEvent.name.split(' –')[0]]] : []),
     ['/guides/', 'מדריכים'],
@@ -341,6 +342,7 @@ ${body}
       <a href="/new-user/">קופון למשתמש חדש</a>
       <a href="/existing-user/">קוד קופון למשתמש קיים</a>
       <a href="/coupon/">קופונים לפי קטגוריה</a>
+      <a href="/top/">מוצרים מומלצים</a>
       ${categories.map((c) => `<a href="/coupon/${c.slug}/">קופון ל${esc(c.short)}</a>`).join('')}
       ${(manual.events || []).map((e) => `<a href="/sale/${e.slug}/">קופונים ${esc(le(e.name.split(' –')[0]))}</a>`).join('')}
     </div>
@@ -931,6 +933,73 @@ function guideFaq(body) {
 }
 
 const affCta = (ctx = 'page') => `<div class="aff-cta"><div><b>מוכנים להזמין?</b><p>נכנסים לעליאקספרס דרך הכפתור, ממלאים עגלה ומדביקים בתשלום את <a href="/#calc">הקוד שמתאים לסכום</a>.</p></div><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home" data-ctx="${ctx}">לעליאקספרס ${ICON.arrow}</a></div>`;
+
+/* ------------------------------------------------------------------ */
+/* Curated lists (/top/): editor-picked products, live prices from the API at build time  */
+/* ------------------------------------------------------------------ */
+const catalog = await readJSON('data/v2/catalog.json', { collections: [], titles: {} });
+const productPool = (await readJSON('data/v2/pool.json', { pool: [] })).pool;
+const topItems = {};
+{
+  const keys = [...new Set(catalog.collections.flatMap((c) => c.items))];
+  for (const k of keys) { const p = productPool.find((x) => x.id.endsWith(k)); if (p) topItems[k] = { id: p.id, title: catalog.titles[k] || p.heRaw, image: p.image, price: p.ils, orig: p.ilsOrig, rating: p.rating, sold: p.sold, link: p.link, live: false }; }
+  const ids = Object.values(topItems).map((x) => x.id);
+  const API = (site.cheapest?.apiUrl || '').replace(/\/$/, '');
+  if (API && !SAMPLE_MODE) {
+    for (let i = 0; i < ids.length; i += 20) {
+      for (let t = 0; t < 3; t++) {
+        try {
+          const r = await fetch(`${API}/api/products?ids=${ids.slice(i, i + 20).join(',')}`, { headers: { Origin: site.url } });
+          const j = await r.json();
+          if (!j.items) throw new Error(j.error || 'no items');
+          for (const p of j.items) { const it = Object.values(topItems).find((x) => x.id === String(p.id)); if (it && p.price) Object.assign(it, { price: p.price, orig: p.originalPrice, rating: p.rating ?? it.rating, sold: p.sold ?? it.sold, image: p.image || it.image, link: p.link || it.link, live: true }); }
+          break;
+        } catch (e) { await new Promise((ok) => setTimeout(ok, 1500)); }
+      }
+    }
+  }
+  console.log(`• curated lists: ${Object.values(topItems).filter((x) => x.live).length}/${ids.length} live prices`);
+}
+const topAt = new Intl.DateTimeFormat('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date());
+const ilsFmt = (n) => `₪${Number(n).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && safeLink(x.link) && x.price > 0 && x.rating >= (catalog.criteria?.minRating || 0) && x.sold >= (catalog.criteria?.minSold || 0));
+
+function topIndexPage() {
+  const pathname = '/top/';
+  const bc = breadcrumbs([{ name: 'מוצרים מומלצים', url: pathname }]);
+  const body = `
+<section class="hero hero-sm"><div class="wrap narrow">${bc.html}
+  <h1>מוצרים מומלצים מעליאקספרס</h1>
+  <p class="lead">רשימות שבחרנו ידנית: מוצרים עם דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחירים מתעדכנים אוטומטית.</p>
+</div></section>
+<section class="section"><div class="wrap"><div class="top-grid">
+  ${catalog.collections.map((c) => { const l = topList(c); return l.length ? `<a class="top-card" href="/top/${c.slug}/"><span class="top-emoji" aria-hidden="true">${c.emoji}</span><h2>${esc(l.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${l.length} `))}</h2><div class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</div><span class="top-more">לרשימה ←</span></a>` : ''; }).join('')}
+</div>
+${affCta('top')}
+</div></section>`;
+  return layout({ title: `מוצרים מומלצים מעליאקספרס לישראל: רשימות נבחרות | ${site.name}`, description: 'רשימות מוצרים מעליאקספרס שבחרנו ידנית: מטענים, אוזניות, מוצרים לבית, לגיימינג ולרכב. דירוג גבוה, אלפי מכירות, משלוח לישראל ומחירים מעודכנים.', pathname, body, ld: [bc.ld] });
+}
+
+function topPage(c) {
+  const pathname = `/top/${c.slug}/`;
+  const list = topList(c);
+  const title = list.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${list.length} `);
+  const bc = breadcrumbs([{ name: 'מוצרים מומלצים', url: '/top/' }, { name: title, url: pathname }]);
+  const body = `
+<section class="hero hero-sm"><div class="wrap narrow">${bc.html}
+  <h1>${esc(title)}</h1>
+  <p class="lead">${esc(c.intro || '')}</p>
+  <p class="muted small">איך בחרנו: דירוג של ${catalog.criteria?.minRating || 92}% ומעלה, לפחות ${catalog.criteria?.minSold || 300} מכירות, ומשלוח לישראל. המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}, לפני משלוח ומע״מ, ועשויים להשתנות.</p>
+</div></section>
+<section class="section"><div class="wrap narrow"><ol class="top-list">
+  ${list.map((x, i) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="top">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; }).join('')}
+</ol>
+<p class="muted">לפני התשלום: בחרו <a href="/#calc">קוד קופון לפי סכום העגלה</a> וחסכו עוד. רשימות נוספות: ${catalog.collections.filter((o) => o.slug !== c.slug).map((o) => `<a href="/top/${o.slug}/">${esc(o.title.replace(/^\d+\s/, ''))}</a>`).join(' · ')}</p>
+</div></section>`;
+  const ld = [bc.ld, { '@context': 'https://schema.org', '@type': 'ItemList', name: title, itemListElement: list.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.title })) }];
+  return layout({ title: `${title} מעליאקספרס | ${site.name}`, description: `${title}: מוצרים מעליאקספרס עם דירוג גבוה, אלפי מכירות ומשלוח לישראל. מחירים מעודכנים וקישור ישיר לכל מוצר.`.slice(0, 160), pathname, body, ld });
+}
+
 function guidePage(g) {
   const pathname = `/guides/${g.slug}/`;
   const bc = breadcrumbs([{ name: 'מדריכים', url: '/guides/' }, { name: g.short || g.title, url: pathname }]);
@@ -1008,6 +1077,10 @@ for (const c of site.dealCategories) {
   await page(`/deals/${c.slug}/`, dealCategoryPage(c), { index: has, lastmod: has ? dataUpdated : undefined });
 }
 for (const e of manual.events || []) await page(`/sale/${e.slug}/`, eventPage(e), { lastmod: dataUpdated });
+if (catalog.collections.some((c) => topList(c).length)) {
+  await page('/top/', topIndexPage(), { lastmod: today });
+  for (const c of catalog.collections) if (topList(c).length) await page(`/top/${c.slug}/`, topPage(c), { lastmod: today });
+}
 await page('/guides/', guidesIndexPage(), { lastmod: guides.map((g) => g.updated).sort().pop() });
 for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), { lastmod: g.updated });
 await page('/about/', staticPage('/about/', 'אודות', `

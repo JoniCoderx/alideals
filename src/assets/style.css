@@ -562,3 +562,14 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .hero-event a{color:#c20e28}
 .btn-fb{background:#1464d8}.btn-fb:hover{background:#0f55bd}
 .verdict{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:16px 18px;border-radius:18px;margin:14px 0;background:linear-gradient(135deg,#fff4ec,#ffe6e9);border:2px solid rgba(229,18,47,.25)}.verdict .v-emoji{font-size:34px}.verdict div{flex:1;min-width:200px}.verdict b{font-size:1.15rem}.verdict p{margin:4px 0 0}.verdict.win{background:linear-gradient(135deg,#ecfff3,#e3f7ff);border-color:rgba(20,150,80,.3)}
+.top-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.top-card{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:20px;background:#fff;box-shadow:0 10px 28px rgba(23,22,28,.07);border:1px solid #f0e8e2;color:inherit;text-decoration:none}
+.top-card h2{font-size:1.15rem;margin:0}.top-emoji{font-size:30px}.top-thumbs{display:flex;gap:6px}.top-thumbs img{border-radius:10px;background:#f6f2ee;object-fit:cover}.top-more{color:#e5122f;font-weight:800;margin-top:auto}
+.top-list{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.top-item{display:grid;grid-template-columns:auto 110px minmax(0,1fr);gap:14px;align-items:center;padding:14px;border-radius:18px;background:#fff;box-shadow:0 8px 22px rgba(23,22,28,.06);border:1px solid #f0e8e2}
+.top-rank{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(150deg,#ff7a2f,#e5122f)}
+.top-img img{border-radius:14px;background:#f6f2ee;object-fit:cover;display:block}.top-body h2{font-size:1.05rem;margin:0 0 4px;line-height:1.35}.top-meta{color:#5e5a66;font-size:.88rem;margin:0}
+.top-price{display:flex;gap:8px;align-items:baseline;margin:6px 0 10px}.top-price b{font-size:1.35rem;color:#c20e28}.top-price s{color:#8a8590;font-size:.9rem}
+.pp-off{background:#c20e28;color:#fff;font-weight:800;border-radius:8px;padding:2px 8px;font-size:.8rem}
+@media(max-width:560px){.top-item{grid-template-columns:auto 84px minmax(0,1fr);gap:10px;padding:10px}.top-img img{width:84px;height:84px}.top-body .btn{width:100%;justify-content:center}}
+.top-thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.top-thumbs img{width:100%;height:auto;aspect-ratio:1}
