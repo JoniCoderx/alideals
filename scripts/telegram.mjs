@@ -286,6 +286,11 @@ const addDays = (d, n) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t
 export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats, products }) {
   let reg = regular;
   let keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
+  // Already-planned product posts pick up the product's current (short) affiliate link.
+  if (products?.length) keep = keep.map((q) => {
+    const pr = q.kind === 'product' && products.find((x) => x.image === q.card?.image);
+    return pr?.link ? { ...q, buttons: (q.buttons || []).map((row, i) => (i === 0 ? row.map((bt, j) => (j === 0 ? { ...bt, url: pr.link } : bt)) : row)) } : q;
+  });
   // Approved product posts take their slots even if an older plan already put a tip there.
   if (products?.length) {
     const productSlots = new Set(SLOTS.filter((sl) => sl.prefer.includes('product')).map((sl) => sl.from));
