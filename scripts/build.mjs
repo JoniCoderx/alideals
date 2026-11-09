@@ -1023,7 +1023,7 @@ function picksSection() {
   if (list.length < 3) return '';
   return `<section class="section picks" id="picks"><div class="wrap">
   <div class="section-head"><h2 class="section-title">נבחרי יש דיל ⭐</h2><a class="more" href="/top/">לכל ההמלצות ←</a></div>
-  <p class="muted picks-sub">מוצרים שבחרנו ידנית: דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחיר נבדק מול עליאקספרס ב־${esc(topAt)}.</p>
+  <p class="muted picks-sub">מוצרים שבחרנו ידנית: דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחיר נבדק מול עליאקספרס ב־${esc(topAt)}. המחיר המחוק והאחוז הם לפי המחיר המקורי שעליאקספרס מציגה.</p>
   <div class="picks-row" tabindex="0" aria-label="מוצרים נבחרים">${list.map((x) => {
     const o = x.live; const off = o.orig > o.price ? Math.round((1 - o.price / o.orig) * 100) : 0;
     return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-ctx="picks"><span class="pick-media"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async">${off >= 5 ? `<i class="pick-off">-${off}%</i>` : ''}</span><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
@@ -1073,7 +1073,7 @@ function priceBandPage(b) {
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
   <h1>${esc(b.title)}</h1>
   <p class="lead">${esc(b.intro)}</p>
-  <p class="muted small">המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}. הרשימה מתעדכנת אוטומטית: מוצר שהמחיר שלו עלה מעל ${b.max} שקל יורד ממנה. משלוח ומע״מ מחושבים בקופה.</p>
+  <p class="muted small">המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}. הרשימה מתעדכנת אוטומטית: מוצר שהמחיר שלו עלה מעל ${b.max} שקל יורד ממנה. משלוח ומע״מ מחושבים בקופה. המחיר המחוק הוא המחיר המקורי שעליאקספרס מציגה.</p>
 </div></section>
 <section class="section"><div class="wrap narrow">
   <ol class="top-list">${list.map((x, i) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="top-${b.slug}">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; }).join('')}</ol>
@@ -1123,7 +1123,7 @@ function topPage(c) {
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
   <h1>${esc(title)}</h1>
   <p class="lead">${esc(c.intro || '')}</p>
-  <p class="muted small">איך בחרנו: דירוג של ${catalog.criteria?.minRating || 92}% ומעלה, לפחות ${catalog.criteria?.minSold || 300} מכירות, ומשלוח לישראל. ${topAnyLive() ? `המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}` : 'המחירים מהבדיקה הקודמת שלנו'}, לפני משלוח ומע״מ, ועשויים להשתנות.</p>
+  <p class="muted small">איך בחרנו: דירוג של ${catalog.criteria?.minRating || 92}% ומעלה, לפחות ${catalog.criteria?.minSold || 300} מכירות, ומשלוח לישראל. ${topAnyLive() ? `המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}` : 'המחירים מהבדיקה הקודמת שלנו'}, לפני משלוח ומע״מ, ועשויים להשתנות. המחיר המחוק הוא המחיר המקורי שעליאקספרס מציגה.</p>
 </div></section>
 <section class="section"><div class="wrap narrow"><ol class="top-list">
   ${list.map((x, i) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="top">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; }).join('')}
@@ -1291,7 +1291,7 @@ function retry(){box.className='pp-card';box.innerHTML='<div class="pp-body"><h1
 if(!/^\\d{6,20}$/.test(id))return fail();
 fetch(${JSON.stringify(PRODUCT_API)}+'/api/products?ids='+id).then(function(r){if(r.status>=500||r.status===429)throw 0;return r.json()}).then(function(j){var p=j.items&&j.items[0];if(!p||!/^https:\\/\\/s\\.click\\.aliexpress\\.com\\//.test(p.link||''))return fail();
 var ils=function(n){return '₪'+Number(n).toLocaleString('he-IL',{minimumFractionDigits:2,maximumFractionDigits:2})};var rt=Number(p.rating)||0,sd=Number(p.sold)||0;var off=p.originalPrice>p.price?Math.round((1-p.price/p.originalPrice)*100):0;
-box.className='pp-card';box.innerHTML='<a class="pp-img" href="'+esc(p.link)+'" rel="nofollow sponsored noopener"><img src="'+esc(p.image)+'" alt="" width="480" height="480" referrerpolicy="no-referrer"></a><div class="pp-body"><span class="pp-kicker">🎯 נבחר בשבילכם ביש דיל!</span><h1>'+esc(p.title)+'</h1>'+(Number(p.price)>0?'<p class="pp-price"><b>'+ils(p.price)+'</b>':'<p class="pp-price">')+'+(off>=5?'<s>'+ils(p.originalPrice)+'</s><span class="pp-off">-'+off+'%</span>':'')+'</p><p class="pp-meta">'+(rt?rt+'% ביקורות חיוביות':'')+(sd?' · '+sd.toLocaleString('he-IL')+' נמכרו':'')+'</p><a class="btn btn-primary btn-block pp-buy" href="'+esc(p.link)+'" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a><p class="pp-note">המחיר נבדק עכשיו מול עליאקספרס. משלוח ומע״מ מוצגים בקופה, והמחיר עשוי להשתנות.</p></div>';
+box.className='pp-card';box.innerHTML='<a class="pp-img" href="'+esc(p.link)+'" rel="nofollow sponsored noopener"><img src="'+esc(p.image)+'" alt="" width="480" height="480" referrerpolicy="no-referrer"></a><div class="pp-body"><span class="pp-kicker">🎯 נבחר בשבילכם ביש דיל!</span><h1>'+esc(p.title)+'</h1>'+(Number(p.price)>0?'<p class="pp-price"><b>'+ils(p.price)+'</b>':'<p class="pp-price">')+(off>=5?'<s>'+ils(p.originalPrice)+'</s><span class="pp-off">-'+off+'%</span>':'')+'</p><p class="pp-meta">'+(rt?rt+'% ביקורות חיוביות':'')+(sd?' · '+sd.toLocaleString('he-IL')+' נמכרו':'')+'</p><a class="btn btn-primary btn-block pp-buy" href="'+esc(p.link)+'" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a><p class="pp-note">המחיר נבדק עכשיו מול עליאקספרס. משלוח ומע״מ מוצגים בקופה, והמחיר עשוי להשתנות. המחיר המחוק הוא המחיר המקורי שעליאקספרס מציגה.</p></div>';
 document.title=String(p.title).slice(0,60)+' | ${site.name}';}).catch(retry)})();</script>`,
 }));
 
@@ -1316,7 +1316,7 @@ for (const [from, to] of [['test/', '/'], ['test/hunter/', '/finder/'], ['test/d
 
 await write('404.html', layout({
   title: `הדף לא נמצא | ${site.name}`, description: 'הדף לא נמצא', pathname: '/404.html', noindex: true,
-  body: `<script>(function(){var m=location.pathname.match(/^\/test\/p\/(\d{6,20})\/?$/);if(m)location.replace('/p/?i='+m[1]);else if(/^\/test\//.test(location.pathname))location.replace('/');})();</script><section class="hero"><div class="wrap narrow"><h1>הדף לא נמצא</h1><p class="lead">אבל הקודים כאן.</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
+  body: `<script>(function(){var m=location.pathname.match(/^\\/test\\/p\\/(\\d{6,20})\\/?$/);if(m)location.replace('/p/?i='+m[1]);else if(/^\\/test\\//.test(location.pathname))location.replace('/');})();</script><section class="hero"><div class="wrap narrow"><h1>הדף לא נמצא</h1><p class="lead">אבל הקודים כאן.</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
 }));
 await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
 await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\nDisallow: /admin/\nDisallow: /p/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
