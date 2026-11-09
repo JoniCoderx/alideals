@@ -173,7 +173,7 @@ function couponCard(c, { compact = false } = {}) {
   </div>
   <div class="coupon-cta">
     ${hidden
-      ? `<a class="btn btn-primary" href="/go/${c.id}/" ${OUT} data-go="${c.id}">למרכז הקופונים ${ICON.arrow}</a>`
+      ? `<a class="btn btn-primary" href="/go/${c.id}/" ${OUT} data-go="${c.id}">לקופונים של עליאקספרס ${ICON.arrow}</a>`
       : `<button class="btn btn-reveal" type="button" ${revealAttrs(c, title)}>
           <span class="reveal-mask" aria-hidden="true">${masked}</span>
           <span class="reveal-label">העתק קוד<span class="sr-only">: ${esc(title)}</span></span>
@@ -227,7 +227,7 @@ function tierTable(list) {
     const next = tiers.slice(i + 1).find((n) => n.currency === t.currency);
     const range = next ? `${money(t.minOrder, t.currency)} עד ${money(+(next.minOrder - 0.01).toFixed(2), t.currency)}` : `${money(t.minOrder, t.currency)} ומעלה`;
     const cell = t.items.map((c) => c.sample || !c.code
-      ? `<a href="/go/${c.id}/" ${OUT} data-go="${c.id}">למרכז הקופונים</a>`
+      ? `<a href="/go/${c.id}/" ${OUT} data-go="${c.id}">לקופונים של עליאקספרס</a>`
       : `<button class="code-chip" type="button" ${revealAttrs(c, `${money(c.discount, c.currency)} הנחה מעל ${money(c.minOrder, c.currency)}`)} aria-label="העתק קוד ${esc(c.code)}">${esc(c.code)}</button>`).join(' ');
     return `<tr><td>${range}</td><td><strong>${money(t.discount, t.currency)}</strong></td><td>${cell}</td></tr>`;
   }).join('')}
@@ -406,7 +406,7 @@ function nextCodesBox() {
   return `<div class="between">
   <b>⏳ קודי המבצע הקודם הסתיימו</b>
   <p>${next ? `קודי ${esc(nshort)} ${next.start <= today ? 'צפויים לצאת בימים הקרובים' : `צפויים לצאת סביב ${heDate(next.start)}`}. נעדכן כאן ובערוץ הטלגרם זמן קצר אחרי שהם יוצאים.` : 'קודי המבצע הבא יופיעו כאן זמן קצר אחרי שעליאקספרס תפרסם אותם.'} בינתיים אפשר לחסוך עם הקופונים במרכז הקופונים של עליאקספרס.</p>
-  <div class="between-cta"><a class="btn btn-primary" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>${tgBtn('קבלו את הקודים בטלגרם')}</div>
+  <div class="between-cta"><a class="btn btn-primary" href="/go/coupon-center/" ${OUT} data-go="coupon-center">לקופונים של עליאקספרס ${ICON.arrow}</a>${tgBtn('קבלו את הקודים בטלגרם')}</div>
 </div>`;
 }
 
@@ -583,7 +583,7 @@ ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wr
           <li><span><b>עליאקספרס נפתחת</b> אוטומטית</span></li>
           <li><span><b>מדביקים בתשלום</b> בשדה "קוד מבצע"</span></li>
         </ol>
-        <a class="btn btn-primary btn-block" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>
+        <a class="btn btn-primary btn-block" href="/go/coupon-center/" ${OUT} data-go="coupon-center">לקופונים של עליאקספרס ${ICON.arrow}</a>
         ${site.social.telegram || site.social.whatsapp ? `<div class="side-alert"><b>רוצים לקבל קודים חדשים?</b><p>הצטרפו לערוץ ונשלח הודעה כשיוצאת סדרת קודים חדשה.</p>${tgBtn('הצטרפו לערוץ הטלגרם', 'btn-block')}${site.social.whatsapp ? `<a class="btn btn-ghost btn-block" href="${esc(site.social.whatsapp)}" rel="noopener">וואטסאפ</a>` : ''}</div>` : ''}
       </div>
     </aside>
@@ -949,7 +949,7 @@ function existingUserPage() {
     <h2>4 דרכים נוספות לחסוך כמשתמש קיים</h2>
     <ol>
       <li><b>קופוני חנות:</b> בעמוד המוצר אוספים את קופון החנות, ומוסיפים עליו קוד מבצע בתשלום.</li>
-      <li><b>מרכז הקופונים:</b> קופונים שנאספים לחשבון ומצטברים עם הקוד. <a href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים</a>.</li>
+      <li><b>מרכז הקופונים:</b> קופונים שנאספים לחשבון ומצטברים עם הקוד. <a href="/go/coupon-center/" ${OUT} data-go="coupon-center">לקופונים של עליאקספרס</a>.</li>
       <li><b>מטבעות:</b> צ'ק־אין יומי באפליקציה נותן עוד הנחה קטנה. ראו את <a href="/guides/aliexpress-coins/">המדריך למטבעות</a>.</li>
       <li><b>תזמון:</b> בימי מבצע הקודים גדולים יותר. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a>.</li>
     </ol>

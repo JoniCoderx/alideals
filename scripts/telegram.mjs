@@ -159,7 +159,7 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
             kind: 'countdown',
             card: { kind: 'countdown', bigNumber: d, bigLabel: d === 1 ? 'יום אחד!' : 'ימים', title: `עד ${short} בעליאקספרס`, points: ['מוסיפים מוצרים לעגלה כבר עכשיו', 'אוספים קופונים ממרכז הקופונים', 'הקודים יגיעו לכאן זמן קצר אחרי שייצאו'], site: host },
             text: `⏳ <b>${d === 1 ? 'מחר' : `בעוד ${d} ימים`}: ${esc(short)} בעליאקספרס!</b>\n\nמי שמתכונן מראש חוסך יותר. מוסיפים לעגלה עכשיו, כדי לראות כמה המחיר באמת יורד. הקודים של המבצע יפורסמו כאן זמן קצר אחרי שייצאו 🔔`,
-            buttons: [[{ text: '📅 עמוד המבצע', url: link(`/sale/${ev.slug}/`, `countdown-${ev.slug}`) }], [{ text: '🎟️ למרכז הקופונים', url: link('/go/coupon-center/', `countdown-${ev.slug}`) }]],
+            buttons: [[{ text: '📅 עמוד המבצע', url: link(`/sale/${ev.slug}/`, `countdown-${ev.slug}`) }], [{ text: 'לקופונים של עליאקספרס 🎟️', url: link('/go/coupon-center/', `countdown-${ev.slug}`) }]],
           }];
         }
       }
