@@ -1,0 +1,2838 @@
+{
+ "at": "2026-11-09T00:39:05.739Z",
+ "items": [
+  {
+   "id": "1005008561769928",
+   "k": "1769928",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/1769928/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.457,
+     "reasons": [],
+     "dominance": 1.016,
+     "coverage": 0.629,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.391,
+     "reasons": [],
+     "dominance": 1.032,
+     "coverage": 0.379,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.131,
+     "reasons": [],
+     "dominance": 0.876,
+     "coverage": 0.15,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.467,
+     "coverage": 0.382,
+     "parts": 10
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.467,
+     "coverage": 0.382,
+     "parts": 10
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.62,
+     "coverage": 0.221,
+     "parts": 3
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005008561769928.jpg"
+  },
+  {
+   "id": "1005008372580313",
+   "k": "2580313",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/2580313/g4.jpg",
+   "candidates": [
+    {
+     "src": "g4.jpg",
+     "score": 0.457,
+     "reasons": [],
+     "dominance": 1.016,
+     "coverage": 0.487,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.155,
+     "reasons": [],
+     "dominance": 1.072,
+     "coverage": 0.145,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.796,
+     "coverage": 0.254,
+     "parts": 14
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.796,
+     "coverage": 0.254,
+     "parts": 14
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.498,
+     "coverage": 0.175,
+     "parts": 65
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.585,
+     "coverage": 0.15,
+     "parts": 51
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005008372580313.jpg"
+  },
+  {
+   "id": "1005009762835151",
+   "k": "2835151",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/2835151/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.479,
+     "reasons": [],
+     "dominance": 1.064,
+     "coverage": 0.498,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.479,
+     "reasons": [],
+     "dominance": 1.064,
+     "coverage": 0.498,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.368,
+     "reasons": [],
+     "dominance": 1.049,
+     "coverage": 0.351,
+     "parts": 2
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.023,
+     "coverage": 0.411,
+     "parts": 19
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.047,
+     "coverage": 0.212,
+     "parts": 42
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.948,
+     "coverage": 0.547,
+     "parts": 94
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009762835151.jpg"
+  },
+  {
+   "id": "1005013413227986",
+   "k": "3227986",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/3227986/g2.jpg",
+   "candidates": [
+    {
+     "src": "g2.jpg",
+     "score": 0.432,
+     "reasons": [],
+     "dominance": 1.033,
+     "coverage": 0.418,
+     "parts": 4
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.292,
+     "reasons": [],
+     "dominance": 1.028,
+     "coverage": 0.284,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.185,
+     "reasons": [],
+     "dominance": 1.007,
+     "coverage": 0.184,
+     "parts": 3
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.585,
+     "coverage": 0.146,
+     "parts": 103
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.585,
+     "coverage": 0.146,
+     "parts": 103
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.043,
+     "coverage": 0.21,
+     "parts": 11
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005013413227986.jpg"
+  },
+  {
+   "id": "1005008843530921",
+   "k": "3530921",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/3530921/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.305,
+     "reasons": [],
+     "dominance": 1.033,
+     "coverage": 0.295,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.305,
+     "reasons": [],
+     "dominance": 1.033,
+     "coverage": 0.295,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.935,
+     "coverage": 0.331,
+     "parts": 16
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small"
+     ],
+     "dominance": 0.788,
+     "coverage": 0.069,
+     "parts": 2
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.994,
+     "coverage": 0.119,
+     "parts": 45
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.432,
+     "coverage": 0.076,
+     "parts": 27
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005008843530921.jpg"
+  },
+  {
+   "id": "1005009503551884",
+   "k": "3551884",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/3551884/g2.jpg",
+   "candidates": [
+    {
+     "src": "g2.jpg",
+     "score": 0.306,
+     "reasons": [],
+     "dominance": 1.038,
+     "coverage": 0.295,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.159,
+     "reasons": [],
+     "dominance": 1.047,
+     "coverage": 0.152,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.637,
+     "coverage": 0.295,
+     "parts": 3
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.637,
+     "coverage": 0.295,
+     "parts": 3
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.997,
+     "coverage": 0.432,
+     "parts": 91
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.911,
+     "coverage": 0.233,
+     "parts": 203
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009503551884.jpg"
+  },
+  {
+   "id": "1005012473735594",
+   "k": "3735594",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/3735594/g4.jpg",
+   "candidates": [
+    {
+     "src": "g4.jpg",
+     "score": 0.12,
+     "reasons": [],
+     "dominance": 1.128,
+     "coverage": 0.106,
+     "parts": 4
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.423,
+     "coverage": 0.036,
+     "parts": 8
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.423,
+     "coverage": 0.036,
+     "parts": 8
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.669,
+     "coverage": 0.132,
+     "parts": 3
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.746,
+     "coverage": 0.332,
+     "parts": 3
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.494,
+     "coverage": 0.165,
+     "parts": 4
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012473735594.jpg"
+  },
+  {
+   "id": "1005009963931270",
+   "k": "3931270",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/3931270/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.223,
+     "reasons": [],
+     "dominance": 1.084,
+     "coverage": 0.206,
+     "parts": 3
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.129,
+     "reasons": [],
+     "dominance": 1.139,
+     "coverage": 0.113,
+     "parts": 4
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.952,
+     "coverage": 0.207,
+     "parts": 15
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.952,
+     "coverage": 0.207,
+     "parts": 15
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.024,
+     "coverage": 0.147,
+     "parts": 38
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.716,
+     "coverage": 0.084,
+     "parts": 6
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009963931270.jpg"
+  },
+  {
+   "id": "1005012823957853",
+   "k": "3957853",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/3957853/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.08,
+     "reasons": [],
+     "dominance": 0.996,
+     "coverage": 0.08,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.646,
+     "coverage": 0.103,
+     "parts": 10
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.646,
+     "coverage": 0.103,
+     "parts": 10
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.891,
+     "coverage": 0.359,
+     "parts": 38
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.967,
+     "coverage": 0.086,
+     "parts": 16
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.665,
+     "coverage": 0.063,
+     "parts": 9
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012823957853.jpg"
+  },
+  {
+   "id": "1005005324086826",
+   "k": "4086826",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4086826/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.39,
+     "reasons": [],
+     "dominance": 1.057,
+     "coverage": 0.369,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.39,
+     "reasons": [],
+     "dominance": 1.057,
+     "coverage": 0.369,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.797,
+     "coverage": 0.155,
+     "parts": 26
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.507,
+     "coverage": 0.169,
+     "parts": 42
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.04,
+     "coverage": 0.296,
+     "parts": 41
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.02,
+     "coverage": 0.292,
+     "parts": 24
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005005324086826.jpg"
+  },
+  {
+   "id": "1005011774262618",
+   "k": "4262618",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4262618/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.466,
+     "reasons": [],
+     "dominance": 1.035,
+     "coverage": 0.545,
+     "parts": 5
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.463,
+     "reasons": [],
+     "dominance": 1.029,
+     "coverage": 0.483,
+     "parts": 3
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.392,
+     "reasons": [],
+     "dominance": 1.048,
+     "coverage": 0.374,
+     "parts": 3
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.92,
+     "coverage": 0.365,
+     "parts": 57
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.92,
+     "coverage": 0.365,
+     "parts": 57
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.191,
+     "coverage": 0.352,
+     "parts": 85
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005011774262618.jpg"
+  },
+  {
+   "id": "1005013104493292",
+   "k": "4493292",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4493292/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.461,
+     "reasons": [],
+     "dominance": 1.024,
+     "coverage": 0.482,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0.459,
+     "reasons": [],
+     "dominance": 1.021,
+     "coverage": 0.615,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.459,
+     "reasons": [],
+     "dominance": 1.021,
+     "coverage": 0.615,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.273,
+     "reasons": [],
+     "dominance": 1.055,
+     "coverage": 0.259,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.203,
+     "reasons": [],
+     "dominance": 1.109,
+     "coverage": 0.183,
+     "parts": 3
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.094,
+     "reasons": [],
+     "dominance": 1.066,
+     "coverage": 0.088,
+     "parts": 1
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005013104493292.jpg"
+  },
+  {
+   "id": "1005010724501614",
+   "k": "4501614",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4501614/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.218,
+     "reasons": [],
+     "dominance": 1.291,
+     "coverage": 0.169,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.218,
+     "reasons": [],
+     "dominance": 1.291,
+     "coverage": 0.169,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.621,
+     "coverage": 0.082,
+     "parts": 56
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.455,
+     "coverage": 0.222,
+     "parts": 11
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.698,
+     "coverage": 0.151,
+     "parts": 27
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.768,
+     "coverage": 0.035,
+     "parts": 42
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005010724501614.jpg"
+  },
+  {
+   "id": "1005010724623265",
+   "k": "4623265",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4623265/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.298,
+     "reasons": [],
+     "dominance": 1.032,
+     "coverage": 0.289,
+     "parts": 1
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.223,
+     "reasons": [],
+     "dominance": 1.036,
+     "coverage": 0.215,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.703,
+     "coverage": 0.23,
+     "parts": 56
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.703,
+     "coverage": 0.23,
+     "parts": 56
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.083,
+     "coverage": 0.298,
+     "parts": 28
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.775,
+     "coverage": 0.14,
+     "parts": 39
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005010724623265.jpg"
+  },
+  {
+   "id": "1005012194775603",
+   "k": "4775603",
+   "ok": false,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4775603/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.491,
+     "coverage": 0.118,
+     "parts": 31
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.491,
+     "coverage": 0.118,
+     "parts": 31
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.027,
+     "coverage": 0.246,
+     "parts": 15
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.568,
+     "coverage": 0.218,
+     "parts": 20
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 1.09,
+     "coverage": 0.064,
+     "parts": 16
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.356,
+     "coverage": 0.065,
+     "parts": 14
+    }
+   ]
+  },
+  {
+   "id": "1005007344952611",
+   "k": "4952611",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4952611/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.245,
+     "reasons": [],
+     "dominance": 1.039,
+     "coverage": 0.236,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.245,
+     "reasons": [],
+     "dominance": 1.039,
+     "coverage": 0.236,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.216,
+     "reasons": [],
+     "dominance": 1.057,
+     "coverage": 0.204,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.146,
+     "reasons": [],
+     "dominance": 1.052,
+     "coverage": 0.139,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.411,
+     "coverage": 0.077,
+     "parts": 65
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.446,
+     "coverage": 0.039,
+     "parts": 163
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005007344952611.jpg"
+  },
+  {
+   "id": "1005009084986255",
+   "k": "4986255",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/4986255/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.321,
+     "reasons": [],
+     "dominance": 1.068,
+     "coverage": 0.301,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.384,
+     "coverage": 0.15,
+     "parts": 5
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.384,
+     "coverage": 0.15,
+     "parts": 5
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.564,
+     "coverage": 0.213,
+     "parts": 22
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.877,
+     "coverage": 0.244,
+     "parts": 59
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.514,
+     "coverage": 0.146,
+     "parts": 25
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009084986255.jpg"
+  },
+  {
+   "id": "1005005685261013",
+   "k": "5261013",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5261013/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.304,
+     "reasons": [],
+     "dominance": 1.04,
+     "coverage": 0.292,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.284,
+     "reasons": [],
+     "dominance": 1.036,
+     "coverage": 0.274,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.229,
+     "reasons": [],
+     "dominance": 1.046,
+     "coverage": 0.219,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0.134,
+     "reasons": [],
+     "dominance": 1.049,
+     "coverage": 0.128,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.134,
+     "reasons": [],
+     "dominance": 1.049,
+     "coverage": 0.128,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.792,
+     "coverage": 0.241,
+     "parts": 3
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005005685261013.jpg"
+  },
+  {
+   "id": "1005013005281433",
+   "k": "5281433",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5281433/g4.jpg",
+   "candidates": [
+    {
+     "src": "g4.jpg",
+     "score": 0.317,
+     "reasons": [],
+     "dominance": 1.068,
+     "coverage": 0.297,
+     "parts": 3
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.285,
+     "reasons": [],
+     "dominance": 1.054,
+     "coverage": 0.27,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.746,
+     "coverage": 0.277,
+     "parts": 2
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.746,
+     "coverage": 0.277,
+     "parts": 2
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.025,
+     "coverage": 0.483,
+     "parts": 24
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.569,
+     "coverage": 0.2,
+     "parts": 13
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005013005281433.jpg"
+  },
+  {
+   "id": "1005012695304551",
+   "k": "5304551",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5304551/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.093,
+     "reasons": [],
+     "dominance": 1.079,
+     "coverage": 0.086,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.757,
+     "coverage": 0.259,
+     "parts": 69
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.757,
+     "coverage": 0.259,
+     "parts": 69
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.753,
+     "coverage": 0.252,
+     "parts": 3
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.324,
+     "coverage": 0.127,
+     "parts": 42
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.989,
+     "coverage": 0.522,
+     "parts": 7
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012695304551.jpg"
+  },
+  {
+   "id": "1005005445585329",
+   "k": "5585329",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5585329/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.447,
+     "reasons": [],
+     "dominance": 1.004,
+     "coverage": 0.445,
+     "parts": 6
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.447,
+     "reasons": [],
+     "dominance": 1.004,
+     "coverage": 0.445,
+     "parts": 6
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.121,
+     "reasons": [],
+     "dominance": 1.051,
+     "coverage": 0.115,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.095,
+     "coverage": 0.014,
+     "parts": 558
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small"
+     ],
+     "dominance": 0.591,
+     "coverage": 0.018,
+     "parts": 4
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.875,
+     "coverage": 0.445,
+     "parts": 41
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005005445585329.jpg"
+  },
+  {
+   "id": "1005007685791957",
+   "k": "5791957",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5791957/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.318,
+     "reasons": [],
+     "dominance": 1.062,
+     "coverage": 0.299,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.169,
+     "reasons": [],
+     "dominance": 1.076,
+     "coverage": 0.157,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.726,
+     "coverage": 0.076,
+     "parts": 11
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.726,
+     "coverage": 0.076,
+     "parts": 11
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 2.231,
+     "coverage": 0.207,
+     "parts": 9
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fills frame (likely cropped)"
+     ],
+     "dominance": 1.014,
+     "coverage": 0.718,
+     "parts": 1
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005007685791957.jpg"
+  },
+  {
+   "id": "1005012295888427",
+   "k": "5888427",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5888427/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.391,
+     "reasons": [],
+     "dominance": 1.052,
+     "coverage": 0.372,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.391,
+     "reasons": [],
+     "dominance": 1.052,
+     "coverage": 0.372,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.138,
+     "reasons": [],
+     "dominance": 1.08,
+     "coverage": 0.128,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.294,
+     "coverage": 0.269,
+     "parts": 34
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.008,
+     "coverage": 0.339,
+     "parts": 33
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.281,
+     "coverage": 0.008,
+     "parts": 70
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012295888427.jpg"
+  },
+  {
+   "id": "1005003635923396",
+   "k": "5923396",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5923396/g2.jpg",
+   "candidates": [
+    {
+     "src": "g2.jpg",
+     "score": 0.332,
+     "reasons": [],
+     "dominance": 1.141,
+     "coverage": 0.291,
+     "parts": 5
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.101,
+     "reasons": [],
+     "dominance": 1.062,
+     "coverage": 0.095,
+     "parts": 3
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.51,
+     "coverage": 0.134,
+     "parts": 29
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.51,
+     "coverage": 0.134,
+     "parts": 29
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.611,
+     "coverage": 0.087,
+     "parts": 2
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.6,
+     "coverage": 0.193,
+     "parts": 9
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005003635923396.jpg"
+  },
+  {
+   "id": "1005009205983512",
+   "k": "5983512",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/5983512/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.318,
+     "reasons": [],
+     "dominance": 0.886,
+     "coverage": 0.359,
+     "parts": 2
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.318,
+     "reasons": [],
+     "dominance": 0.886,
+     "coverage": 0.359,
+     "parts": 2
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.316,
+     "coverage": 0.114,
+     "parts": 6
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.315,
+     "coverage": 0.103,
+     "parts": 4
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.642,
+     "coverage": 0.131,
+     "parts": 4
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small"
+     ],
+     "dominance": 0.579,
+     "coverage": 0.064,
+     "parts": 5
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009205983512.jpg"
+  },
+  {
+   "id": "1005007476166643",
+   "k": "6166643",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/6166643/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.386,
+     "reasons": [],
+     "dominance": 0.986,
+     "coverage": 0.391,
+     "parts": 2
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.386,
+     "reasons": [],
+     "dominance": 0.986,
+     "coverage": 0.391,
+     "parts": 2
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.182,
+     "reasons": [],
+     "dominance": 1.036,
+     "coverage": 0.176,
+     "parts": 2
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.879,
+     "coverage": 0.18,
+     "parts": 60
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.989,
+     "coverage": 0.425,
+     "parts": 17
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.727,
+     "coverage": 0.217,
+     "parts": 2
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005007476166643.jpg"
+  },
+  {
+   "id": "1005012756822033",
+   "k": "6822033",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/6822033/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.196,
+     "reasons": [],
+     "dominance": 1.04,
+     "coverage": 0.188,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0.191,
+     "reasons": [],
+     "dominance": 1.047,
+     "coverage": 0.182,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.191,
+     "reasons": [],
+     "dominance": 1.047,
+     "coverage": 0.182,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.116,
+     "coverage": 0.005,
+     "parts": 107
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.185,
+     "coverage": 0.007,
+     "parts": 26
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.968,
+     "coverage": 0.208,
+     "parts": 35
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012756822033.jpg"
+  },
+  {
+   "id": "1005012526914062",
+   "k": "6914062",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/6914062/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.274,
+     "reasons": [],
+     "dominance": 0.945,
+     "coverage": 0.29,
+     "parts": 2
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.274,
+     "reasons": [],
+     "dominance": 0.945,
+     "coverage": 0.29,
+     "parts": 2
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.261,
+     "reasons": [],
+     "dominance": 1.047,
+     "coverage": 0.249,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.155,
+     "reasons": [],
+     "dominance": 0.903,
+     "coverage": 0.172,
+     "parts": 6
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.924,
+     "coverage": 0.114,
+     "parts": 31
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.414,
+     "coverage": 0.09,
+     "parts": 3
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012526914062.jpg"
+  },
+  {
+   "id": "1005012887596505",
+   "k": "7596505",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/7596505/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.382,
+     "reasons": [],
+     "dominance": 1.029,
+     "coverage": 0.371,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0.331,
+     "reasons": [],
+     "dominance": 1.035,
+     "coverage": 0.32,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.331,
+     "reasons": [],
+     "dominance": 1.035,
+     "coverage": 0.32,
+     "parts": 1
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.266,
+     "reasons": [],
+     "dominance": 1.06,
+     "coverage": 0.251,
+     "parts": 2
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.986,
+     "coverage": 0.345,
+     "parts": 41
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.137,
+     "coverage": 0.1,
+     "parts": 11
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012887596505.jpg"
+  },
+  {
+   "id": "1005005997681339",
+   "k": "7681339",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/7681339/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.445,
+     "reasons": [],
+     "dominance": 1.045,
+     "coverage": 0.426,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.445,
+     "reasons": [],
+     "dominance": 1.045,
+     "coverage": 0.426,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.347,
+     "reasons": [],
+     "dominance": 1.021,
+     "coverage": 0.34,
+     "parts": 2
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.195,
+     "reasons": [],
+     "dominance": 1.052,
+     "coverage": 0.185,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.099,
+     "reasons": [],
+     "dominance": 1.065,
+     "coverage": 0.093,
+     "parts": 1
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.529,
+     "coverage": 0.118,
+     "parts": 31
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005005997681339.jpg"
+  },
+  {
+   "id": "1005009418411818",
+   "k": "8411818",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/8411818/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.23,
+     "reasons": [],
+     "dominance": 0.943,
+     "coverage": 0.244,
+     "parts": 2
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.18,
+     "reasons": [],
+     "dominance": 1.078,
+     "coverage": 0.167,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.908,
+     "coverage": 0.175,
+     "parts": 42
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.908,
+     "coverage": 0.175,
+     "parts": 42
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.058,
+     "coverage": 0.143,
+     "parts": 7
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.496,
+     "coverage": 0.113,
+     "parts": 8
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009418411818.jpg"
+  },
+  {
+   "id": "1005012898663425",
+   "k": "8663425",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/8663425/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.214,
+     "reasons": [],
+     "dominance": 0.866,
+     "coverage": 0.247,
+     "parts": 6
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.214,
+     "reasons": [],
+     "dominance": 0.866,
+     "coverage": 0.247,
+     "parts": 6
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.593,
+     "coverage": 0.073,
+     "parts": 106
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.439,
+     "coverage": 0.09,
+     "parts": 68
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.354,
+     "coverage": 0.057,
+     "parts": 237
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.39,
+     "coverage": 0.052,
+     "parts": 36
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012898663425.jpg"
+  },
+  {
+   "id": "1005008908987378",
+   "k": "8987378",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/8987378/g2.jpg",
+   "candidates": [
+    {
+     "src": "g2.jpg",
+     "score": 0.426,
+     "reasons": [],
+     "dominance": 1.19,
+     "coverage": 0.358,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0.322,
+     "reasons": [],
+     "dominance": 1.349,
+     "coverage": 0.239,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.322,
+     "reasons": [],
+     "dominance": 1.349,
+     "coverage": 0.239,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.262,
+     "reasons": [],
+     "dominance": 1.259,
+     "coverage": 0.208,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.229,
+     "reasons": [],
+     "dominance": 1.037,
+     "coverage": 0.221,
+     "parts": 1
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.617,
+     "coverage": 0.152,
+     "parts": 4
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005008908987378.jpg"
+  },
+  {
+   "id": "1005009879065094",
+   "k": "9065094",
+   "ok": false,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9065094/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.608,
+     "coverage": 0.178,
+     "parts": 3
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.608,
+     "coverage": 0.178,
+     "parts": 3
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.435,
+     "coverage": 0.161,
+     "parts": 61
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.446,
+     "coverage": 0.113,
+     "parts": 4
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.595,
+     "coverage": 0.147,
+     "parts": 15
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.038,
+     "coverage": 0.194,
+     "parts": 117
+    }
+   ]
+  },
+  {
+   "id": "1005007649257337",
+   "k": "9257337",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9257337/g2.jpg",
+   "candidates": [
+    {
+     "src": "g2.jpg",
+     "score": 0.27,
+     "reasons": [],
+     "dominance": 0.906,
+     "coverage": 0.298,
+     "parts": 5
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.229,
+     "reasons": [],
+     "dominance": 0.981,
+     "coverage": 0.233,
+     "parts": 6
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.721,
+     "coverage": 0.113,
+     "parts": 2
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.721,
+     "coverage": 0.113,
+     "parts": 2
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.784,
+     "coverage": 0.23,
+     "parts": 6
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.423,
+     "coverage": 0.051,
+     "parts": 7
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005007649257337.jpg"
+  },
+  {
+   "id": "1005009139287286",
+   "k": "9287286",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9287286/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.214,
+     "reasons": [],
+     "dominance": 1.111,
+     "coverage": 0.193,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.214,
+     "reasons": [],
+     "dominance": 1.111,
+     "coverage": 0.193,
+     "parts": 1
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0.192,
+     "reasons": [],
+     "dominance": 1.059,
+     "coverage": 0.181,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.143,
+     "reasons": [],
+     "dominance": 1.157,
+     "coverage": 0.124,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.847,
+     "coverage": 0.108,
+     "parts": 6
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.99,
+     "coverage": 0.253,
+     "parts": 32
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009139287286.jpg"
+  },
+  {
+   "id": "1005009999376748",
+   "k": "9376748",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9376748/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0.473,
+     "reasons": [],
+     "dominance": 1.05,
+     "coverage": 0.536,
+     "parts": 1
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0.473,
+     "reasons": [],
+     "dominance": 1.05,
+     "coverage": 0.536,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.452,
+     "reasons": [],
+     "dominance": 1.047,
+     "coverage": 0.432,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.802,
+     "coverage": 0.256,
+     "parts": 5
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.857,
+     "coverage": 0.318,
+     "parts": 17
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.481,
+     "coverage": 0.192,
+     "parts": 9
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005009999376748.jpg"
+  },
+  {
+   "id": "1005008979696540",
+   "k": "9696540",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9696540/g2.jpg",
+   "candidates": [
+    {
+     "src": "g2.jpg",
+     "score": 0.319,
+     "reasons": [],
+     "dominance": 1.142,
+     "coverage": 0.279,
+     "parts": 1
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.252,
+     "reasons": [],
+     "dominance": 1.048,
+     "coverage": 0.24,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.006,
+     "coverage": 0.267,
+     "parts": 7
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.006,
+     "coverage": 0.267,
+     "parts": 7
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.4,
+     "coverage": 0.014,
+     "parts": 17
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small"
+     ],
+     "dominance": 0.826,
+     "coverage": 0.024,
+     "parts": 2
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005008979696540.jpg"
+  },
+  {
+   "id": "1005006579895295",
+   "k": "9895295",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9895295/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.123,
+     "reasons": [],
+     "dominance": 1.335,
+     "coverage": 0.092,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.834,
+     "coverage": 0.291,
+     "parts": 8
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.834,
+     "coverage": 0.291,
+     "parts": 8
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.874,
+     "coverage": 0.219,
+     "parts": 70
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.989,
+     "coverage": 0.108,
+     "parts": 19
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "fragmented mask"
+     ],
+     "dominance": 0.593,
+     "coverage": 0.289,
+     "parts": 46
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005006579895295.jpg"
+  },
+  {
+   "id": "1005010559897387",
+   "k": "9897387",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/9897387/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.299,
+     "reasons": [],
+     "dominance": 1.106,
+     "coverage": 0.27,
+     "parts": 1
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.218,
+     "reasons": [],
+     "dominance": 1.047,
+     "coverage": 0.208,
+     "parts": 1
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.152,
+     "reasons": [],
+     "dominance": 0.938,
+     "coverage": 0.162,
+     "parts": 2
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.361,
+     "coverage": 0.132,
+     "parts": 3
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.361,
+     "coverage": 0.132,
+     "parts": 3
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small",
+      "fragmented mask"
+     ],
+     "dominance": 0.099,
+     "coverage": 0.01,
+     "parts": 16
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005010559897387.jpg"
+  },
+  {
+   "id": "1005012280076565",
+   "k": "0076565",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/0076565/g3.jpg",
+   "candidates": [
+    {
+     "src": "g3.jpg",
+     "score": 0.403,
+     "reasons": [],
+     "dominance": 1.029,
+     "coverage": 0.392,
+     "parts": 4
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0.292,
+     "reasons": [],
+     "dominance": 1.031,
+     "coverage": 0.283,
+     "parts": 1
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0.116,
+     "reasons": [],
+     "dominance": 0.875,
+     "coverage": 0.133,
+     "parts": 4
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.396,
+     "coverage": 0.153,
+     "parts": 4
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.396,
+     "coverage": 0.153,
+     "parts": 4
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "product too small"
+     ],
+     "dominance": 1.095,
+     "coverage": 0.059,
+     "parts": 4
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005012280076565.jpg"
+  },
+  {
+   "id": "1005012700841879",
+   "k": "0841879",
+   "ok": false,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/0841879/g0.jpg",
+   "candidates": [
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.518,
+     "coverage": 0.164,
+     "parts": 2
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.518,
+     "coverage": 0.164,
+     "parts": 2
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.611,
+     "coverage": 0.081,
+     "parts": 2
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small"
+     ],
+     "dominance": 0.556,
+     "coverage": 0.075,
+     "parts": 4
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text",
+      "product too small"
+     ],
+     "dominance": 0.552,
+     "coverage": 0.037,
+     "parts": 2
+    },
+    {
+     "src": "g5.jpg",
+     "score": 0,
+     "reasons": [
+      "fills frame (likely cropped)"
+     ],
+     "dominance": 1.018,
+     "coverage": 0.777,
+     "parts": 1
+    }
+   ]
+  },
+  {
+   "id": "1005011940143389",
+   "k": "0143389",
+   "ok": true,
+   "chosen": "/tmp/claude-0/-home-user-alideals/b8b14c79-f61b-52dd-854a-0f248a0de96d/scratchpad/batch/0143389/g5.jpg",
+   "candidates": [
+    {
+     "src": "g5.jpg",
+     "score": 0.264,
+     "reasons": [],
+     "dominance": 1.009,
+     "coverage": 0.262,
+     "parts": 2
+    },
+    {
+     "src": "g4.jpg",
+     "score": 0.203,
+     "reasons": [],
+     "dominance": 1.097,
+     "coverage": 0.185,
+     "parts": 1
+    },
+    {
+     "src": "g0.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.195,
+     "coverage": 0.151,
+     "parts": 9
+    },
+    {
+     "src": "g1.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 1.195,
+     "coverage": 0.151,
+     "parts": 9
+    },
+    {
+     "src": "g2.jpg",
+     "score": 0,
+     "reasons": [
+      "extra objects/text"
+     ],
+     "dominance": 0.531,
+     "coverage": 0.105,
+     "parts": 3
+    },
+    {
+     "src": "g3.jpg",
+     "score": 0,
+     "reasons": [
+      "fragmented mask"
+     ],
+     "dominance": 0.989,
+     "coverage": 0.174,
+     "parts": 108
+    }
+   ],
+   "image": "src/v2/creative/telegram/1005011940143389.jpg"
+  }
+ ]
+}
