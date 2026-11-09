@@ -68,7 +68,7 @@ const colors = (slug) => categoryColors[slug] || ['#ff7a2f', '#e5122f'];
 const previewChip = '<span class="chip-preview" title="נתוני תצוגה עד חיבור ה-API הרשמי">נתוני תצוגה</span>';
 
 function shell({ title, body, active: nav = '' }) {
-  const L = [['/test/', 'ראשי', 'home'], ['/test/hunter/', '🎯 צייד הדילים', 'hunter'], ['/test/top/car-accessories/', 'Top 10', 'top'], ['/test/c/car/', 'קטגוריות', 'cat'], ['/test/#coupons', 'קודי קופון', 'coupons']];
+  const L = [['/test/', 'ראשי', 'home'], ['/test/hunter/', '🎯 צייד הדילים', 'hunter'], ['/test/#lists', 'רשימות נבחרות', 'top'], ['/test/c/car/', 'קטגוריות', 'cat'], ['/test/#coupons', 'קודי קופון', 'coupons']];
   return `<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
@@ -166,7 +166,7 @@ pages['index.html'] = shell({ active: 'home', title: 'יש דיל! 2.0', body: `
   <div class="grid">${allProducts.filter((p) => qualified(p) && CATALOG.titles?.[String(p.id).slice(-7)]).sort((a, b) => b.sold - a.sold).slice(0, 4).map((p) => productCard(p)).join('')}</div>
 </div></section>
 
-<section class="sec"><div class="wrap">
+<section class="sec" id="lists"><div class="wrap">
   <div class="sec-h"><h2>⭐ רשימות נבחרות</h2></div>
   <div class="cols">${fixtureCollections.filter((c) => c.items.some((id) => qualified(byId[id]))).map((c) => `<a class="col" href="/test/top/${c.slug}/" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><span>${c.emoji}</span><b>${esc(collTitle(c))}</b><i>לאוסף ←</i></a>`).join('')}
   ${T200_LIVE.map((c) => `<a class="col" href="/test/top/${c.slug}/" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><span>${c.emoji}</span><b>${esc(c.title)}</b><i>לאוסף ←</i></a>`).join('')}</div>
