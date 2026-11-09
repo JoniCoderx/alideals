@@ -180,3 +180,14 @@ test('reviews: one per person, rating required, no links, ignores chatter', asyn
   assert.deepEqual([r.reviews[0].name, r.reviews[0].stars], ['דנה', 4]);
   assert.deepEqual(r.replies.map((x) => x.kind), ['reviewAsk', 'reviewThanks', 'reviewAsk', 'reviewBad', 'reviewAsk', 'reviewThanks']);
 });
+
+test('queue: dated announcement waits for its day and survives re-plans next to product slots', async () => {
+  const { planQueue } = await import('./telegram.mjs');
+  const ann = [{ id: 'ann-x', on: '2026-11-11', type: 'feature', emoji: '🔥', title: 'X', points: [], text: 'x', buttons: [] }];
+  const products = [{ id: '1', image: 'a.jpg', emoji: '🛒', title: 'P', lines: ['l'], link: 'https://s.click.aliexpress.com/e/p' }];
+  const base = { coupons: [], siteUrl: 'https://yeshdeal.com', affLink: 'https://s.click.aliexpress.com/e/x', announcements: ann, library: [], cats: [], products };
+  let q = planQueue({ ...base, queue: [], regular: {}, today: '2026-11-09', hour: 7 });
+  assert.ok(!q.queue.some((i) => i.annId === 'ann-x' && i.date < '2026-11-11'));
+  for (const [d, h] of [['2026-11-10', 6], ['2026-11-11', 6]]) q = planQueue({ ...base, queue: q.queue, regular: q.regular, today: d, hour: h });
+  assert.equal(q.queue.filter((i) => i.annId === 'ann-x').length, 1);
+});

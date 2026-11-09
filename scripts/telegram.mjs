@@ -241,7 +241,7 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
   };
 
   // 1) One-time announcements (each posted once ever) go first.
-  const ann = announcements.find((a) => !state.history[a.id]);
+  const ann = announcements.find((a) => !state.history[a.id] && (!a.on || a.on <= today));
   if (ann) {
     return done(ann.id, {
       kind: ann.type,
@@ -286,9 +286,14 @@ const addDays = (d, n) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t
 export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats, products }) {
   let reg = regular;
   let keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
+  // Approved product posts take their slots even if an older plan already put a tip there.
+  if (products?.length) {
+    const productSlots = new Set(SLOTS.filter((sl) => sl.prefer.includes('product')).map((sl) => sl.from));
+    keep = keep.filter((q) => q.annId || q.kind === 'product' || !productSlots.has(q.hour) || (q.date === today && q.hour <= hour + 1));
+  }
   // A new one-time announcement jumps the queue: it replaces the next planned slot.
   const annList = announcements || telegramAnnouncements;
-  const pending = annList.find((a) => !(reg.history || {})[a.id] && !keep.some((q) => q.annId === a.id));
+  const pending = annList.find((a) => (!a.on || a.on <= today) && !(reg.history || {})[a.id] && !keep.some((q) => q.annId === a.id));
   if (pending) {
     const next = keep.find((q) => q.date > today || q.hour > hour);
     if (next) {
@@ -312,11 +317,14 @@ export function planQueue({ queue = [], regular = {}, today, hour, days = 2, eve
       if (announcements) opts.announcements = announcements;
       if (cats) opts.cats = cats;
       if (products) opts.products = products;
+      const before = reg.history || {};
       const r = planRegular(opts);
       reg = r.regular;
       if (!r.message) continue;
       const m = withAffiliate(r.message, { siteUrl, affLink });
-      out.push({ key, date, hour: slot.from, kind: m.kind, text: m.text, buttons: m.buttons, card: m.card, img: `${date}-${slot.id}.png` });
+      // Remember which announcement filled this slot, so later re-plans never drop it.
+      const annId = annList.map((a) => a.id).find((id) => !before[id] && (reg.history || {})[id]);
+      out.push({ key, date, hour: slot.from, kind: m.kind, text: m.text, buttons: m.buttons, card: m.card, img: `${date}-${slot.id}.png`, ...(annId ? { annId } : {}) });
     }
   }
   out.sort((a, b) => a.date.localeCompare(b.date) || a.hour - b.hour);
