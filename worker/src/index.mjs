@@ -217,6 +217,20 @@ export default {
         });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
     }
+    // Short affiliate link (s.click.aliexpress.com/e/_xxx) for a product id – long /s/ links look suspicious in Telegram/Facebook.
+    if (url.pathname === '/api/shortlink' && req.method === 'GET') {
+      const id = (url.searchParams.get('id') || '').trim();
+      if (!/^\d{6,20}$/.test(id)) return json({ error: 'bad_id' }, 400, h);
+      if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured' }, 503, h);
+      if (limited(req, 'shortlink', 30)) return json(RATE_LIMITED, 429, h);
+      try {
+        return await cachedJSON(ctx, `shortlink/v1/${id}`, 7 * 86400, h, async () => {
+          const r = await aliCall(env, 'aliexpress.affiliate.link.generate', { promotion_link_type: 0, source_values: `https://www.aliexpress.com/item/${id}.html`, tracking_id: env.ALI_TRACKING_ID });
+          const link = r?.promotion_links?.promotion_link?.[0]?.promotion_link || '';
+          return /^https:\/\/s\.click\.aliexpress\.com\//.test(link) ? { status: 200, body: { id, link } } : { status: 502, body: { error: 'no_link' } };
+        });
+      } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
+    }
     // Light short-link → product id resolver (the admin link maker). No AliExpress API call.
     if (url.pathname === '/api/resolve' && req.method === 'GET') {
       if (limited(req, 'resolve', 30)) return json(RATE_LIMITED, 429, h);
