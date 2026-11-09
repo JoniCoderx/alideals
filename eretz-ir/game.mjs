@@ -1,14 +1,35 @@
-// לוגיקת המשחק "ארץ עיר" – בלי תלות ב-HTTP, כדי שאפשר יהיה לבדוק אותה.
+// לוגיקת המשחק "ארץ עיר" – בלי תלות בשרת, כדי שאפשר יהיה לבדוק אותה ולהריץ אותה גם ב-Node וגם ב-Cloudflare.
 
 export const HEB_LETTERS = 'אבגדהוזחטיכלמנסעפצקרשת'.split('');
+export const EN_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-export const DEFAULT_CATEGORIES = ['ארץ', 'עיר', 'חי', 'צומח', 'דומם', 'מקצוע', 'שם', 'מפורסם/ת'];
+export const LANGS = {
+  he: {
+    letters: HEB_LETTERS,
+    defaultLetters: HEB_LETTERS,
+    categories: ['ארץ', 'עיר', 'חי', 'צומח', 'דומם', 'מקצוע', 'שם', 'מפורסם/ת'],
+    extras: [
+      'מאכל', 'מותג', 'סרט או סדרה', 'שיר', 'זמר/ת', 'קבוצת ספורט', 'ענף ספורט', 'צבע',
+      'חלק בגוף', 'כלי נגינה', 'דמות מצוירת', 'תחביב', 'משהו במטבח', 'משקה', 'נהר/ים/הר',
+      'דמות מהתנ"ך', 'שם של חיית מחמד', 'תירוץ לאיחור', 'משהו שלוקחים לים', 'רכב',
+    ],
+  },
+  en: {
+    letters: EN_LETTERS,
+    // Q, U, V, X, Y, Z are off by default (almost impossible in most categories); the host can turn them on.
+    defaultLetters: EN_LETTERS.filter((l) => !'QUVXYZ'.includes(l)),
+    categories: ['Country', 'City', 'Animal', 'Plant', 'Thing', 'Job', 'Name', 'Famous person'],
+    extras: [
+      'Food', 'Brand', 'Movie or TV show', 'Song', 'Singer', 'Sports team', 'Sport', 'Color',
+      'Body part', 'Instrument', 'Cartoon character', 'Hobby', 'Kitchen item', 'Drink', 'River/Sea/Mountain',
+      'Superhero', 'Pet name', 'Excuse for being late', 'Beach item', 'Car brand',
+    ],
+  },
+};
 
-export const EXTRA_CATEGORIES = [
-  'מאכל', 'מותג', 'סרט או סדרה', 'שיר', 'זמר/ת', 'קבוצת ספורט', 'ענף ספורט', 'צבע',
-  'חלק בגוף', 'כלי נגינה', 'דמות מצוירת', 'תחביב', 'משהו במטבח', 'משקה', 'נהר/ים/הר',
-  'דמות מהתנ"ך', 'שם של חיית מחמד', 'תירוץ לאיחור', 'משהו שלוקחים לים', 'רכב',
-];
+// תאימות לאחור
+export const DEFAULT_CATEGORIES = LANGS.he.categories;
+export const EXTRA_CATEGORIES = LANGS.he.extras;
 
 export const LIMITS = {
   maxPlayers: 16,
@@ -20,12 +41,14 @@ export const LIMITS = {
 
 const FINALS = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
 
-/** מנרמל תשובה להשוואה: בלי ניקוד, בלי פיסוק, אותיות סופיות כרגילות, רווחים מצומצמים. */
+/** מנרמל תשובה להשוואה: בלי ניקוד, בלי פיסוק, אותיות סופיות כרגילות, אותיות קטנות, רווחים מצומצמים. */
 export function normalize(s) {
   return String(s ?? '')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '') // diacritics (é → e)
     .normalize('NFC')
     .replace(/[֑-ׇ]/g, '') // ניקוד וטעמים
-    .replace(/[״׳"'`.,\-–—_!?()[\]{}:;/\\]/g, ' ')
+    .replace(/[״׳"'`’.,\-–—_!?()[\]{}:;/\\]/g, ' ')
     .replace(/[ךםןףץ]/g, (c) => FINALS[c])
     .toLowerCase()
     .replace(/\s+/g, ' ')
@@ -35,7 +58,7 @@ export function normalize(s) {
 /** האם התשובה מתחילה באות הנכונה. */
 export function startsWithLetter(answer, letter) {
   const n = normalize(answer);
-  return n.length > 0 && n[0] === (FINALS[letter] || letter);
+  return n.length > 0 && n[0] === normalize(letter)[0];
 }
 
 /** כמה פסילות צריך כדי לפסול תשובה: רוב רגיל מבין שאר המשתתפים. */
@@ -56,11 +79,11 @@ export function rejectThreshold(participantCount) {
  */
 export function scoreRound({ letter, categories, participants, answers, votes = {}, soloBonus = true }) {
   const threshold = rejectThreshold(participants.length);
-  const cells = {}; // pid -> [{answer, status, points, rejects}]
+  const cells = {};
   for (const pid of participants) cells[pid] = [];
 
   categories.forEach((_, ci) => {
-    const valid = []; // {pid, norm}
+    const valid = [];
     for (const pid of participants) {
       const answer = String(answers[pid]?.[ci] ?? '').trim();
       const rejects = (votes[`${pid}|${ci}`] || []).filter((v) => v !== pid && participants.includes(v));
@@ -95,26 +118,32 @@ export function pickLetter(enabled, used, rnd = Math.random) {
   return from[Math.floor(rnd() * from.length)];
 }
 
-/** מנקה ומאמת הגדרות שמגיעות מהמארח. */
+/** מנקה ומאמת הגדרות שמגיעות מהמארח. החלפת שפה מאפסת קטגוריות ואותיות לברירת המחדל של השפה. */
 export function sanitizeSettings(input, current) {
   const s = { ...current };
+  if (input.lang && LANGS[input.lang] && input.lang !== s.lang) {
+    s.lang = input.lang;
+    s.categories = [...LANGS[s.lang].categories];
+    s.letters = [...LANGS[s.lang].defaultLetters];
+  }
+  const L = LANGS[s.lang] || LANGS.he;
   if (Array.isArray(input.categories)) {
     const seen = new Set();
     const cats = [];
     for (const c of input.categories) {
-      const t = String(c ?? '').replace(/\s+/g, ' ').trim().slice(0, LIMITS.maxCategoryLen);
-      if (t && !seen.has(t)) { seen.add(t); cats.push(t); }
+      const t = String(c ?? '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, LIMITS.maxCategoryLen);
+      if (t && !seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); cats.push(t); }
       if (cats.length >= LIMITS.maxCategories) break;
     }
     if (cats.length) s.categories = cats;
   }
   if (input.roundSeconds != null) s.roundSeconds = clampInt(input.roundSeconds, 30, 600, s.roundSeconds);
-  if (input.rounds != null) s.rounds = clampInt(input.rounds, 1, 22, s.rounds);
+  if (input.rounds != null) s.rounds = clampInt(input.rounds, 1, 26, s.rounds);
   if (input.stopGrace != null) s.stopGrace = clampInt(input.stopGrace, 0, 30, s.stopGrace);
   if (input.soloBonus != null) s.soloBonus = !!input.soloBonus;
   if (input.stopEnabled != null) s.stopEnabled = !!input.stopEnabled;
   if (Array.isArray(input.letters)) {
-    const ls = HEB_LETTERS.filter((l) => input.letters.includes(l));
+    const ls = L.letters.filter((l) => input.letters.includes(l));
     if (ls.length >= 1) s.letters = ls;
   }
   return s;
@@ -126,14 +155,16 @@ function clampInt(v, min, max, fallback) {
   return Math.min(max, Math.max(min, n));
 }
 
-export function defaultSettings() {
+export function defaultSettings(lang = 'he') {
+  const L = LANGS[lang] || LANGS.he;
   return {
-    categories: [...DEFAULT_CATEGORIES],
+    lang: LANGS[lang] ? lang : 'he',
+    categories: [...L.categories],
     roundSeconds: 120,
     rounds: 5,
     stopEnabled: true,
     stopGrace: 10,
     soloBonus: true,
-    letters: [...HEB_LETTERS],
+    letters: [...L.defaultLetters],
   };
 }

@@ -59,7 +59,7 @@ test('sanitizeSettings מגביל ומנקה', () => {
   const s = sanitizeSettings({ categories: [' ארץ ', 'ארץ', '', 'עיר'], roundSeconds: 5, rounds: 99, letters: ['א', 'Z'] }, defaultSettings());
   assert.deepEqual(s.categories, ['ארץ', 'עיר']);
   assert.equal(s.roundSeconds, 30);
-  assert.equal(s.rounds, 22);
+  assert.equal(s.rounds, 26);
   assert.deepEqual(s.letters, ['א']);
 });
 
@@ -67,4 +67,23 @@ test('pickLetter לא חוזר על אות עד שנגמרות', () => {
   const used = [];
   for (let i = 0; i < 3; i++) used.push(pickLetter(['א', 'ב', 'ג'], used));
   assert.deepEqual([...used].sort(), ['א', 'ב', 'ג']);
+});
+
+test('English: case-insensitive letter check and matching', () => {
+  assert.ok(startsWithLetter('brazil', 'B'));
+  assert.ok(startsWithLetter('Éclair', 'E'));
+  const r = scoreRound({
+    letter: 'B', categories: ['Country'], participants: ['a', 'b'],
+    answers: { a: ['Brazil'], b: [' brazil '] },
+  });
+  assert.equal(r.cells.a[0].status, 'shared');
+});
+
+test('switching game language resets categories and letters', () => {
+  const s = sanitizeSettings({ lang: 'en' }, defaultSettings('he'));
+  assert.equal(s.lang, 'en');
+  assert.equal(s.categories[0], 'Country');
+  assert.ok(!s.letters.includes('Q') && s.letters.includes('A'));
+  const s2 = sanitizeSettings({ letters: ['Q', 'א'] }, s);
+  assert.deepEqual(s2.letters, ['Q']);
 });

@@ -1,6 +1,6 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package.json game.mjs server.mjs ./
+COPY package.json game.mjs room.mjs server.mjs ./
 COPY public ./public
 ENV NODE_ENV=production PORT=3000
 EXPOSE 3000
