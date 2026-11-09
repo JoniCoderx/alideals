@@ -27,9 +27,9 @@ fs.writeFileSync(path.join(D, 'timeline.json'), JSON.stringify({ S, DUR, FPS }))
 const html = `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><style>
 @font-face{font-family:R;src:url(data:font/woff2;base64,${he}) format('woff2');font-weight:300 900;unicode-range:U+0590-05FF}
 @font-face{font-family:R;src:url(data:font/woff2;base64,${la}) format('woff2');font-weight:300 900}
-*{margin:0;box-sizing:border-box}html,body{width:${W}px;height:${H}px;overflow:hidden;background:#0d0a0f;font-family:R;color:#fff}
-#bg{position:absolute;inset:-10%;background:radial-gradient(700px 600px at 75% 20%,rgba(255,122,47,.65),transparent 60%),radial-gradient(800px 700px at 15% 90%,rgba(229,18,47,.55),transparent 60%),linear-gradient(160deg,#1c1217,#0b090d)}
-#grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:60px 60px;transform-origin:50% 100%}
+*{margin:0;box-sizing:border-box}html,body{width:${W}px;height:${H}px;overflow:hidden;position:relative;direction:rtl;background:#0d0a0f;font-family:R;color:#fff}
+#bg{position:absolute;left:0;top:0;width:1080px;height:1350px;background:radial-gradient(700px 600px at 75% 20%,rgba(255,122,47,.65),transparent 60%),radial-gradient(800px 700px at 15% 90%,rgba(229,18,47,.55),transparent 60%),linear-gradient(160deg,#1c1217,#0b090d)}
+#grid{position:absolute;left:0;top:0;width:1080px;height:1350px;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:60px 60px;transform-origin:50% 100%}
 #stage{position:absolute;z-index:1;left:0;right:0;top:300px;height:1060px;perspective:1600px;perspective-origin:50% 40%}
 #phone{position:absolute;left:50%;top:0;width:430px;height:932px;margin-left:-215px;border-radius:58px;background:#0a0a0c;padding:14px;box-shadow:0 60px 110px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.1),0 0 80px rgba(255,90,40,.25);transform-style:preserve-3d}
 #phone .scr{position:relative;width:100%;height:100%;border-radius:46px;overflow:hidden;background:#fff}
@@ -71,7 +71,7 @@ const beat=(t)=>Math.exp(-((t%0.5))/0.11);
 window.render=async(t)=>{
   const s=TL.find(x=>t>=x.t0&&t<x.t1)||TL[TL.length-1]; const lt=t-s.t0;
   // background pulse on the beat + slow drift
-  $('bg').style.transform='translate('+(Math.sin(t*0.25)*10)+'px,'+(Math.cos(t*0.2)*8)+'px)';
+  $('bg').style.transform='scale(1.12) translate('+(Math.sin(t*0.25)*10)+'px,'+(Math.cos(t*0.2)*8)+'px)';
   $('grid').style.transform='perspective(900px) rotateX(62deg) translateY('+((t*40)%60)+'px)';
   $('grid').style.opacity=0.55;
   const isScene=!!s.clip;
