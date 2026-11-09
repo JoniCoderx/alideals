@@ -352,7 +352,25 @@ export function withAffiliate(msg, { siteUrl, affLink, store = STORE }) {
   if (!buttons.flat().some((b) => isAli(b.url))) buttons.push([{ text: `🛒 ל${store}`, url: affLink }]);
   const tail = `\n\n🛒 <a href="${affLink}">כניסה ל${store}</a>`;
   const text = msg.kind === 'product' || msg.text.includes(affLink) || msg.text.length + tail.length > 1000 ? msg.text : msg.text + tail;
-  return { ...msg, buttons, text };
+  return emojiAfter({ ...msg, buttons, text });
+}
+
+// House style: an emoji never opens a line or a button – it follows the words ("כל הקודים 🔥", not "🔥 כל הקודים").
+const LEAD = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u200D|\p{Extended_Pictographic}|\p{Emoji_Modifier})*)\s+/u;
+export function emojiAfter(msg) {
+  if (!msg) return msg;
+  const line = (l) => {
+    const m = l.match(LEAD);
+    if (!m) return l;
+    const rest = l.slice(m[0].length);
+    if (!rest.trim()) return l;
+    if (/^(👉|👇|➡️|⬇️)$/u.test(m[1])) return rest; // pointing arrows only make sense in front – drop them
+    const bold = rest.match(/^(<b>[\s\S]*?<\/b>)([\s\S]*)$/);
+    return bold ? `${bold[1]} ${m[1]}${bold[2]}` : `${rest} ${m[1]}`;
+  };
+  const text = String(msg.text || '').split('\n').map(line).join('\n');
+  const buttons = (msg.buttons || []).map((row) => row.map((b) => ({ ...b, text: line(b.text || '') })));
+  return { ...msg, text, buttons };
 }
 
 async function api(token, method, body) {

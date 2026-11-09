@@ -122,7 +122,7 @@ test('every post carries the affiliate link (direct, not via /go/)', () => {
   const tip = withAffiliate({ text: 'טיפ', buttons: [[{ text: 'מדריך', url: `${siteUrl}/guides/x/?utm_source=telegram` }]] }, { siteUrl, affLink });
   assert.equal(tip.buttons.length, 2);
   assert.equal(tip.buttons[1][0].url, affLink);
-  assert.ok(tip.text.endsWith(`<a href="${affLink}">כניסה לעליאקספרס</a>`));
+  assert.ok(tip.text.includes(`<a href="${affLink}">כניסה לעליאקספרס</a>`));
   const code = withAffiliate({ text: 'קוד', buttons: [[{ text: 'לעלי', url: `${siteUrl}/go/c1/?utm_source=telegram` }]] }, { siteUrl, affLink });
   assert.equal(code.buttons.length, 1);
   assert.equal(code.buttons[0][0].url, affLink);
