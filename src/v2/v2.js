@@ -4,7 +4,8 @@ import { parseAmount, toUSD, pickCoupon, parseProductInput, classifyMatch } from
 const $ = (s, r = document) => r.querySelector(s);
 const AFF = document.body.dataset.aff || '';
 const usd = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US');
-const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = (u) => (/^https:\/\//.test(String(u || '')) ? String(u) : '#');
 
 /* toast after copying: code copied + affiliate link to AliExpress (same attribution as production) */
 function toast(code) {
@@ -96,7 +97,7 @@ document.querySelectorAll('.filters').forEach((f) => f.addEventListener('click',
   f.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
   const [lo, hi] = b.textContent.includes('עד') ? [0, 50] : b.textContent.includes('–') ? [50, 150] : [0, Infinity];
   f.parentElement.querySelectorAll('.grid .pc').forEach((c) => {
-    const n = Number((c.querySelector('.price b')?.textContent || '').replace(/[^\d]/g, ''));
+    const n = parseFloat((c.querySelector('.price b')?.textContent || '').replace(/[^\d.]/g, ''));
     c.hidden = !(n >= lo && n <= hi);
   });
 }));
@@ -109,21 +110,21 @@ function renderResults(j, box) {
   const when = new Date(j.at || Date.now()).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
   const pool = (j.pool || j.alternatives || []).map((c) => ({ ...c, m: classifyMatch({ title: o.enTitle || o.title }, { title: c.enTitle || c.title }) }));
   const groups = [['exact', '✅ התאמה מדויקת', 'אותו דגם, בלי סתירה במאפיינים'], ['likely', '🟡 כנראה אותו מוצר – כדאי לבדוק', 'דומה מאוד. בדקו גרסה, צבע ומפרט לפני שקונים'], ['similar', '🔁 חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
-  const img = (u) => (u ? `<img src="${esc(u)}_220x220.jpg" alt="" loading="lazy" width="110" height="110" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${esc(u)}'">` : '');
+  const img = (u) => (u ? `<img src="${esc(safeUrl(u))}_220x220.jpg" alt="" loading="lazy" width="110" height="110" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${esc(u)}'">` : '');
   const card = (c) => {
     const save = o.price != null && c.m.level !== 'similar' ? Math.round((o.price - c.price) * 100) / 100 : null;
     return `<article class="offer lvl-${c.m.level}"><div class="o-img">${img(c.image)}</div><div class="o-main"><b>${esc(c.title)}</b><span class="muted small">${esc(c.shop || '')}${c.rating != null ? ` · ${c.rating}% חיובי` : ''}${c.sold ? ` · ${c.sold.toLocaleString('he-IL')} נמכרו` : ''}</span></div>
-<div class="o-act"><b class="o-price">${ils(c.price)}</b>${save > 0 ? `<span class="save">זול ב-${ils(save)}</span>` : ''}<a class="btn btn-sm" href="${esc(c.link)}" rel="nofollow sponsored noopener">לעליאקספרס ←</a></div></article>`;
+<div class="o-act"><b class="o-price">${ils(c.price)}</b>${save > 0 ? `<span class="save">זול ב-${ils(save)}</span>` : ''}<a class="btn btn-sm" href="${esc(safeUrl(c.link))}" rel="nofollow sponsored noopener">לעליאקספרס ←</a></div></article>`;
   };
-  let h = `<div class="searched live"><div class="o-img">${img(o.image)}</div><div><span class="muted small">המוצר שחיפשתם</span><h2>${esc(o.title || '')}</h2><p><b>${o.price != null ? ils(o.price) : ''}</b> · משלוח ומע״מ מוצגים בקופה · <a href="${esc(o.link || '')}" rel="nofollow sponsored noopener">לעמוד המוצר ←</a></p><p class="muted small">נבדק מול ה-API הרשמי: ${when}</p></div></div>`;
+  let h = `<div class="searched live"><div class="o-img">${img(o.image)}</div><div><span class="muted small">המוצר שחיפשתם</span><h2>${esc(o.title || '')}</h2><p><b>${o.price != null ? ils(o.price) : ''}</b> · משלוח ומע״מ מוצגים בקופה · <a href="${esc(safeUrl(o.link))}" rel="nofollow sponsored noopener">לעמוד המוצר ←</a></p><p class="muted small">נבדק מול ה-API הרשמי: ${when}</p></div></div>`;
   // Verdict first: the cheapest of the pasted product and the same/likely-same offers. Every button is an affiliate link.
   const same = pool.filter((c) => c.m.level !== 'similar' && c.price != null && c.link);
   const best = same.slice().sort((a, b) => a.price - b.price)[0];
   if (o.price != null && o.link) {
     const cheaper = best && best.price < o.price - 0.5 ? best : null;
     h += cheaper
-      ? `<div class="verdict win"><span class="v-emoji">🎯</span><div><b>מצאנו זול יותר ב־${ils(o.price - cheaper.price)}</b><p class="small">${cheaper.m.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע'} אצל ${esc(cheaper.shop || 'מוכר אחר')}: ${ils(cheaper.price)}</p></div><a class="btn btn-primary" href="${esc(cheaper.link)}" rel="nofollow sponsored noopener">לקנייה במחיר הזה ←</a></div>`
-      : `<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p class="small">בדקנו ${j.checked ?? pool.length} הצעות ולא מצאנו את אותו מוצר בפחות. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="${esc(o.link)}" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a></div>`;
+      ? `<div class="verdict win"><span class="v-emoji">🎯</span><div><b>מצאנו זול יותר ב־${ils(o.price - cheaper.price)}</b><p class="small">${cheaper.m.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע'} אצל ${esc(cheaper.shop || 'מוכר אחר')}: ${ils(cheaper.price)}</p></div><a class="btn btn-primary" href="${esc(safeUrl(cheaper.link))}" rel="nofollow sponsored noopener">לקנייה במחיר הזה ←</a></div>`
+      : `<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p class="small">בדקנו ${j.checked ?? pool.length} הצעות ולא מצאנו את אותו מוצר בפחות. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="${esc(safeUrl(o.link))}" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a></div>`;
   }
   const any = groups.map(([lvl, t, sub]) => { const l = pool.filter((c) => c.m.level === lvl).sort((a, b) => a.price - b.price); return l.length ? `<h3 class="grp">${t}</h3><p class="muted small">${sub}</p>${l.map(card).join('')}` : ''; }).join('');
   h += any || '<div class="note">לא מצאנו הצעה אחרת לאותו מוצר. כנראה שהמחיר שבחרתם כבר טוב 👌 אפשר להוסיף עליו <a href="/test/#coupons">קוד קופון לפי סכום העגלה</a>.</div>';

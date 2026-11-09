@@ -14,6 +14,8 @@ const guides = [...baseGuides, ...moreGuides, ...israelGuides];
 import { eventContent } from '../src/content/events.mjs';
 import { categories, categoryColors } from '../src/content/categories.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
+import { buildFacebookPage } from './fb-posts.mjs';
+import { renderCard } from './telegram-card.mjs';
 import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -241,14 +243,15 @@ function breadcrumbs(items) {
   };
 }
 
+const eventHasCodes = (ev) => realCodes.some((c) => (c.event === ev.slug || !c.event) && (!c.expires || c.expires >= today) && (!c.starts || c.starts <= today));
 function topbar() {
   if (!activeEvent) return '';
-  const live = activeEvent.start <= today;
+  const live = activeEvent.start <= today && eventHasCodes(activeEvent);
   const short = activeEvent.name.split(' –')[0];
   const days = daysBetween(today, activeEvent.start);
   const text = live
     ? `🔥 קודי ${esc(short)} לישראל בתוקף עכשיו${activeEvent.end ? `, עד ${heDate(activeEvent.end)}` : ''}. לכל הקודים`
-    : `⏳ ${esc(short)} מתחיל ${days === 1 ? 'מחר' : `בעוד ${days} ימים`}. כך מתכוננים`;
+    : activeEvent.start <= today ? `⏳ ${esc(short)} כאן. הקודים לישראל יעלו לכאן ברגע שעליאקספרס תפרסם אותם` : `⏳ ${esc(short)} מתחיל ${days === 1 ? 'מחר' : `בעוד ${days} ימים`}. כך מתכוננים`;
   return `<div class="topbar"><a href="/sale/${activeEvent.slug}/">${text} ←</a></div>`;
 }
 
@@ -393,22 +396,22 @@ const faqLd = (items) => ({ '@context': 'https://schema.org', '@type': 'FAQPage'
 
 // Between sales (no active codes): say what happens next instead of showing an empty list.
 function nextCodesBox() {
-  const next = (manual.events || []).filter((e) => e.start > today).sort((a, b) => a.start.localeCompare(b.start))[0];
+  const next = (manual.events || []).filter((e) => e.end >= today && !eventHasCodes(e)).sort((a, b) => a.start.localeCompare(b.start))[0];
   const nshort = next ? next.name.split(' –')[0] : '';
   return `<div class="between">
   <b>⏳ קודי המבצע הקודם הסתיימו</b>
-  <p>${next ? `קודי ${esc(nshort)} צפויים לצאת סביב ${heDate(next.start)}. נעדכן כאן ובערוץ הטלגרם זמן קצר אחרי שהם יוצאים.` : 'קודי המבצע הבא יופיעו כאן זמן קצר אחרי שעליאקספרס תפרסם אותם.'} בינתיים אפשר לחסוך עם הקופונים במרכז הקופונים של עליאקספרס.</p>
+  <p>${next ? `קודי ${esc(nshort)} ${next.start <= today ? 'צפויים לצאת בימים הקרובים' : `צפויים לצאת סביב ${heDate(next.start)}`}. נעדכן כאן ובערוץ הטלגרם זמן קצר אחרי שהם יוצאים.` : 'קודי המבצע הבא יופיעו כאן זמן קצר אחרי שעליאקספרס תפרסם אותם.'} בינתיים אפשר לחסוך עם הקופונים במרכז הקופונים של עליאקספרס.</p>
   <div class="between-cta"><a class="btn btn-primary" href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים ${ICON.arrow}</a>${tgBtn('קבלו את הקודים בטלגרם')}</div>
 </div>`;
 }
 
 function calcWidget() {
-  if (!realCodes.length) return '';
+  if (!realCodes.length) return '<div id="calc"></div>';
   const data = coupons.filter((c) => (c.currency || 'USD') === 'USD').map((c) => ({
-    id: c.id, d: c.discount, m: c.minOrder, s: c.sample || !c.code ? 1 : 0, code: c.sample ? '' : c.code,
+    id: c.id, d: c.discount, m: c.minOrder, s: c.sample || !c.code ? 1 : 0, code: c.sample ? '' : c.code, x: c.expires || '',
     t: `${money(c.discount)} הנחה מעל ${money(c.minOrder)}`,
   }));
-  if (!data.length) return '';
+  if (!data.length) return '<div id="calc"></div>';
   return `<div class="calc" id="calc" data-rate="${USD_ILS}">
     <label class="calc-label" for="calc-amount">כמה יש לכם בעגלה?</label>
     <div class="calc-row">
@@ -662,12 +665,19 @@ function dealCategoryPage(cat) {
   });
 }
 
+// Israel's UTC offset on a given date (+02:00 in winter, +03:00 in summer time).
+function ilOffset(date) {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jerusalem', timeZoneName: 'shortOffset' }).formatToParts(new Date(`${date}T12:00:00Z`)).find((x) => x.type === 'timeZoneName')?.value || 'GMT+2';
+  const h = Number((p.match(/[+-]\d+/) || ['+2'])[0]);
+  return `${h < 0 ? '-' : '+'}${String(Math.abs(h)).padStart(2, '0')}:00`;
+}
+
 function eventPage(ev) {
   const pathname = `/sale/${ev.slug}/`;
   const short = ev.name.split(' –')[0];
   const content = eventContent[ev.slug] || {};
   const bc = breadcrumbs([{ name: `קופונים ${le(short)}`, url: pathname }]);
-  const live = ev.start <= today && ev.end >= today;
+  const live = ev.start <= today && ev.end >= today && eventHasCodes(ev);
   const upcoming = ev.start > today;
   const year = ev.start.slice(0, 4);
   const own = coupons.filter((c) => c.event === ev.slug);
@@ -677,8 +687,8 @@ function eventPage(ev) {
   const body = `
 <section class="hero"><div class="wrap narrow">${bc.html}
   <h1>${short.includes('עליאקספרס') ? `קוד קופון ${esc(le(short))}` : `קוד קופון עליאקספרס ${esc(le(short))}`} ${year}</h1>
-  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשעליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
-  ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
+  <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשעליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : ev.end >= today ? 'המבצע התחיל. קודי ההנחה לישראל יעלו לכאן ברגע שעליאקספרס תפרסם אותם.' : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
+  ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00${ilOffset(ev.start)}" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
 <section class="section"><div class="wrap narrow">
   ${content.intro ? `<div class="prose">${content.intro}</div>` : ''}
@@ -1050,12 +1060,16 @@ await write('p/index.html', layout({
 <script>(function(){var box=document.getElementById('pp');var id=(new URLSearchParams(location.search).get('i')||'').replace(/\\D/g,'');
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function fail(){box.className='pp-card';box.innerHTML='<div class="pp-body"><h1>הדיל הזה כבר לא זמין</h1><p>אבל יש לנו קודי קופון פעילים לעליאקספרס.</p><a class="btn btn-primary" href="/">לקודי הקופון</a></div>'}
+function retry(){box.className='pp-card';box.innerHTML='<div class="pp-body"><h1>רגע, עליאקספרס עמוסה</h1><p>לא הצלחנו לטעון את הדיל כרגע.</p><button class="btn btn-primary" type="button" onclick="location.reload()">לנסות שוב</button></div>'}
 if(!/^\\d{6,20}$/.test(id))return fail();
-fetch(${JSON.stringify(PRODUCT_API)}+'/api/products?ids='+id).then(function(r){return r.json()}).then(function(j){var p=j.items&&j.items[0];if(!p||!/^https:\\/\\/s\\.click\\.aliexpress\\.com\\//.test(p.link||''))return fail();
-var ils=function(n){return '₪'+(Math.round(n*100)/100).toLocaleString('he-IL')};var off=p.originalPrice>p.price?Math.round((1-p.price/p.originalPrice)*100):0;
-box.className='pp-card';box.innerHTML='<a class="pp-img" href="'+esc(p.link)+'" rel="nofollow sponsored noopener"><img src="'+esc(p.image)+'" alt="" width="480" height="480" referrerpolicy="no-referrer"></a><div class="pp-body"><span class="pp-kicker">🎯 נבחר בשבילכם ביש דיל!</span><h1>'+esc(p.title)+'</h1><p class="pp-price"><b>'+ils(p.price)+'</b>'+(off>=5?'<s>'+ils(p.originalPrice)+'</s><span class="pp-off">-'+off+'%</span>':'')+'</p><p class="pp-meta">'+(p.rating?p.rating+'% ביקורות חיוביות':'')+(p.sold?' · '+Number(p.sold).toLocaleString('he-IL')+' נמכרו':'')+'</p><a class="btn btn-primary btn-block pp-buy" href="'+esc(p.link)+'" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a><p class="pp-note">המחיר נבדק עכשיו מול עליאקספרס. משלוח ומע״מ מוצגים בקופה, והמחיר עשוי להשתנות.</p></div>';
-document.title=p.title.slice(0,60)+' | ${site.name}';}).catch(fail)})();</script>`,
+fetch(${JSON.stringify(PRODUCT_API)}+'/api/products?ids='+id).then(function(r){if(r.status>=500||r.status===429)throw 0;return r.json()}).then(function(j){var p=j.items&&j.items[0];if(!p||!/^https:\\/\\/s\\.click\\.aliexpress\\.com\\//.test(p.link||''))return fail();
+var ils=function(n){return '₪'+Number(n).toLocaleString('he-IL',{minimumFractionDigits:2,maximumFractionDigits:2})};var rt=Number(p.rating)||0,sd=Number(p.sold)||0;var off=p.originalPrice>p.price?Math.round((1-p.price/p.originalPrice)*100):0;
+box.className='pp-card';box.innerHTML='<a class="pp-img" href="'+esc(p.link)+'" rel="nofollow sponsored noopener"><img src="'+esc(p.image)+'" alt="" width="480" height="480" referrerpolicy="no-referrer"></a><div class="pp-body"><span class="pp-kicker">🎯 נבחר בשבילכם ביש דיל!</span><h1>'+esc(p.title)+'</h1>'+(Number(p.price)>0?'<p class="pp-price"><b>'+ils(p.price)+'</b>':'<p class="pp-price">')+'+(off>=5?'<s>'+ils(p.originalPrice)+'</s><span class="pp-off">-'+off+'%</span>':'')+'</p><p class="pp-meta">'+(rt?rt+'% ביקורות חיוביות':'')+(sd?' · '+sd.toLocaleString('he-IL')+' נמכרו':'')+'</p><a class="btn btn-primary btn-block pp-buy" href="'+esc(p.link)+'" rel="nofollow sponsored noopener">לקנייה בעליאקספרס ←</a><p class="pp-note">המחיר נבדק עכשיו מול עליאקספרס. משלוח ומע״מ מוצגים בקופה, והמחיר עשוי להשתנות.</p></div>';
+document.title=String(p.title).slice(0,60)+' | ${site.name}';}).catch(retry)})();</script>`,
 }));
+
+const fb = await buildFacebookPage({ site, coupons, today, write, layout, esc, abs, renderCard, root: ROOT, event: activeEvent }).catch((e) => { console.log(`• facebook page skipped: ${e.message}`); return null; });
+if (fb) console.log(`• facebook posts: ${fb.today} today, ${fb.upcoming} upcoming → /admin/fb/`);
 
 await write('admin/link/index.html', layout({
   title: `יצירת קישור דיל | ${site.name}`, description: 'כלי פנימי', pathname: '/admin/link/', noindex: true,
@@ -1066,7 +1080,7 @@ function show(id){var u=location.origin+'/p/?i='+id;out.innerHTML='<div class="a
 document.getElementById('adm-copy').onclick=function(){navigator.clipboard.writeText(u).then(function(){document.getElementById('adm-copy').textContent='הועתק ✓'})}}
 document.getElementById('adm-go').onclick=function(){var t=inp.value||'';var m=t.match(/\\/item\\/(\\d{6,20})\\.html/)||t.match(/productId=(\\d{6,20})/);if(m)return show(m[1]);
 if(!/https?:\\/\\/(s\\.click|a)\\.aliexpress\\.com\\//.test(t)){out.innerHTML='<p class="muted">זה לא נראה כמו קישור למוצר בעליאקספרס.</p>';return}
-out.innerHTML='<p class="muted">פותח קישור מקוצר…</p>';fetch(${JSON.stringify(PRODUCT_API)}+'/api/cheapest?url='+encodeURIComponent(t.trim())).then(function(r){return r.json()}).then(function(j){j.original&&j.original.id?show(j.original.id):out.innerHTML='<p class="muted">לא הצלחנו לזהות את המוצר. נסו את הקישור המלא מהדפדפן.</p>'}).catch(function(){out.innerHTML='<p class="muted">שגיאת רשת. נסו שוב.</p>'})}})();</script>`,
+out.innerHTML='<p class="muted">פותח קישור מקוצר…</p>';fetch(${JSON.stringify(PRODUCT_API)}+'/api/resolve?url='+encodeURIComponent(t.trim())).then(function(r){return r.json()}).then(function(j){j.id?show(j.id):out.innerHTML='<p class="muted">לא הצלחנו לזהות את המוצר. נסו את הקישור המלא מהדפדפן.</p>'}).catch(function(){out.innerHTML='<p class="muted">שגיאת רשת. נסו שוב.</p>'})}})();</script>`,
 }));
 
 await write('404.html', layout({

@@ -203,6 +203,7 @@
   var calc = $('calc'), input = $('calc-amount'), out = $('calc-out');
   var tiers = [];
   try { tiers = JSON.parse(($('calc-data') || {}).textContent || '[]'); } catch (e) {}
+  tiers = tiers.filter(function (t) { return !t.x || t.x >= today; });
   var currency = 'USD';
   try { currency = localStorage.getItem('calc-cur') || 'USD'; } catch (e) {}
   var rate = calc ? Number(calc.getAttribute('data-rate')) || 3.7 : 3.7;
@@ -221,9 +222,13 @@
   }
 
   function runCalc() {
-    if (!out || !tiers.length) return;
+    if (!out) return;
+    if (!tiers.length) { out.textContent = 'הקודים של המבצע הסתיימו. קודים חדשים יעלו כאן ובערוץ הטלגרם.'; return; }
     // same rules as src/v2/logic.mjs parseAmount (unit-tested): decimal comma, thousands, no negatives/1e5
-    var s = String(input.value || '').trim().replace(/[₪$\s]/g, ''), raw = NaN;
+    var typed = String(input.value || '');
+    if (/₪/.test(typed) && currency !== 'ILS') return setCurrency('ILS');
+    if (/\$/.test(typed) && currency !== 'USD') return setCurrency('USD');
+    var s = typed.trim().replace(/[₪$\s]/g, ''), raw = NaN;
     if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) raw = Number(s.replace(/,/g, ''));
     else if (/^\d+,\d{1,2}$/.test(s)) raw = Number(s.replace(',', '.'));
     else if (/^\d+(\.\d+)?$/.test(s)) raw = Number(s);
@@ -247,7 +252,7 @@
     if (next) {
       var gap = Math.round((next.m - usd) * 100) / 100;
       if (!best || gap <= Math.max(10, usd * 0.35)) {
-        html += '<p class="upsell">💡 הוסיפו עוד ' + fmt(gap) + ' לעגלה וקבלו ' + fmt(next.d) + ' הנחה במקום ' + (best ? fmt(best.d) : '0') + '.</p>';
+        html += '<p class="upsell">💡 הוסיפו עוד ' + fmt(gap) + ' לעגלה וקבלו ' + fmt(next.d) + (best ? ' הנחה במקום ' + fmt(best.d) : ' הנחה') + '.</p>';
       }
     }
     out.innerHTML = html;
@@ -271,7 +276,7 @@
     if (foot) new IntersectionObserver(function (en) { footVisible = en[0].isIntersecting; upd(); }).observe(foot);
     sticky.querySelector('a').addEventListener('click', function (e) {
       e.preventDefault();
-      calc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(function () { input && input.focus({ preventScroll: true }); }, 400);
       track('sticky_cta');
     });

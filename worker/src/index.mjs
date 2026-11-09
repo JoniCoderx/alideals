@@ -9,6 +9,27 @@ const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_
 const CACHE_TTL = 6 * 3600; // seconds
 const RATE = { windowMs: 60_000, max: 12 }; // per IP per minute (per isolate – a soft guard)
 const hits = new Map();
+// Per-IP, per-endpoint soft limit (per isolate). Old entries are pruned so the map can't grow forever.
+function limited(req, bucket, max) {
+  const now = Date.now();
+  if (hits.size > 5000) for (const [k, v] of hits) if (now - v.t > RATE.windowMs) hits.delete(k);
+  const key = `${bucket}:${req.headers.get('CF-Connecting-IP') || 'anon'}`;
+  const rec = hits.get(key) || { n: 0, t: now };
+  if (now - rec.t > RATE.windowMs) { rec.n = 0; rec.t = now; }
+  rec.n++; hits.set(key, rec);
+  return rec.n > max;
+}
+// Edge cache (caches.default): one AliExpress call serves everyone asking the same thing for `ttl` seconds.
+async function cachedJSON(ctx, key, ttl, h, fn) {
+  const cache = typeof caches !== 'undefined' ? caches.default : null;
+  const req = new Request(`https://cache.yeshdeal/${key}`);
+  if (cache) { const hit = await cache.match(req); if (hit) { const r = new Response(hit.body, hit); for (const [k, v] of Object.entries(h)) r.headers.set(k, v); r.headers.set('X-Cache', 'HIT'); return r; } }
+  const { status, body } = await fn();
+  const res = json(body, status, { ...h, 'Cache-Control': status === 200 ? `public, max-age=${ttl}` : 'no-store' });
+  if (cache && status === 200) ctx.waitUntil(cache.put(req, res.clone()));
+  return res;
+}
+const RATE_LIMITED = { error: 'rate_limited', message: 'יותר מדי בקשות. נסו שוב בעוד דקה.' };
 
 async function hmacHex(secret, msg) {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -168,11 +189,14 @@ export default {
       if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured' }, 503, h);
       const q = (url.searchParams.get('q') || '').trim().slice(0, 80);
       if (q.length < 2) return json({ error: 'bad_query' }, 400, h);
+      if (limited(req, 'search', 20)) return json(RATE_LIMITED, 429, h);
+      const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
       try {
-        const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
-        const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: 20, page_no: 1 });
-        const items = (r?.products?.product || []).map(normalizeProduct);
-        return json({ q, count: items.length, items, checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
+        return await cachedJSON(ctx, `search/v1/${lang}/${encodeURIComponent(q.toLowerCase())}`, 1800, h, async () => {
+          const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: 20, page_no: 1 });
+          const items = (r?.products?.product || []).map(normalizeProduct);
+          return { status: 200, body: { q, count: items.length, items, checkedAt: new Date().toISOString() } };
+        });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
     }
     // Hebrew details for a short list of product ids (digits only, max 20).
@@ -180,25 +204,32 @@ export default {
       if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured' }, 503, h);
       const ids = (url.searchParams.get('ids') || '').split(',').filter((x) => /^\d{6,20}$/.test(x)).slice(0, 20);
       if (!ids.length) return json({ error: 'bad_ids' }, 400, h);
+      if (limited(req, 'products', 40)) return json(RATE_LIMITED, 429, h);
+      const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
+      const raw = url.searchParams.get('raw') === '1' && ids.length <= 3; // diagnostics: every field the API returns
+      const call = () => aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, ...(raw ? {} : { fields: FIELDS }), product_ids: ids.join(','), country: 'IL' });
       try {
-        const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
-        const raw = url.searchParams.get('raw') === '1' && ids.length <= 3; // diagnostics: every field the API returns
-        const r = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, ...(raw ? {} : { fields: FIELDS }), product_ids: ids.join(','), country: 'IL' });
-        const list = r?.products?.product || [];
-        if (raw) return json({ raw: list, checkedAt: new Date().toISOString() }, 200, h);
-        return json({ items: list.map(normalizeProduct), checkedAt: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'public, max-age=1800' });
+        if (raw) { const r = await call(); return json({ raw: r?.products?.product || [], checkedAt: new Date().toISOString() }, 200, h); }
+        return await cachedJSON(ctx, `products/v1/${lang}/${[...ids].sort().join(',')}`, 1800, h, async () => {
+          let r = await call().catch(() => null);
+          if (!r) { await new Promise((ok) => setTimeout(ok, 1100)); r = await call(); } // 1 call/s API limit: retry once
+          return { status: 200, body: { items: (r?.products?.product || []).map(normalizeProduct), checkedAt: new Date().toISOString() } };
+        });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
+    }
+    // Light short-link → product id resolver (the admin link maker). No AliExpress API call.
+    if (url.pathname === '/api/resolve' && req.method === 'GET') {
+      if (limited(req, 'resolve', 30)) return json(RATE_LIMITED, 429, h);
+      const parsed = parseProductInput(url.searchParams.get('url') || '');
+      if (!parsed.ok) return json({ error: 'bad_link' }, 400, h);
+      const id = parsed.id || (parsed.shortUrl ? await resolveShortLink(parsed.shortUrl, fetch).catch(() => null) : null);
+      return id ? json({ id }, 200, { ...h, 'Cache-Control': 'public, max-age=86400' }) : json({ error: 'not_found' }, 404, h);
     }
     if (url.pathname !== '/api/cheapest' || req.method !== 'GET') return json({ error: 'not_found' }, 404, h);
     if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured', message: 'השירות עוד לא הופעל.' }, 503, h);
 
     // Soft rate limit per IP.
-    const ip = req.headers.get('CF-Connecting-IP') || 'anon';
-    const now = Date.now();
-    const rec = hits.get(ip) || { n: 0, t: now };
-    if (now - rec.t > RATE.windowMs) { rec.n = 0; rec.t = now; }
-    rec.n++; hits.set(ip, rec);
-    if (rec.n > RATE.max) return json({ error: 'rate_limited', message: 'יותר מדי חיפושים. נסו שוב בעוד דקה.' }, 429, h);
+    if (limited(req, 'cheapest', RATE.max)) return json({ error: 'rate_limited', message: 'יותר מדי חיפושים. נסו שוב בעוד דקה.' }, 429, h);
 
     const input = url.searchParams.get('url') || '';
     if (input.length > 2000) return json({ error: 'bad_link', message: 'הקישור ארוך מדי.' }, 400, h);

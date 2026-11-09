@@ -348,7 +348,8 @@ export function collectReports(updates, { reports = {}, codes = [], today }) {
     if (!valid.has(code)) { replies.push({ chat: msg.chat.id, kind: 'unknown', code }); continue; }
     const list = next[code] ? [...next[code]] : [];
     const uid = msg.from?.id ?? msg.chat.id;
-    if (!list.some((r) => r.u === uid && r.d === today)) list.push({ d: today, u: uid });
+    const hu = uhash(uid); // only a one-way hash is stored (the state file is public)
+    if (!list.some((r) => (r.u === hu || r.u === uid) && r.d === today)) list.push({ d: today, u: hu });
     next[code] = list.slice(-50);
     replies.push({ chat: msg.chat.id, kind: 'thanks', code });
   }
