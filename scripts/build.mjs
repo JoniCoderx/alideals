@@ -270,7 +270,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
   const robots = noindex || SAMPLE_MODE ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1';
   const nav = [
     ['/', 'קודי קופון'],
-    ...(FINDER_API ? [['/finder/', '🎯 צייד הדילים']] : []),
+    ...(FINDER_API ? [['/finder/', 'צייד הדילים 🎯']] : []),
     ['/coupon/', 'קטגוריות'],
     ['/top/', 'מומלצים'],
     ['/deals-today/', 'דילים של היום'],
@@ -358,7 +358,7 @@ ${body}
       <a href="/about/">אודות</a>
       <a href="/disclosure/">גילוי נאות</a>
       <a href="/privacy/">פרטיות</a>
-      ${FINDER_API ? '<a href="/finder/">🎯 צייד הדילים</a>' : ''}
+      ${FINDER_API ? '<a href="/finder/">צייד הדילים 🎯</a>' : ''}
       ${site.social.telegram ? `<a class="foot-tg" href="${esc(site.social.telegram)}" rel="noopener" target="_blank">ערוץ טלגרם ${ICON.telegram}</a>` : ''}
       ${site.social.whatsapp ? `<a href="${esc(site.social.whatsapp)}" rel="noopener">ערוץ וואטסאפ</a>` : ''}
       ${site.social.facebook ? `<a class="foot-fb" href="${esc(site.social.facebook)}" rel="noopener" target="_blank">עמוד פייסבוק <svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></a>` : ''}
@@ -527,12 +527,12 @@ ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div cl
 </div></div></section>` : ''}
 ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wrap"><div class="finder-tease hunter">
   <div class="ft-text">
-    <span class="ft-badge">🎯 צייד הדילים · פעיל</span>
+    <span class="ft-badge">צייד הדילים · פעיל 🎯</span>
     <h2>יש לכם מוצר בעגלה? בואו&nbsp;נבדוק&nbsp;אותו</h2>
     <p class="hunter-tag">מדביקים קישור, ותוך שניות יודעים אם יש אותו מוצר בזול יותר וכמה הוא יעלה עם קוד קופון.</p>
     <form class="ft-form" action="/finder/" method="get" autocomplete="off">
       <input name="url" type="text" inputmode="url" dir="ltr" placeholder="הדביקו קישור מעליאקספרס" aria-label="קישור למוצר מעליאקספרס" required>
-      <button class="btn btn-primary" type="submit">🎯 שלחו את הצייד</button>
+      <button class="btn btn-primary" type="submit">שלחו את הצייד 🎯</button>
     </form>
     <p class="ft-note">עובד גם עם קישור מקוצר מהאפליקציה (שיתוף ← העתקת קישור).</p>
   </div>
@@ -763,7 +763,7 @@ function finderPage() {
   ];
   const body = `
 <section class="hero hero-hunter"><div class="wrap narrow">${bc.html}
-  <div class="hunter-head"><div><h1 class="hunter-h1">🎯 צייד הדילים: אותו מוצר, במחיר הכי טוב&nbsp;שמצאנו</h1>
+  <div class="hunter-head"><div><h1 class="hunter-h1">צייד הדילים: אותו מוצר, במחיר הכי טוב&nbsp;שמצאנו 🎯</h1>
   <p class="hunter-tag">אתם שולחים קישור. הצייד סורק, משווה ומחשב לכם את המחיר עם&nbsp;קופון.</p>
   <p class="lead">מנוע הצייד מחפש ישירות במאגר המוצרים הרשמי של עליאקספרס, עובר על <strong>עשרות מוכרים בתוך שניות</strong>, מזהה את אותו דגם לפי מספר הדגם, קיבולת, הספק וסוג תקע, ומחזיר את ההצעות עם משלוח לישראל, ממוינות לפי מחיר.</p></div>
   <div class="ft-visual"><div class="radar" aria-hidden="true">
@@ -775,7 +775,7 @@ function finderPage() {
     <label for="finder-url" class="calc-label">הקישור למוצר</label>
     <div class="finder-row">
       <input id="finder-url" name="url" type="text" inputmode="url" dir="ltr" placeholder="https://he.aliexpress.com/item/..." required>
-      <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>🎯 שלחו את הצייד</button>
+      <button class="btn btn-primary" type="submit" id="finder-go"${FINDER_API ? '' : ' disabled'}>שלחו את הצייד 🎯</button>
     </div>
     <p class="muted finder-help">באפליקציה: עמוד המוצר ← שיתוף ← העתקת קישור. עובד גם עם קישורים מקוצרים.</p>
     ${FINDER_API ? '' : `<div class="soon-inline"><b>🎯 הצייד יוצא לדרך ממש בקרוב</b><span>אנחנו בשלבי כיול אחרונים. רוצים לדעת ראשונים כשהוא עולה?</span>${tgBtn('הצטרפו לטלגרם')}<a href="/">בינתיים: כל קודי הקופון ←</a></div>`}
@@ -786,10 +786,10 @@ function finderPage() {
   <div class="prose">
     <h2>איך הצייד עובד</h2>
     <ol class="ft-steps">
-      <li><b>🎯 נועל מטרה</b><span>מזהה את המוצר מהקישור, גם מקישור מקוצר מהאפליקציה</span></li>
-      <li><b>📡 סורק את השטח</b><span>חיפוש חי במאגר הרשמי של עליאקספרס: עשרות מוכרים של אותו מוצר, עם משלוח לישראל</span></li>
-      <li><b>🧠 מסנן חכם</b><span>מנוע ההתאמה משווה דגם, קיבולת, הספק ותקע, ומפריד בין "אותו דגם", "כנראה אותו מוצר" ו"חלופה דומה"</span></li>
-      <li><b>💰 מחשב את השלל</b><span>המחיר הכי טוב, וכמה הוא יוצא עם קוד הקופון שמתאים לו</span></li>
+      <li><b>נועל מטרה 🎯</b><span>מזהה את המוצר מהקישור, גם מקישור מקוצר מהאפליקציה</span></li>
+      <li><b>סורק את השטח 📡</b><span>חיפוש חי במאגר הרשמי של עליאקספרס: עשרות מוכרים של אותו מוצר, עם משלוח לישראל</span></li>
+      <li><b>מסנן חכם 🧠</b><span>מנוע ההתאמה משווה דגם, קיבולת, הספק ותקע, ומפריד בין "אותו דגם", "כנראה אותו מוצר" ו"חלופה דומה"</span></li>
+      <li><b>מחשב את השלל 💰</b><span>המחיר הכי טוב, וכמה הוא יוצא עם קוד הקופון שמתאים לו</span></li>
     </ol>
     <h2>למה אותו מוצר עולה אחרת?</h2>
     <p>בעליאקספרס מוכרים רבים מציעים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים יעשה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>

@@ -247,8 +247,8 @@ async function checkWatches(env) {
     const link = await shortAff(env, w.id, p.link);
     await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       chat_id: w.chat, parse_mode: 'HTML', disable_web_page_preview: true,
-      text: `🔔 <b>המחיר ירד!</b>\n\n${escH(String(p.title || w.title).slice(0, 90))}\n<b>${ilsT(p.price)}</b> במקום ${ilsT(w.price)} (−${Math.round((1 - p.price / w.price) * 100)}%)\n\nמחירים לפני משלוח ומע״מ. אל תשכחו קוד קופון לפי סכום העגלה.`,
-      reply_markup: { inline_keyboard: [[{ text: '🛒 לקנייה במחיר הזה', url: link }], [{ text: '🔕 להפסיק לעקוב', callback_data: `al:rm:${w.id}` }]] },
+      text: `<b>המחיר ירד! 🔔</b>\n\n${escH(String(p.title || w.title).slice(0, 90))}\n<b>${ilsT(p.price)}</b> במקום ${ilsT(w.price)} (−${Math.round((1 - p.price / w.price) * 100)}%)\n\nמחירים לפני משלוח ומע״מ. אל תשכחו קוד קופון לפי סכום העגלה.`,
+      reply_markup: { inline_keyboard: [[{ text: 'לקנייה במחיר הזה 🛒', url: link }], [{ text: 'להפסיק לעקוב 🔕', callback_data: `al:rm:${w.id}` }]] },
     }) }).catch(() => {});
     w.price = p.price; sent++;
   }
@@ -288,7 +288,7 @@ async function shortAff(env, id, fallback) {
 export async function hunterReply(env, text) {
   const site = env.SITE_URL || 'https://yeshdeal.com';
   const { status, body } = await findCheapest(env, text);
-  if (status !== 200 || !body?.original) return { text: `😕 ${escH(body?.message || 'לא הצלחנו לזהות את המוצר. שלחו קישור מלא לעמוד המוצר בעליאקספרס.')}` };
+  if (status !== 200 || !body?.original) return { text: `${escH(body?.message || 'לא הצלחנו לזהות את המוצר. שלחו קישור מלא לעמוד המוצר בעליאקספרס.')}` };
   const o = body.original;
   const pool = (body.pool || []).filter((c) => c.price != null && c.link);
   const same = pool.filter((c) => c.level === 'exact' || c.level === 'likely').sort((a, b) => a.price - b.price);
@@ -297,18 +297,18 @@ export async function hunterReply(env, text) {
   const link = await shortAff(env, t.id, t.link);
   const title = escH(String(o.title || '').slice(0, 90));
   let msg;
-  if (cheaper) msg = `🎯 <b>מצאנו זול יותר ב־${ilsT(Math.round((o.price - cheaper.price) * 100) / 100)}!</b>\n\n${title}\n${cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר (בדקו גרסה וצבע)'} אצל ${escH(cheaper.shop || 'מוכר אחר')}: <b>${ilsT(cheaper.price)}</b> במקום ${ilsT(o.price)}`;
-  else if (same.length) msg = `👑 <b>אתם קינג! זה המחיר הכי טוב שמצאנו</b>\n\n${title}\n<b>${ilsT(o.price)}</b> · השווינו ל${same.length === 1 ? 'הצעה נוספת של אותו מוצר' : `־${same.length} הצעות של אותו מוצר`}, ואף אחת לא זולה יותר.`;
-  else msg = `🔎 <b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b>\n\n${title}\n<b>${ilsT(o.price)}</b> · אבל יש דרך לשלם עליו פחות 👇`;
+  if (cheaper) msg = `<b>מצאנו זול יותר ב־${ilsT(Math.round((o.price - cheaper.price) * 100) / 100)}! 🎯</b>\n\n${title}\n${cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר (בדקו גרסה וצבע)'} אצל ${escH(cheaper.shop || 'מוכר אחר')}: <b>${ilsT(cheaper.price)}</b> במקום ${ilsT(o.price)}`;
+  else if (same.length) msg = `<b>אתם ציידים! זה המחיר הכי טוב שמצאנו 🎯</b>\n\n${title}\n<b>${ilsT(o.price)}</b> · השווינו ל${same.length === 1 ? 'הצעה נוספת של אותו מוצר' : `־${same.length} הצעות של אותו מוצר`}, ואף אחת לא זולה יותר.`;
+  else msg = `<b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b>\n\n${title}\n<b>${ilsT(o.price)}</b> · אבל יש דרך לשלם עליו פחות:`;
   // Real coupon estimate: the best code whose minimum the price meets (codes are checked in USD)
   const codes = await liveCodes(env);
   const rate = o.usd ? o.price / o.usd : 3.2;
   const usd = t.usd || (t.price / rate);
   const fit = codes.filter((c) => c.m <= usd).sort((a, b) => b.d - a.d)[0];
-  if (fit) msg += `\n\n💰 עם הקוד <code>${escH(fit.code)}</code> זה יוצא בערך <b>${ilsT(Math.max(0, Math.round((t.price - fit.d * rate) * 100) / 100))}</b> (ההנחה של $${fit.d} יורדת בקופה, לחיצה על הקוד מעתיקה אותו)`;
-  else if (codes.length) { const first = codes.slice().sort((a, b) => a.m - b.m)[0]; msg += `\n\n💡 הוסיפו לעגלה עוד כ־${ilsT(Math.ceil((first.m - usd) * rate))} ותוכלו להשתמש בקוד <code>${escH(first.code)}</code> ($${first.d} הנחה).`; }
+  if (fit) msg += `\n\nעם הקוד <code>${escH(fit.code)}</code> זה יוצא בערך <b>${ilsT(Math.max(0, Math.round((t.price - fit.d * rate) * 100) / 100))}</b> 💰\n(ההנחה של $${fit.d} יורדת בקופה. לחיצה על הקוד מעתיקה אותו)`;
+  else if (codes.length) { const first = codes.slice().sort((a, b) => a.m - b.m)[0]; msg += `\n\nהוסיפו לעגלה עוד כ־${ilsT(Math.ceil((first.m - usd) * rate))} ותוכלו להשתמש בקוד <code>${escH(first.code)}</code> ($${first.d} הנחה) 💡`; }
   msg += '\n\nמחירים לפני משלוח ומע״מ, ועשויים להשתנות.';
-  return { text: msg, html: true, buttons: [[{ text: cheaper ? '🛒 לקנייה במחיר הזה' : '🛒 לקנייה בעליאקספרס', url: link }], [{ text: '🔔 תודיעו לי כשהמחיר יורד', callback_data: `al:add:${t.id}:${Math.round(t.price * 100)}` }], [{ text: '🔎 כל התוצאות באתר', url: `${site}/finder/?url=${encodeURIComponent(`https://www.aliexpress.com/item/${o.id}.html`)}` }]] };
+  return { text: msg, html: true, buttons: [[{ text: cheaper ? 'לקנייה במחיר הזה 🛒' : 'לקנייה בעליאקספרס 🛒', url: link }], [{ text: 'תודיעו לי כשהמחיר יורד 🔔', callback_data: `al:add:${t.id}:${Math.round(t.price * 100)}` }], [{ text: 'כל התוצאות באתר 🔎', url: `${site}/finder/?url=${encodeURIComponent(`https://www.aliexpress.com/item/${o.id}.html`)}` }]] };
 }
 
 async function handleBot(req, env, ctx) {
@@ -326,8 +326,8 @@ async function handleBot(req, env, ctx) {
   if (update.message?.chat?.type === 'private' && /aliexpress\.|^\d{10,20}$/i.test(mtext) && flowStep !== 'text' && flowStep !== 'custom') {
     const chatId = update.message.chat.id;
     const work = (async () => {
-      await tg('sendMessage', { chat_id: chatId, text: '🎯 הצייד יצא לציד… סורק מוכרים, כמה שניות.' });
-      const r = await hunterReply(env, mtext).catch(() => ({ text: '😕 עליאקספרס לא ענתה כרגע. נסו שוב בעוד דקה.' }));
+      await tg('sendMessage', { chat_id: chatId, text: 'הצייד יצא לציד 🎯 סורק מוכרים, כמה שניות…' });
+      const r = await hunterReply(env, mtext).catch(() => ({ text: 'עליאקספרס לא ענתה כרגע. נסו שוב בעוד דקה 🙏' }));
       await tg('sendMessage', { chat_id: chatId, text: r.text, disable_web_page_preview: true, ...(r.html ? { parse_mode: 'HTML' } : {}), ...(r.buttons ? { reply_markup: { inline_keyboard: r.buttons } } : {}) });
     })();
     if (ctx?.waitUntil) ctx.waitUntil(work); else await work;
@@ -347,9 +347,9 @@ async function handleBot(req, env, ctx) {
       else {
         const until = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
         watches.push({ chat: chatId, id, price: Number(cents) / 100, until });
-        note = '🔔 סגור! נודיע לכם כאן אם המחיר יורד ב־5% או יותר (מעקב ל־30 יום).';
+        note = 'סגור! נודיע לכם כאן אם המחיר יורד ב־5% או יותר (מעקב ל־30 יום) 🔔';
       }
-    } else { watches = watches.filter((w) => !(w.chat === chatId && w.id === id)); note = '🔕 הפסקנו לעקוב אחרי המוצר.'; }
+    } else { watches = watches.filter((w) => !(w.chat === chatId && w.id === id)); note = 'הפסקנו לעקוב אחרי המוצר 🔕'; }
     await env.BOT.put('watch', JSON.stringify(watches));
     await tg('answerCallbackQuery', { callback_query_id: update.callback_query.id });
     if (chatId) await tg('sendMessage', { chat_id: chatId, text: note });

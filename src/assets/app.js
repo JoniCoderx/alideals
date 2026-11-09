@@ -342,11 +342,11 @@
       var fit = fTiers.filter(function (t) { return t.m <= usd; }).sort(function (a, b) { return b.d - a.d; })[0];
       if (fit) {
         var after = Math.max(0, priceIls - fit.d * fRate);
-        return '<div class="coupon-est"><span class="lbl">עם קוד קופון</span><span>💰 עם הקוד <code>' + h(fit.code) + '</code> זה יוצא בערך <b>' + ils(Math.round(after * 100) / 100) + '</b> במקום ' + ils(priceIls) + '</span><button type="button" data-copy-code="' + h(fit.code) + '">העתקת קוד</button><small class="muted">הערכה לפי שער הדולר: ההנחה של $' + fit.d + ' יורדת בקופה כשהמוצרים בעגלה מעל $' + fit.m + '.</small></div>';
+        return '<div class="coupon-est"><span class="lbl">עם קוד קופון</span><span>עם הקוד <code>' + h(fit.code) + '</code> זה יוצא בערך <b>' + ils(Math.round(after * 100) / 100) + '</b> במקום ' + ils(priceIls) + ' 💰</span><button type="button" data-copy-code="' + h(fit.code) + '">העתקת קוד</button><small class="muted">הערכה לפי שער הדולר: ההנחה של $' + fit.d + ' יורדת בקופה כשהמוצרים בעגלה מעל $' + fit.m + '.</small></div>';
       }
       var first = fTiers.slice().sort(function (a, b) { return a.m - b.m; })[0];
       var gap = Math.ceil((first.m - usd) * fRate);
-      return '<div class="coupon-est"><span class="lbl">טיפ</span><span>💡 הוסיפו לעגלה עוד כ־' + ils(gap) + ' ותוכלו להשתמש בקוד <code>' + h(first.code) + '</code> ולקבל $' + first.d + ' הנחה.</span></div>';
+      return '<div class="coupon-est"><span class="lbl">טיפ</span><span>הוסיפו לעגלה עוד כ־' + ils(gap) + ' ותוכלו להשתמש בקוד <code>' + h(first.code) + '</code> ולקבל $' + first.d + ' הנחה 💡</span></div>';
     };
     document.addEventListener('click', function (e) {
       var b = e.target.closest('[data-copy-code]'); if (!b) return;
@@ -376,13 +376,13 @@
           track('finder_result', { same: same.length, cheaper: cheaper ? 1 : 0 });
           var html = '';
           if (cheaper) {
-            html += '<div class="verdict win"><span class="v-emoji">🎯</span><div><b>מצאנו זול יותר ב־' + ils(Math.round((o.price - cheaper.price) * 100) / 100) + '</b><p>' + (cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע') + ' אצל ' + h(cheaper.shop || 'מוכר אחר') + ': ' + ils(cheaper.price) + '</p></div><a class="btn btn-primary" href="' + h(safe(cheaper.link)) + '" rel="nofollow sponsored" data-finder="' + h(cheaper.id) + '">לקנייה במחיר הזה</a>' + couponEst(cheaper.price) + '</div>';
+            html += '<div class="verdict win"><div><b>מצאנו זול יותר ב־' + ils(Math.round((o.price - cheaper.price) * 100) / 100) + ' 🎯</b><p>' + (cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע') + ' אצל ' + h(cheaper.shop || 'מוכר אחר') + ': ' + ils(cheaper.price) + '</p></div><a class="btn btn-primary" href="' + h(safe(cheaper.link)) + '" rel="nofollow sponsored" data-finder="' + h(cheaper.id) + '">לקנייה במחיר הזה</a>' + couponEst(cheaper.price) + '</div>';
           } else if (safe(o.link) && !same.length) {
-            html += '<div class="verdict"><span class="v-emoji">🔎</span><div><b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b><p>אין לנו עם מה להשוות את המחיר הזה, אבל יש דרך לשלם עליו פחות 👇</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a>' + couponEst(o.price) + '</div>';
+            html += '<div class="verdict"><div><b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b><p>אין לנו עם מה להשוות את המחיר הזה, אבל יש דרך לשלם עליו פחות:</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a>' + couponEst(o.price) + '</div>';
           } else if (safe(o.link)) {
-            html += '<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p>השווינו ל' + (same.length === 1 ? 'הצעה נוספת של אותו מוצר, והיא לא זולה יותר.' : '־' + same.length + ' הצעות של אותו מוצר, ואף אחת לא זולה יותר.') + ' ועכשיו מורידים עוד 👇</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a>' + couponEst(o.price) + '</div>';
+            html += '<div class="verdict king"><div><b>אתם ציידים! זה המחיר הכי טוב שמצאנו 🎯</b><p>השווינו ל' + (same.length === 1 ? 'הצעה נוספת של אותו מוצר, והיא לא זולה יותר.' : '־' + same.length + ' הצעות של אותו מוצר, ואף אחת לא זולה יותר.') + ' ועכשיו מורידים עוד:</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a>' + couponEst(o.price) + '</div>';
           }
-          var groups = [['exact', '✅ אותו דגם', 'שם דגם זהה, בלי סתירה במאפיינים'], ['likely', '🟡 כנראה אותו מוצר', 'דומה מאוד. בודקים גרסה, צבע ומפרט לפני שקונים'], ['similar', '🔁 חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
+          var groups = [['exact', 'אותו דגם ✅', 'שם דגם זהה, בלי סתירה במאפיינים'], ['likely', 'כנראה אותו מוצר', 'דומה מאוד. בודקים גרסה, צבע ומפרט לפני שקונים'], ['similar', 'חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
           groups.forEach(function (g) {
             var list = pool.filter(function (c) { return (c.level || 'similar') === g[0]; }).sort(function (a, b) { return a.price - b.price; }).slice(0, g[0] === 'similar' ? 3 : 5);
             if (!list.length) return;
