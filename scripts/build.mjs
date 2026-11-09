@@ -569,7 +569,7 @@ ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wr
 
       ${coupons.length ? `<details class="tiers-box" id="tiers"><summary><h2>איזה קוד מתאים לסכום שלי? <span>טבלת כל המדרגות</span></h2></summary>
       ${tierTable(coupons)}
-      <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
+      <p class="muted">בדרך כלל הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
       </details>` : ''}
 
     </div>
