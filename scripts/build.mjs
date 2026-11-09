@@ -445,7 +445,7 @@ const heShort = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}.$
 function homePage() {
   const pathname = '/';
   const title = realCodes.length
-    ? `קוד קופון עליאקספרס ${monthYear}: קודי הנחה עד $${maxDiscount} | AliExpress`
+    ? `קוד קופון עליאקספרס (AliExpress) ${monthYear}: קודי הנחה עד $${maxDiscount} | ${site.name}`
     : `קוד קופון עליאקספרס ${monthYear}: הקודים לישראל | ${site.name}`;
   const description = realCodes.length
     ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (עלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
@@ -463,7 +463,7 @@ function homePage() {
       ${soonestExpiry ? `<p class="urgency" data-until="${soonestExpiry}">⏳ <span>הקודים בתוקף עד ${esc(heShort(soonestExpiry))}</span></p>` : ''}
       <ul class="trust">
         <li>${ICON.check} קודים שפג תוקפם יורדים מהרשימה</li>
-        <li>${ICON.check} מסודר לפי סכום העגלה</li>
+        <li>${ICON.check} מסודרים לפי סכום העגלה</li>
         <li>${ICON.check} חינם, בלי הרשמה</li>
       </ul>
       <div class="hero-cta">
@@ -489,7 +489,7 @@ ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div cl
     <span class="ft-badge">🎯 חדש · יוצא לציד בקרוב</span>
     <h2>צייד הדילים</h2>
     <p class="hunter-tag">אתם שולחים קישור. הצייד יוצא לחפש לכם דיל.</p>
-    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. תדביקו קישור, והצייד יסרוק את השטח ויחזיר לכם הצעות זולות יותר לאותו מוצר, אם יש.</p>
+    <p>אותו מוצר נמכר בעליאקספרס אצל הרבה מוכרים, לפעמים בהפרשים גדולים. מדביקים קישור, והצייד יסרוק את השטח ויחזיר לכם הצעות זולות יותר לאותו מוצר, אם יש.</p>
     <a class="btn ft-cta" href="/finder/">איך הצייד עובד ←</a>
   </div>
   <div class="ft-visual"><div class="radar" aria-hidden="true">
@@ -500,7 +500,7 @@ ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div cl
   <ol class="ft-steps">
     <li><b>🎯 נועל מטרה</b><span>מזהה את המוצר מהקישור, גם מהאפליקציה</span></li>
     <li><b>📡 סורק את השטח</b><span>עובר על המוכרים שמוכרים את אותו מוצר</span></li>
-    <li><b>🛡️ עוקף מלכודות</b><span>מסנן דירוג נמוך, בלי מכירות או בלי משלוח לישראל</span></li>
+    <li><b>🛡️ עוקף מלכודות</b><span>מסנן מוכרים עם דירוג נמוך, בלי מכירות או בלי משלוח לישראל</span></li>
     <li><b>🏆 מביא את השלל</b><span>הזול למעלה, במחיר בשקלים. אתם מחליטים</span></li>
   </ol>
   ${site.social.telegram ? `<p class="ft-note">רוצים להיות הראשונים כשהצייד יוצא לדרך? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">הצטרפו לטלגרם ${ICON.telegram}</a></p>` : ''}
@@ -565,7 +565,7 @@ ${hotProducts.length ? `
 </section>` : ''}
 
 <section class="section">
-  <div class="wrap info-grid">
+  <div class="wrap info-grid info-stack">
     <div class="info-card"><h2>מתי יוצאים הקודים הכי שווים?</h2>
     <p>הקודים הגבוהים יוצאים בדרך כלל במבצעים הגדולים: יום ההולדת של עליאקספרס בסוף מרץ, 11.11 בנובמבר ובלאק פריידי. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a> ואת המדריך ל<a href="/guides/stacking-aliexpress-discounts/">שילוב כמה הנחות באותה הזמנה</a>.</p></div>
     <div class="info-card"><h2>מדריכים פופולריים</h2>
@@ -582,7 +582,7 @@ ${hotProducts.length ? `
 
 
 <section class="section"><div class="wrap">
-  <h2 class="section-title">קופונים לעלי אקספרס לפי קטגוריה</h2>
+  <h2 class="section-title">קופונים לעליאקספרס לפי קטגוריה</h2>
   <div class="cat-grid">${categories.map((c) => catCard(c, `קופון עליאקספרס ל${c.short}`)).join('')}</div>
 </div></section>
 
@@ -656,8 +656,8 @@ function dealCategoryPage(cat) {
   <p class="muted">המחירים כפי שהתקבלו מעליאקספרס ב-${esc(updatedHe)} ועשויים להשתנות. <a href="/">לכל קודי הקופון ←</a></p>
 </div></section>`;
   return layout({
-    title: `דילים מעליאקספרס ב${cat.name} עם משלוח לישראל | ${site.name}`,
-    description: `המוצרים הנמכרים ביותר ב${cat.name} מעליאקספרס עם משלוח לישראל ומחירים בשקלים, יחד עם קודי הקופון העדכניים.`,
+    title: `דילים מעליאקספרס ל${cat.name} עם משלוח לישראל | ${site.name}`,
+    description: `המוצרים הנמכרים ביותר בקטגוריית ${cat.name} מעליאקספרס עם משלוח לישראל ומחירים בשקלים, יחד עם קודי הקופון העדכניים.`,
     pathname, body, ld: [bc.ld], noindex: !items.length,
   });
 }
@@ -676,7 +676,7 @@ function eventPage(ev) {
   const faqItems = content.faq || [];
   const body = `
 <section class="hero"><div class="wrap narrow">${bc.html}
-  <h1>קוד קופון עליאקספרס ${esc(le(short))} ${year}</h1>
+  <h1>${short.includes('עליאקספרס') ? `קוד קופון ${esc(le(short))}` : `קוד קופון עליאקספרס ${esc(le(short))}`} ${year}</h1>
   <p class="lead">${live ? `המבצע פעיל עכשיו, עד ${heDate(ev.end)}.` : upcoming ? `המבצע צפוי להתחיל ב-${heDate(ev.start)}. כשעליאקספרס תפרסם את קודי המבצע, הם יופיעו כאן.` : 'המבצע הסתיים. אלה הקודים הפעילים כרגע.'}</p>
   ${upcoming ? `<div class="countdown" data-countdown="${ev.start}T00:00:00+02:00" role="timer" aria-label="זמן עד תחילת המבצע"></div>` : ''}
 </div></section>
@@ -694,10 +694,11 @@ function eventPage(ev) {
     </ol>
     <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a> · <a href="/guides/how-to-use-aliexpress-coupon/">איך מפעילים קוד</a></p>
   </div>
+  ${affCta('sale')}
   ${faqItems.length ? `<h2 class="section-title">שאלות נפוצות על ${esc(short)}</h2><div class="faq">${faqItems.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>` : ''}
 </div></section>`;
   return layout({
-    title: ownLive.length ? `קוד קופון עליאקספרס ${short} ${year}: עד $${Math.max(...ownLive.map((c) => c.discount))} הנחה לישראל | ${site.name}` : `קוד קופון עליאקספרס ${le(short)} ${year} | ${site.name}`,
+    title: ownLive.length ? `קוד קופון עליאקספרס ${le(short)} ${year}: עד $${Math.max(...ownLive.map((c) => c.discount))} הנחה לישראל | ${site.name}` : `${short.includes('עליאקספרס') ? `קוד קופון ${le(short)}` : `קוד קופון עליאקספרס ${le(short)}`} ${year} | ${site.name}`,
     description: ownLive.length
       ? `כל קודי ההנחה של עליאקספרס ${le(short)} לקונים מישראל, מ-$${Math.min(...ownLive.map((c) => c.discount))} ועד $${Math.max(...ownLive.map((c) => c.discount))} לפי סכום העגלה.${ownLive.some((c) => c.expires) ? ` בתוקף עד ${heShort(ownLive.map((c) => c.expires).filter(Boolean).sort().pop())}.` : ''} בוחרים קוד ומעתיקים בקליק.`
       : `קודי הקופון של עליאקספרס ${le(short)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
@@ -740,7 +741,7 @@ function finderPage() {
   <div id="finder-out" aria-live="polite"></div>
   <div class="prose">
     <h2>למה אותו מוצר עולה אחרת?</h2>
-    <p>בעליאקספרס הרבה מוכרים מוכרים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים יעשה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
+    <p>בעליאקספרס מוכרים רבים מציעים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים יעשה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
     <h2>ואחרי שמצאתם: עוד הנחה</h2>
     <p>על המחיר הזול אפשר להוסיף <a href="/#calc">קוד קופון לפי סכום העגלה</a>, קופון של החנות וקופונים ממרכז הקופונים. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>.</p>
   </div>
@@ -798,6 +799,7 @@ function categoryPage(cat) {
     <h2>איך חוסכים עוד</h2>
     <p>מעבר לקוד המבצע, אפשר לשלב קופון של החנות מעמוד המוצר, קופונים ממרכז הקופונים ומטבעות. ראו <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a>, ומי שקונה בפעם הראשונה: <a href="/new-user/">קופון למשתמש חדש</a>.</p>
   </div>
+  ${affCta('category')}
   <h2 class="section-title">שאלות נפוצות: ${esc(cat.name)} בעליאקספרס</h2>
   <div class="faq">${faqItems.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
   <h2 class="section-title">קופונים לקטגוריות נוספות</h2>
@@ -837,8 +839,8 @@ function newUserPage() {
   </div>
   <div class="prose">
     <h2>מה זה בעצם "הטבת משתמש חדש"?</h2>
-    <p>עליאקספרס מנסה לשכנע קונים חדשים לבצע הזמנה ראשונה, ולכן מציגה להם הטבות שלא מופיעות לקונים קיימים: לרוב מוצרים נבחרים במחיר מוזל מאוד (לפעמים מסומנים כ"Welcome Deal"), וקופונים שנאספים לחשבון אחרי ההרשמה. ההטבה משתנה מתקופה לתקופה, ולכן כדאי לבדוק מה מוצג לכם בפועל אחרי ההרשמה ולא לסמוך על סכום שראיתם פעם.</p>
-    <h2>איך יודעים אם אני נחשב משתמש חדש?</h2>
+    <p>עליאקספרס מנסה לשכנע קונים חדשים לבצע הזמנה ראשונה, ולכן מציגה להם הטבות שלא מוצגות לקונים קיימים: לרוב מוצרים נבחרים במחיר מוזל מאוד (לפעמים מסומנים כ"Welcome Deal"), וקופונים שנאספים לחשבון אחרי ההרשמה. ההטבה משתנה מתקופה לתקופה, ולכן כדאי לבדוק מה מוצג לכם בפועל אחרי ההרשמה ולא לסמוך על סכום שראיתם פעם.</p>
+    <h2>איך יודעים אם אתם נחשבים משתמשים חדשים?</h2>
     <p>מי שעדיין לא השלים הזמנה בחשבון עליאקספרס נחשב בדרך כלל משתמש חדש. אם כבר הזמנתם פעם, גם מחשבון ישן, סביר שההטבות לא יוצגו לכם, ואז הדף הנכון בשבילכם הוא <a href="/existing-user/">קוד קופון למשתמש קיים</a>. פתיחת חשבון נוסף לאותו אדם כדי לקבל שוב את ההטבה עלולה להפר את התנאים של עליאקספרס, ולכן לא ממליצים על זה.</p>
     <h2>אפליקציה או מחשב?</h2>
     <p>חלק מהטבות ההצטרפות מוצגות רק באפליקציה, וחלקן גם באתר. אם לא רואים הטבה במחשב, שווה להיכנס לאותו חשבון באפליקציה ולבדוק שם לפני שמשלמים. קוד מבצע מהרשימה שלנו עובד גם באפליקציה וגם באתר, בשדה "קוד מבצע" במסך התשלום.</p>
@@ -887,7 +889,7 @@ function existingUserPage() {
     <ol>
       <li><b>קופוני חנות:</b> בעמוד המוצר אוספים את קופון החנות, ומוסיפים עליו קוד מבצע בתשלום.</li>
       <li><b>מרכז הקופונים:</b> קופונים שנאספים לחשבון ומצטברים עם הקוד. <a href="/go/coupon-center/" ${OUT} data-go="coupon-center">למרכז הקופונים</a>.</li>
-      <li><b>מטבעות:</b> צ'ק־אין יומי באפליקציה נותן עוד הנחה קטנה. ראו <a href="/guides/aliexpress-coins/">המדריך למטבעות</a>.</li>
+      <li><b>מטבעות:</b> צ'ק־אין יומי באפליקציה נותן עוד הנחה קטנה. ראו את <a href="/guides/aliexpress-coins/">המדריך למטבעות</a>.</li>
       <li><b>תזמון:</b> בימי מבצע הקודים גדולים יותר. ראו את <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים</a>.</li>
     </ol>
     <p>איך משלבים הכול באותה הזמנה: <a href="/guides/stacking-aliexpress-discounts/">המדריך לשילוב הנחות</a>. קונים בפעם הראשונה? <a href="/new-user/">קופון למשתמש חדש</a>.</p>
@@ -918,6 +920,7 @@ function guideFaq(body) {
   return [...body.slice(i).matchAll(/<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>/g)].map((m) => ({ q: strip(m[1]), a: strip(m[2]) }));
 }
 
+const affCta = (ctx = 'page') => `<div class="aff-cta"><div><b>מוכנים להזמין?</b><p>נכנסים לעליאקספרס דרך הכפתור, ממלאים עגלה ומדביקים בתשלום את <a href="/#calc">הקוד שמתאים לסכום</a>.</p></div><a class="btn btn-primary" href="/go/home/" ${OUT} data-go="home" data-ctx="${ctx}">לעליאקספרס ${ICON.arrow}</a></div>`;
 function guidePage(g) {
   const pathname = `/guides/${g.slug}/`;
   const bc = breadcrumbs([{ name: 'מדריכים', url: '/guides/' }, { name: g.short || g.title, url: pathname }]);
@@ -928,6 +931,7 @@ function guidePage(g) {
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}<h1>${esc(g.title)}</h1><p class="byline">${esc(site.name)} · עודכן ${esc(heLong(g.updated))}</p></div></section>
 <section class="section"><div class="wrap narrow">
   <article class="prose">${g.body}</article>
+  ${affCta('guide')}
   ${top.length ? `<h2 class="section-title">הקודים המומלצים כרגע</h2><div class="coupon-list">${top.map((c) => couponCard(c, { compact: true })).join('')}</div><p><a href="/">לכל קודי הקופון ←</a></p>` : ''}
   <h2 class="section-title">עוד מדריכים</h2>
   <div class="guide-grid">${others.map((o) => `<a class="guide-card" href="/guides/${o.slug}/"><h3>${esc(o.title)}</h3><span>לקריאה ←</span></a>`).join('')}</div>
@@ -1003,7 +1007,7 @@ await page('/about/', staticPage('/about/', 'אודות', `
 await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
 <p>${esc(site.name)} משתתף בתוכנית השותפים של עליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מעליאקספרס.</p>
 <p>העמלה לא מייקרת את המחיר שלכם, ולא משפיעה על סדר הקודים. הם מסודרים לפי סכום ההזמנה.</p>
-<p>האתר אינו קשור, מאושר או מופעל ע"י AliExpress או Alibaba Group. כל הסימנים המסחריים שייכים לבעליהם.</p>
+<p>האתר אינו קשור ל-AliExpress או ל-Alibaba Group, ואינו מאושר או מופעל על ידן. כל הסימנים המסחריים שייכים לבעליהם.</p>
 <p>התנאים של כל קוד נקבעים ע"י עליאקספרס, ואנחנו לא יכולים להבטיח שקוד מסוים יעבוד בכל הזמנה.</p>`, 'גילוי נאות: איך האתר מרוויח מקישורי השותפים של עליאקספרס, ולמה זה לא משנה את המחיר שלכם ולא את סדר הקודים.'));
 await page('/privacy/', staticPage('/privacy/', 'מדיניות פרטיות', `
 <p>האתר לא דורש הרשמה ולא אוסף פרטים מזהים.</p>
