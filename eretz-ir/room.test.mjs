@@ -22,9 +22,9 @@ test('room: join, play, stop, review with ready auto-finish', async (t) => {
   assert.equal(room.phase, 'countdown');
   assert.equal(last(sb).letter, null); // letter hidden during countdown
   room.phase = 'playing'; room.clearTimer(); // skip the countdown
-  const L = room.letter;
-  room.act(a, { type: 'answers', answers: [L + 'aaa', L + 'bbb'] });
-  room.act(b, { type: 'answers', answers: [L + 'aaa', ''] });
+  room.letter = 'B';
+  room.act(a, { type: 'answers', answers: ['Brazil', 'Boston'] });
+  room.act(b, { type: 'answers', answers: ['brazil', ''] });
   assert.equal(room.act(b, { type: 'stop' }), 'fill_all');
   assert.equal(room.act(a, { type: 'stop' }), null);
   await wait(1700); // stopGrace 0 + collect 1.5s

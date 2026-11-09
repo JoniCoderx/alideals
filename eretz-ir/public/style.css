@@ -325,3 +325,19 @@ details > summary { cursor: pointer; font-weight: 700; }
   .preset { padding: 8px 4px; }
   .seg-btn { padding: 7px 10px; }
 }
+
+/* ---- v3: בדיקת תשובות ---- */
+.field-row.warn { border-color: #f3d27a; }
+.field-row.warn .inp { border-color: #f0b429; background: #fffdf5; }
+.hint.warn { color: #9a6b00; }
+.field-row.verified .inp { background: #f2fcf6; }
+.fix-btn { margin-top: 6px; border: 1px solid #f0b429; background: #fff6d9; color: #7a5300; border-radius: 10px; padding: 6px 10px; font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; }
+.fix-btn:hover { background: #ffedb3; }
+.st-unv { background: #fff8e1; }
+.st-unv .what { color: #8a6100; }
+.st-unv .pts b { color: #b07800; }
+.tag { font-size: .85rem; font-weight: 800; }
+.tag.ok { color: var(--green); }
+.what .maybe { display: block; font-size: .78rem; font-weight: 500; color: var(--muted); }
+.vote.up.on { background: var(--green); border-color: #0a8a55; }
+.vote.up.on small { color: #fff; }

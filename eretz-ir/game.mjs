@@ -39,27 +39,8 @@ export const LIMITS = {
   maxAnswerLen: 40,
 };
 
-const FINALS = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
-
-/** מנרמל תשובה להשוואה: בלי ניקוד, בלי פיסוק, אותיות סופיות כרגילות, אותיות קטנות, רווחים מצומצמים. */
-export function normalize(s) {
-  return String(s ?? '')
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '') // diacritics (é → e)
-    .normalize('NFC')
-    .replace(/[֑-ׇ]/g, '') // ניקוד וטעמים
-    .replace(/[״׳"'`’.,\-–—_!?()[\]{}:;/\\]/g, ' ')
-    .replace(/[ךםןףץ]/g, (c) => FINALS[c])
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/** האם התשובה מתחילה באות הנכונה. */
-export function startsWithLetter(answer, letter) {
-  const n = normalize(answer);
-  return n.length > 0 && n[0] === normalize(letter)[0];
-}
+import { normalize, startsWithLetter, checkAnswer } from './public/check.mjs';
+export { normalize, startsWithLetter, checkAnswer };
 
 /** כמה פסילות צריך כדי לפסול תשובה: רוב רגיל מבין שאר המשתתפים. */
 export function rejectThreshold(participantCount) {
@@ -67,33 +48,45 @@ export function rejectThreshold(participantCount) {
   return Math.floor(others / 2) + 1;
 }
 
+/** כמה אישורים צריך לתשובה שלא נמצאה במילון: לפחות חצי מהשחקנים האחרים (מינימום 1). */
+export function approveThreshold(participantCount) {
+  return Math.max(1, Math.ceil((participantCount - 1) / 2));
+}
+
 /**
  * מחשב ניקוד לסיבוב.
+ * תשובה נבדקת: ריקה / לא באות / זבל (אות בודדת, רצף) = 0.
+ * נמצאה במילון, או קטגוריה בלי מילון = תקפה (אפשר לפסול ברוב 👎).
+ * קטגוריה עם מילון והמילה לא נמצאה (למשל שגיאת כתיב) = 0 עד שהשחקנים האחרים מאשרים 👍.
  * @param {object} p
- * @param {string} p.letter
- * @param {string[]} p.categories
- * @param {string[]} p.participants  מזהי שחקנים שהשתתפו
- * @param {Record<string,string[]>} p.answers  pid -> תשובות לפי אינדקס קטגוריה
  * @param {Record<string,string[]>} p.votes  "pid|i" -> מזהי פוסלים
- * @param {boolean} p.soloBonus  15 נקודות למי שהיחיד שענה בקטגוריה
+ * @param {Record<string,string[]>} p.approvals  "pid|i" -> מזהי מאשרים
  */
-export function scoreRound({ letter, categories, participants, answers, votes = {}, soloBonus = true }) {
-  const threshold = rejectThreshold(participants.length);
+export function scoreRound({ letter, categories, participants, answers, votes = {}, approvals = {}, soloBonus = true }) {
+  const n = participants.length;
+  const threshold = rejectThreshold(n);
+  const approveNeed = approveThreshold(n);
   const cells = {};
   for (const pid of participants) cells[pid] = [];
 
-  categories.forEach((_, ci) => {
+  categories.forEach((cat, ci) => {
     const valid = [];
     for (const pid of participants) {
       const answer = String(answers[pid]?.[ci] ?? '').trim();
-      const rejects = (votes[`${pid}|${ci}`] || []).filter((v) => v !== pid && participants.includes(v));
-      const cell = { answer, status: 'empty', points: 0, rejects: rejects.length };
-      if (!answer) cell.status = 'empty';
-      else if (!startsWithLetter(answer, letter)) cell.status = 'letter';
-      else if (rejects.length >= threshold) cell.status = 'rejected';
-      else {
-        cell.status = 'ok';
-        valid.push({ pid, norm: normalize(answer) });
+      const others = (list) => (list || []).filter((v) => v !== pid && participants.includes(v));
+      const rejects = others(votes[`${pid}|${ci}`]);
+      const ups = others(approvals[`${pid}|${ci}`]);
+      const ch = checkAnswer(answer, letter, cat);
+      const cell = { answer, status: ch.status, points: 0, rejects: rejects.length, approvals: ups.length, check: ch.check || null, suggest: ch.suggest || null };
+      let ok = ch.status === 'ok';
+      if (ch.status === 'unknown') {
+        if (n === 1) { ok = true; cell.check = 'open'; }               // לבד: אין מי שיאשר
+        else if (ups.length >= approveNeed) { ok = true; cell.check = 'approved'; }
+        else cell.status = 'unverified';
+      }
+      if (ok) {
+        if (rejects.length >= threshold) cell.status = 'rejected';
+        else { cell.status = 'ok'; valid.push({ pid, norm: ch.key }); }
       }
       cells[pid][ci] = cell;
     }
@@ -102,14 +95,14 @@ export function scoreRound({ letter, categories, participants, answers, votes = 
     for (const v of valid) {
       const cell = cells[v.pid][ci];
       if (counts[v.norm] > 1) { cell.status = 'shared'; cell.points = 5; }
-      else if (soloBonus && valid.length === 1 && participants.length > 1) { cell.status = 'solo'; cell.points = 15; }
+      else if (soloBonus && valid.length === 1 && n > 1) { cell.status = 'solo'; cell.points = 15; }
       else { cell.status = 'unique'; cell.points = 10; }
     }
   });
 
   const totals = {};
   for (const pid of participants) totals[pid] = cells[pid].reduce((s, c) => s + c.points, 0);
-  return { cells, totals, threshold };
+  return { cells, totals, threshold, approveNeed };
 }
 
 export function pickLetter(enabled, used, rnd = Math.random) {

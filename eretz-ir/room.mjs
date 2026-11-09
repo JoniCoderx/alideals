@@ -36,6 +36,7 @@ export class Room {
     this.participants = [];
     this.answers = {};
     this.votes = {};
+    this.approvals = {};
     this.ready = new Set();
     this.result = null;
     this.history = [];
@@ -163,6 +164,7 @@ export class Room {
     if (this.phase === 'review' || this.phase === 'scores' || this.phase === 'final') {
       v.result = this.result;
       v.votes = this.votes;
+      v.approvals = this.approvals;
     }
     return v;
   }
@@ -199,6 +201,7 @@ export class Room {
     this.participants = online.map((p) => p.id);
     this.answers = {};
     this.votes = {};
+    this.approvals = {};
     this.ready = new Set();
     this.result = null;
     this.stoppedBy = null;
@@ -234,7 +237,7 @@ export class Room {
   recompute() {
     this.result = scoreRound({
       letter: this.letter, categories: this.categories, participants: this.participants,
-      answers: this.answers, votes: this.votes, soloBonus: this.settings.soloBonus,
+      answers: this.answers, votes: this.votes, approvals: this.approvals, soloBonus: this.settings.soloBonus,
     });
   }
 
@@ -261,7 +264,7 @@ export class Room {
     for (const p of this.players.values()) p.score = 0;
     Object.assign(this, {
       phase: 'lobby', round: 0, roundId: null, letter: null, usedLetters: [], startsAt: 0, endsAt: 0, stoppedBy: null,
-      categories: [], participants: [], answers: {}, votes: {}, ready: new Set(), result: null, history: [],
+      categories: [], participants: [], answers: {}, votes: {}, approvals: {}, ready: new Set(), result: null, history: [],
     });
     for (const [id, p] of this.players) if (!this.isOnline(p)) this.players.delete(id);
     this.ensureHost();
@@ -309,14 +312,18 @@ export class Room {
         this.endRound();
         return null;
       }
-      case 'vote': {
+      case 'vote':
+      case 'approve': {
         if (this.phase !== 'review' || !this.participants.includes(me.id)) return null;
         const target = String(a.target), ci = Number(a.ci);
         if (target === me.id || !this.participants.includes(target) || !(ci >= 0 && ci < this.categories.length)) return null;
         const key = `${target}|${ci}`;
-        const list = new Set(this.votes[key] || []);
-        if (list.has(me.id)) list.delete(me.id); else list.add(me.id);
-        this.votes[key] = [...list];
+        const book = a.type === 'approve' ? this.approvals : this.votes;
+        const other = a.type === 'approve' ? this.votes : this.approvals;
+        const list = new Set(book[key] || []);
+        if (list.has(me.id)) list.delete(me.id);
+        else { list.add(me.id); other[key] = (other[key] || []).filter((x) => x !== me.id); }
+        book[key] = [...list];
         this.recompute();
         break;
       }

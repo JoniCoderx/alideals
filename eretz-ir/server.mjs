@@ -24,8 +24,8 @@ function newCode() {
   return String(randomInt(10000, 100000));
 }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
-const STATIC = new Set(['/index.html', '/style.css', '/app.js', '/icon.svg', '/manifest.webmanifest']);
+const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const STATIC = new Set(['/index.html', '/style.css', '/app.js', '/icon.svg', '/manifest.webmanifest', '/check.mjs', '/dict-data.mjs']);
 const cache = new Map();
 
 async function serveStatic(res, pathname) {

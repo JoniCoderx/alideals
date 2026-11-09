@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalize, startsWithLetter, scoreRound, rejectThreshold, sanitizeSettings, defaultSettings, pickLetter } from './game.mjs';
+import { normalize, startsWithLetter, scoreRound, rejectThreshold, sanitizeSettings, defaultSettings, pickLetter, checkAnswer } from './game.mjs';
 
 test('normalize: ניקוד, סופיות, פיסוק ורווחים', () => {
   assert.equal(normalize('  שָׁלוֹם  '), 'שלומ');
@@ -42,7 +42,7 @@ test('scoreRound: ייחודי 10, כפול 5, יחיד 15, ריק/אות שגו
 
   const r2 = scoreRound({
     letter: 'ב', categories: ['ארץ'], participants: ['a', 'b', 'c'],
-    answers: { a: ['בבבב'], b: ['בלגיה'], c: [''] },
+    answers: { a: ['בוליביה'], b: ['בלגיה'], c: [''] },
     votes: { 'a|0': ['b', 'c'], 'b|0': ['b', 'a'] }, // הצבעה עצמית לא נספרת
   });
   assert.equal(r2.cells.a[0].status, 'rejected');
@@ -86,4 +86,35 @@ test('switching game language resets categories and letters', () => {
   assert.ok(!s.letters.includes('Q') && s.letters.includes('A'));
   const s2 = sanitizeSettings({ letters: ['Q', 'א'] }, s);
   assert.deepEqual(s2.letters, ['Q']);
+});
+
+test('dictionary: verified, typo suggestion, junk, approvals', () => {
+  const ok = checkAnswer('אשדוד', 'א', 'עיר');
+  assert.equal(ok.status, 'ok'); assert.equal(ok.check, 'dict');
+  const typo = checkAnswer('אשדאוד', 'א', 'עיר');
+  assert.equal(typo.status, 'unknown'); assert.equal(typo.suggest, 'אשדוד');
+  assert.equal(checkAnswer('כ', 'כ', 'ארץ').status, 'junk');
+  assert.equal(checkAnswer('כככ', 'כ', 'שם').status, 'junk');
+  assert.equal(checkAnswer('כג', 'כ', 'ארץ').status, 'junk');
+  assert.equal(checkAnswer('ארה"ב', 'א', 'ארץ').canon, 'ארצות הברית');
+  assert.equal(checkAnswer('שויץ', 'ש', 'ארץ').status, 'ok');     // כתיב חסר
+  assert.equal(checkAnswer('תל-אביב', 'ת', 'עיר').status, 'ok');  // מקף
+  assert.equal(checkAnswer('ענבים', 'ע', 'צומח').status, 'ok');   // רבים
+  assert.equal(checkAnswer('new york', 'N', 'City').status, 'ok');
+  assert.equal(checkAnswer('Brazl', 'B', 'Country').suggest, 'Brazil');
+  assert.equal(checkAnswer('כפיר דוד', 'כ', 'מפורסם/ת').check, 'open'); // אין מילון -> פתוח
+
+  // ניקוד: שגיאת כתיב לא נספרת עד שהאחרים מאשרים; ארה"ב ו"ארצות הברית" = כפול
+  const base = { letter: 'א', categories: ['עיר', 'ארץ'], participants: ['a', 'b', 'c'],
+    answers: { a: ['אשדאוד', 'ארה"ב'], b: ['אשקלון', 'ארצות הברית'], c: ['א', ''] } };
+  let r = scoreRound(base);
+  assert.equal(r.cells.a[0].status, 'unverified'); assert.equal(r.cells.a[0].points, 0);
+  assert.equal(r.cells.a[0].suggest, 'אשדוד');
+  assert.equal(r.cells.c[0].status, 'junk');
+  assert.equal(r.cells.a[1].status, 'shared');
+  assert.equal(r.cells.b[0].status, 'solo');
+  r = scoreRound({ ...base, approvals: { 'a|0': ['b'] } });
+  assert.equal(r.cells.a[0].check, 'approved'); assert.equal(r.cells.a[0].points, 10);
+  r = scoreRound({ ...base, approvals: { 'a|0': ['a'] } }); // אישור עצמי לא נחשב
+  assert.equal(r.cells.a[0].status, 'unverified');
 });

@@ -32,6 +32,7 @@ const I = {
       'פותחים חדר ושולחים את הקישור בוואטסאפ.',
       'בכל סיבוב מוגרלת אות. ממלאים מילה שמתחילה בה בכל קטגוריה לפני שהזמן נגמר.',
       'מי שמילא הכול לוחץ "עצור!", ולשאר נשארות כמה שניות.',
+      'כל תשובה נבדקת מול מילון. ✓ = נמצאה ונספרת. מילה עם שגיאת כתיב, או מילה שלא במילון, לא נספרת עד שהחברים מאשרים 👍. אות בודדת או ג\'יבריש = 0.',
       'בודקים ביחד: 👎 על תשובה לא תקינה. רוב השחקנים פוסל.',
       'ניקוד: ייחודי 10, כפול 5, רק את/ה ענית בקטגוריה 15.',
     ],
@@ -70,7 +71,10 @@ const I = {
     someoneStopped: (n) => `${n} עצר/ה! ✋`, nowHost: 'את/ה המארח/ת עכשיו 👑',
     joined: (n) => `${n} הצטרף/ה 👋`, left: (n) => `${n} יצא/ה`,
     reviewTitle: (r) => `בדיקת תשובות – סיבוב ${r}`,
-    reviewHelp: 'לא מסכימים עם תשובה? לחצו 👎. אם רוב השחקנים האחרים פוסלים, היא שווה 0. כשסיימתם, לחצו "סיימתי".',
+    reviewHelp: '✓ = נמצא במילון ונספר. ❓ = לא במילון: לחצו 👍 אם זה נכון. 👎 = פסילה של תשובה לא נכונה. כשסיימתם, לחצו "סיימתי".',
+    stJunk: 'לא מילה', stUnverified: 'צריך אישור', inDict: 'במילון', approvedTag: 'אושר', maybe: (w) => `אולי: ${w}`,
+    approve: 'זה נכון – אישור', unapprove: 'ביטול אישור',
+    hintJunk: 'זו לא מילה – לא תיספר', hintUnknown: 'לא במילון – תיספר רק אם החברים יאשרו', didYouMean: (w) => `התכוונת ל"${w}"? לחצו לתיקון`, hintOk: 'במילון',
     stUnique: 'ייחודי', stSolo: 'רק את/ה!', stShared: 'כפול', stEmpty: 'ריק', stLetter: (l) => `לא ב-${l}`, stRejected: 'נפסל',
     unvote: 'ביטול פסילה', vote: 'פסילה', roundPoints: 'ניקוד הסיבוב',
     doneReview: '✓ סיימתי לבדוק', undoReady: 'רגע, עוד לא', readyCount: (a, b) => `${a}/${b} סיימו`,
@@ -100,6 +104,7 @@ const I = {
       'Create a room and share the link (WhatsApp works great).',
       'Each round a random letter is drawn. Fill in a word starting with it for every category before time runs out.',
       'Filled everything? Hit "Stop!" and everyone else gets a few seconds left.',
+      'Every answer is checked against a dictionary. ✓ = found and counts. A misspelled word, or one we don\'t know, only counts if friends approve it 👍. A single letter or gibberish = 0.',
       'Review together: tap 👎 on answers that don\'t count. A majority of the other players rejects it.',
       'Scoring: unique 10, shared 5, the only one who answered a category 15.',
     ],
@@ -138,7 +143,10 @@ const I = {
     someoneStopped: (n) => `${n} stopped! ✋`, nowHost: 'You\'re the host now 👑',
     joined: (n) => `${n} joined 👋`, left: (n) => `${n} left`,
     reviewTitle: (r) => `Review answers – round ${r}`,
-    reviewHelp: 'Disagree with an answer? Tap 👎. If most other players reject it, it scores 0. Tap "Done" when you\'re finished.',
+    reviewHelp: '✓ = in the dictionary and counts. ❓ = not in the dictionary: tap 👍 if it\'s right. 👎 = reject a wrong answer. Tap "Done" when you\'re finished.',
+    stJunk: 'not a word', stUnverified: 'needs approval', inDict: 'in dictionary', approvedTag: 'approved', maybe: (w) => `maybe: ${w}`,
+    approve: 'That\'s right – approve', unapprove: 'Undo approval',
+    hintJunk: 'That\'s not a word – it won\'t count', hintUnknown: 'Not in our dictionary – counts only if friends approve', didYouMean: (w) => `Did you mean "${w}"? Tap to fix`, hintOk: 'in dictionary',
     stUnique: 'unique', stSolo: 'only you!', stShared: 'shared', stEmpty: 'empty', stLetter: (l) => `not ${l}`, stRejected: 'rejected',
     unvote: 'Undo', vote: 'Reject', roundPoints: 'Round points',
     doneReview: '✓ Done reviewing', undoReady: 'Wait, not yet', readyCount: (a, b) => `${a}/${b} done`,
@@ -237,6 +245,8 @@ function firstLetterOk(ans, letter) {
 function avatar(id, size) {
   return h('span', { class: 'av' + (size ? ' av-' + size : ''), style: { background: pcolor(id) }, 'aria-hidden': 'true' }, pname(id).slice(0, 1).toUpperCase());
 }
+let CHECK = null;
+import('/check.mjs').then((m) => { CHECK = m; if (screenKey.startsWith('game') && S) S.categories.forEach((_, i) => markField(i)); }).catch(() => {});
 const langInfo = (lang) => (meta && meta.langs && meta.langs[lang]) || null;
 
 // ---------- צלילים ----------
@@ -707,10 +717,28 @@ function markField(i) {
   const row = document.getElementById('fr' + i); if (!row) return;
   const inp = document.getElementById('a' + i);
   if (S.letter && inp) inp.placeholder = S.letter + '…';
+  const hint = document.getElementById('hint' + i);
   const ok = S.letter ? firstLetterOk(answers[i], S.letter) : null;
-  row.classList.toggle('good', ok === true);
-  row.classList.toggle('bad', ok === false);
-  document.getElementById('hint' + i).textContent = ok === false ? t('mustStart', S.letter) : '';
+  let state = ok === true ? 'good' : ok === false ? 'bad' : '';
+  let msg = ok === false ? t('mustStart', S.letter) : '';
+  let fix = null;
+  if (ok === true && CHECK) {
+    const r = CHECK.checkAnswer(answers[i], S.letter, S.categories[i]);
+    if (r.status === 'junk') { state = 'bad'; msg = t('hintJunk'); }
+    else if (r.status === 'unknown') {
+      state = 'warn'; msg = t('hintUnknown');
+      if (r.suggest) fix = r.suggest;
+    } else if (r.check === 'dict') { state = 'good verified'; }
+  }
+  row.classList.remove('good', 'bad', 'warn', 'verified');
+  if (state) row.classList.add(...state.split(' '));
+  hint.className = 'hint' + (state === 'warn' ? ' warn' : '');
+  hint.replaceChildren(fix
+    ? h('button', { type: 'button', class: 'fix-btn', onmousedown: (e) => e.preventDefault(), onclick: () => {
+      const inp2 = document.getElementById('a' + i);
+      inp2.value = fix; answers[i] = fix; markField(i); queueSend(); inp2.focus();
+    } }, '✏️ ', t('didYouMean', fix))
+    : msg);
   updateStopBtn();
 }
 
@@ -816,6 +844,8 @@ function statusInfo(c) {
     case 'shared': return ['5', 'shared', t('stShared')];
     case 'letter': return ['0', 'zero', t('stLetter', S.letter)];
     case 'rejected': return ['0', 'rej', t('stRejected')];
+    case 'junk': return ['0', 'zero', t('stJunk')];
+    case 'unverified': return ['0', 'unv', t('stUnverified')];
     default: return ['0', 'zero', t('stEmpty')];
   }
 }
@@ -842,16 +872,30 @@ function updateReview() {
     h('ul', { class: 'ans-list' }, ...part.map((pid) => {
       const c = R.cells[pid][ci];
       const [pts, cls, label] = statusInfo(c);
-      const voted = (S.votes[`${pid}|${ci}`] || []).includes(S.you);
-      const canVote = inRound && pid !== S.you && c.answer && c.status !== 'letter';
-      return h('li', { class: 'ans-row st-' + cls + (pid === S.you ? ' mine' : '') },
+      const key = `${pid}|${ci}`;
+      const voted = ((S.votes || {})[key] || []).includes(S.you);
+      const approved = ((S.approvals || {})[key] || []).includes(S.you);
+      const needsApproval = c.status === 'unverified' || c.check === 'approved';
+      const mine = pid === S.you;
+      const canAct = inRound && !mine && c.answer && !['letter', 'junk', 'empty'].includes(c.status);
+      let btn;
+      if (canAct && needsApproval) {
+        btn = h('button', { class: 'vote up' + (approved ? ' on' : ''), title: approved ? t('unapprove') : t('approve'), 'aria-label': approved ? t('unapprove') : t('approve'), 'aria-pressed': String(approved), onclick: () => action('approve', { target: pid, ci }) }, '👍', h('small', null, `${c.approvals}/${R.approveNeed}`));
+      } else if (canAct) {
+        btn = h('button', { class: 'vote' + (voted ? ' on' : ''), title: voted ? t('unvote') : t('vote'), 'aria-label': voted ? t('unvote') : t('vote'), 'aria-pressed': String(voted), onclick: () => action('vote', { target: pid, ci }) }, '👎', c.rejects ? h('small', null, `${c.rejects}/${R.threshold}`) : null);
+      } else {
+        btn = h('span', { class: 'vote-ph' }, needsApproval ? `👍 ${c.approvals}/${R.approveNeed}` : c.rejects ? `👎 ${c.rejects}/${R.threshold}` : '');
+      }
+      const tag = c.check === 'dict' && c.status !== 'rejected' ? h('span', { class: 'tag ok', title: t('inDict') }, '✓')
+        : c.check === 'approved' ? h('span', { class: 'tag appr', title: t('approvedTag') }, '👍')
+        : c.status === 'unverified' ? h('span', { class: 'tag unk' }, '❓') : null;
+      return h('li', { class: 'ans-row st-' + cls + (mine ? ' mine' : '') },
         avatar(pid, 'sm'),
         h('span', { class: 'who' }, pname(pid)),
-        h('span', { class: 'what', dir }, c.answer || '—'),
+        h('span', { class: 'what', dir }, c.answer || '—', tag ? ' ' : null, tag,
+          c.suggest && c.status === 'unverified' ? h('small', { class: 'maybe' }, t('maybe', c.suggest)) : null),
         h('span', { class: 'pts' }, h('b', null, pts), h('small', null, label)),
-        canVote
-          ? h('button', { class: 'vote' + (voted ? ' on' : ''), title: voted ? t('unvote') : t('vote'), 'aria-label': voted ? t('unvote') : t('vote'), 'aria-pressed': String(voted), onclick: () => action('vote', { target: pid, ci }) }, '👎', c.rejects ? h('small', null, `${c.rejects}/${R.threshold}`) : null)
-          : h('span', { class: 'vote-ph' }, c.rejects ? `👎 ${c.rejects}/${R.threshold}` : ''));
+        btn);
     })))));
 
   const ranked = [...part].sort((a, b) => R.totals[b] - R.totals[a]);
