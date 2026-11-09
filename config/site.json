@@ -15,7 +15,7 @@
   "affiliate": {
     "_comment": "defaultLink = קישור השותפים הכללי מ-AliExpress Portals (Tracking ID: default). כל לחיצה על קופון/כפתור באתר ובטלגרם עוברת דרכו.",
     "defaultLink": "https://s.click.aliexpress.com/e/_c455wdun",
-    "couponCenterUrl": "https://www.aliexpress.com/p/coupon-pages/center.html",
+    "couponCenterUrl": "",
     "homeUrl": "https://he.aliexpress.com/"
   },
   "social": {
