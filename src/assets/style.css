@@ -586,3 +586,10 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .pick-price{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.pick-price b{font-size:1.25rem;color:#ff8a55}.pick-price s{color:#a9a3b3;font-size:.85rem}.pick-price i{font-style:normal;background:#e5122f;border-radius:6px;padding:1px 6px;font-size:.75rem;font-weight:800}
 .pick-cta{font-weight:800;font-size:.88rem;color:#ffd2bd}
 @media(max-width:700px){.picks-row{grid-auto-columns:72%}}
+
+.hunter-h1{text-wrap:balance}
+.ft-form{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 6px}.ft-form input{flex:1 1 240px;min-width:0;padding:14px 16px;border-radius:14px;border:2px solid rgba(255,255,255,.25);background:#fff;color:#17161c;font:inherit}.ft-form .btn{flex:0 0 auto}
+.coupon-est{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff;border:2px dashed rgba(229,18,47,.35)}
+.coupon-est b{color:#c20e28;font-size:1.1rem}.coupon-est .lbl{font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#fff1d6;color:#8a5a00}
+.coupon-est button{border:0;background:#17161c;color:#fff;border-radius:10px;padding:6px 12px;font:inherit;font-weight:700;cursor:pointer}
+.verdict .coupon-est{flex:1 1 100%}.coupon-est small{flex-basis:100%}

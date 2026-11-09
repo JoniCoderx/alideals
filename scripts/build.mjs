@@ -466,7 +466,7 @@ function homePage() {
     ? `קוד קופון עליאקספרס (AliExpress) ${monthYear}: קודי הנחה עד $${maxDiscount} | ${site.name}`
     : `קוד קופון עליאקספרס ${monthYear}: הקודים לישראל | ${site.name}`;
   const description = realCodes.length
-    ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (עלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
+    ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (עלי אקספרס / אלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
     : `קודי הקופון וההנחות של עליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const body = `
@@ -523,7 +523,23 @@ ${!FINDER_API ? `<section class="section finder-promo"><div class="wrap"><div cl
   </ol>
   ${site.social.telegram ? `<p class="ft-note">רוצים להיות הראשונים כשהצייד יוצא לדרך? <a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">הצטרפו לטלגרם ${ICON.telegram}</a></p>` : ''}
 </div></div></section>` : ''}
-${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class="finder-banner" href="/finder/"><b>🎯 חדש: צייד הדילים</b><span>אתם שולחים קישור למוצר, הצייד חוזר עם הצעות זולות יותר לאותו מוצר</span><i>שלחו את הצייד ←</i></a></div></section>` : ''}
+${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wrap"><div class="finder-tease hunter">
+  <div class="ft-text">
+    <span class="ft-badge">🎯 צייד הדילים · פעיל</span>
+    <h2>יש לכם מוצר בעגלה? בואו&nbsp;נבדוק&nbsp;אותו</h2>
+    <p class="hunter-tag">מדביקים קישור, ותוך שניות יודעים אם יש אותו מוצר בזול יותר וכמה הוא יעלה עם קוד קופון.</p>
+    <form class="ft-form" action="/finder/" method="get" autocomplete="off">
+      <input name="url" type="text" inputmode="url" dir="ltr" placeholder="הדביקו קישור מעליאקספרס" aria-label="קישור למוצר מעליאקספרס" required>
+      <button class="btn btn-primary" type="submit">🎯 שלחו את הצייד</button>
+    </form>
+    <p class="ft-note">עובד גם עם קישור מקוצר מהאפליקציה (שיתוף ← העתקת קישור).</p>
+  </div>
+  <div class="ft-visual"><div class="radar" aria-hidden="true">
+    <div class="radar-sweep"></div>
+    <span class="blip b1"><i>₪89</i></span><span class="blip b2"><i>₪74</i></span><span class="blip b4"><i>₪95</i></span><span class="blip b3 best"><i>₪61 🎯</i></span>
+    <div class="radar-core">🎯</div>
+  </div><small>המחשה</small></div>
+</div></div></section>` : ''}
 <section class="section" id="codes">
   <div class="wrap layout-2">
     <div>
@@ -745,15 +761,15 @@ function finderPage() {
   ];
   const body = `
 <section class="hero hero-hunter"><div class="wrap narrow">${bc.html}
-  <div class="hunter-head"><div><h1>🎯 צייד הדילים</h1>
-  <p class="hunter-tag">אתם שולחים קישור. הצייד יוצא לחפש לכם דיל.</p>
-  <p class="lead">מדביקים קישור למוצר מעליאקספרס, והצייד מחפש <strong>את אותו מוצר אצל מוכרים זולים יותר</strong>, עם משלוח לישראל. אתם משווים ובוחרים.</p></div>
+  <div class="hunter-head"><div><h1 class="hunter-h1">🎯 צייד הדילים: אותו מוצר, במחיר הכי טוב&nbsp;שמצאנו</h1>
+  <p class="hunter-tag">אתם שולחים קישור. הצייד סורק, משווה ומחשב לכם את המחיר עם&nbsp;קופון.</p>
+  <p class="lead">מנוע הצייד מחפש ישירות במאגר המוצרים הרשמי של עליאקספרס, עובר על <strong>עשרות מוכרים בתוך שניות</strong>, מזהה את אותו דגם לפי מספר הדגם, קיבולת, הספק וסוג תקע, ומחזיר את ההצעות עם משלוח לישראל, ממוינות לפי מחיר.</p></div>
   <div class="ft-visual"><div class="radar" aria-hidden="true">
     <div class="radar-sweep"></div>
     <span class="blip b1"><i>₪89</i></span><span class="blip b2"><i>₪74</i></span><span class="blip b4"><i>₪95</i></span><span class="blip b3 best"><i>₪61 🎯</i></span>
     <div class="radar-core">🎯</div>
   </div></div></div>
-  <form class="finder" id="finder-form" data-api="${esc(FINDER_API)}" autocomplete="off">
+  <form class="finder" id="finder-form" data-api="${esc(FINDER_API)}" data-rate="${USD_ILS}" data-tiers="${esc(JSON.stringify(realCodes.filter((c) => (c.currency || 'USD') === 'USD' && c.code).map((c) => ({ d: c.discount, m: c.minOrder, code: c.code, x: c.expires || '' }))))}" autocomplete="off">
     <label for="finder-url" class="calc-label">הקישור למוצר</label>
     <div class="finder-row">
       <input id="finder-url" name="url" type="text" inputmode="url" dir="ltr" placeholder="https://he.aliexpress.com/item/..." required>
@@ -766,6 +782,13 @@ function finderPage() {
 <section class="section"><div class="wrap narrow">
   <div id="finder-out" aria-live="polite"></div>
   <div class="prose">
+    <h2>איך הצייד עובד</h2>
+    <ol class="ft-steps">
+      <li><b>🎯 נועל מטרה</b><span>מזהה את המוצר מהקישור, גם מקישור מקוצר מהאפליקציה</span></li>
+      <li><b>📡 סורק את השטח</b><span>חיפוש חי במאגר הרשמי של עליאקספרס: עשרות מוכרים של אותו מוצר, עם משלוח לישראל</span></li>
+      <li><b>🧠 מסנן חכם</b><span>מנוע ההתאמה משווה דגם, קיבולת, הספק ותקע, ומפריד בין "אותו דגם", "כנראה אותו מוצר" ו"חלופה דומה"</span></li>
+      <li><b>💰 מחשב את השלל</b><span>המחיר הכי טוב, וכמה הוא יוצא עם קוד הקופון שמתאים לו</span></li>
+    </ol>
     <h2>למה אותו מוצר עולה אחרת?</h2>
     <p>בעליאקספרס מוכרים רבים מציעים את אותו מוצר בדיוק, מאותו מפעל, במחירים שונים. ההבדל יכול להגיע לעשרות אחוזים. צייד הדילים יעשה את החיפוש וההשוואה בשבילכם. ההתאמה נעשית לפי שם המוצר והקטגוריה, אז לפני שקונים כדאי להציץ בתמונות ובמפרט ולוודא שזה בדיוק מה שרציתם.</p>
     <h2>ואחרי שמצאתם: עוד הנחה</h2>
