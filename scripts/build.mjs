@@ -573,6 +573,7 @@ ${FINDER_API ? `<section class="section finder-promo"><div class="wrap"><a class
   </div>
 </section>
 
+${picksSection()}
 ${hotProducts.length ? `
 <section class="section section-alt">
   <div class="wrap">
@@ -977,6 +978,22 @@ const topAt = new Intl.DateTimeFormat('he-IL', { timeZone: 'Asia/Jerusalem', day
 const ilsFmt = (n) => `₪${Number(n).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const topAnyLive = () => Object.values(topItems).some((x) => x.live);
 const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && (!topAnyLive() || x.live) && safeLink(x.link) && x.price > 0 && x.rating >= (catalog.criteria?.minRating || 0) && x.sold >= (catalog.criteria?.minSold || 0));
+
+
+// "נבחרי יש דיל": editor-approved products with the premium brand images, live price + affiliate link.
+const picksData = (await readJSON('data/v2/telegram-products.json', { items: [] })).items;
+function picksSection() {
+  const list = picksData.map((x) => ({ ...x, live: topItems[x.id.slice(-7)] })).filter((x) => x.live && x.live.live !== false && x.live.price > 0 && safeLink(x.live.link));
+  if (list.length < 3) return '';
+  return `<section class="section picks" id="picks"><div class="wrap">
+  <div class="section-head"><h2 class="section-title">⭐ נבחרי יש דיל</h2><a class="more" href="/top/">לכל ההמלצות ←</a></div>
+  <p class="muted picks-sub">מוצרים שבחרנו ידנית: דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחיר נבדק מול עליאקספרס ב־${esc(topAt)}.</p>
+  <div class="picks-row" tabindex="0" aria-label="מוצרים נבחרים">${list.map((x) => {
+    const o = x.live; const off = o.orig > o.price ? Math.round((1 - o.price / o.orig) * 100) : 0;
+    return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-ctx="picks"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async"><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s><i>-${off}%</i>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
+  }).join('')}</div>
+</div></section>`;
+}
 
 function topIndexPage() {
   const pathname = '/top/';
