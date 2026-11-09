@@ -572,8 +572,6 @@ ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wr
       <p class="muted">הסכום נבדק אחרי הנחות החנות ולפני משלוח. אם חסר לכם מעט למדרגה הבאה, לפעמים משתלם להוסיף מוצר קטן שאתם צריכים בכל מקרה.</p>
       </details>` : ''}
 
-      <h2 class="section-title">עוד דרכים לחסוך בעליאקספרס</h2>
-      <div class="deal-grid">${deals.map(dealCard).join('')}</div>
     </div>
 
     <aside class="sidebar" aria-label="איך זה עובד">
@@ -592,6 +590,11 @@ ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wr
 </section>
 
 ${picksSection()}
+<section class="section" id="more-ways"><div class="wrap">
+  <h2 class="section-title">עוד דרכים לחסוך בעליאקספרס</h2>
+  <div class="deal-grid">${deals.map(dealCard).join('')}</div>
+  <p class="muted">רוצים להבין לעומק? <a href="/guides/stacking-aliexpress-discounts/">איך משלמים פחות בעליאקספרס</a> · <a href="/guides/aliexpress-free-shipping-israel/">משלוח חינם לישראל</a> · <a href="/guides/aliexpress-customs-israel/">מכס ומע״מ</a> · <a href="/guides/">כל המדריכים</a></p>
+</div></section>
 ${hotProducts.length ? `
 <section class="section section-alt">
   <div class="wrap">
@@ -1019,7 +1022,7 @@ function picksSection() {
   const list = picksData.map((x) => ({ ...x, live: topItems[x.id.slice(-7)] })).filter((x) => x.live && x.live.live !== false && x.live.price > 0 && safeLink(x.live.link));
   if (list.length < 3) return '';
   return `<section class="section picks" id="picks"><div class="wrap">
-  <div class="section-head"><h2 class="section-title">⭐ נבחרי יש דיל</h2><a class="more" href="/top/">לכל ההמלצות ←</a></div>
+  <div class="section-head"><h2 class="section-title">נבחרי יש דיל ⭐</h2><a class="more" href="/top/">לכל ההמלצות ←</a></div>
   <p class="muted picks-sub">מוצרים שבחרנו ידנית: דירוג גבוה, אלפי מכירות ומשלוח לישראל. המחיר נבדק מול עליאקספרס ב־${esc(topAt)}.</p>
   <div class="picks-row" tabindex="0" aria-label="מוצרים נבחרים">${list.map((x) => {
     const o = x.live; const off = o.orig > o.price ? Math.round((1 - o.price / o.orig) * 100) : 0;
