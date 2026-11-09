@@ -288,6 +288,7 @@ const addDays = (d, n) => { const t = new Date(`${d}T12:00:00Z`); t.setUTCDate(t
 export function planQueue({ queue = [], regular = {}, today, hour, days = 2, events = [], coupons = [], siteUrl, affLink, library, announcements, cats, products }) {
   let reg = regular;
   let keep = queue.filter((q) => q.date > today || (q.date === today && q.hour >= hour));
+  keep = keep.map((q) => ({ ...q, ...emojiAfter({ text: q.text, buttons: q.buttons }) })); // house style also for already-planned posts
   // Already-planned product posts pick up the product's current (short) affiliate link.
   if (products?.length) keep = keep.map((q) => {
     const pr = q.kind === 'product' && products.find((x) => x.image === q.card?.image);
