@@ -1221,6 +1221,8 @@ await write('404.html', layout({
 await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
 await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\nDisallow: /admin/\nDisallow: /p/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 await write('.nojekyll', '');
+// Live coupon tiers for the Telegram bot's Deal Hunter (the codes are public on the site anyway).
+await write('codes.json', JSON.stringify({ at: new Date().toISOString(), codes: realCodes.filter((c) => c.code && (c.currency || 'USD') === 'USD').map((c) => ({ code: c.code, d: c.discount, m: c.minOrder, x: c.expires || '' })) }));
 if (gen.telegram?.posted) await write('telegram-state.json', JSON.stringify(gen.telegram));
 if (site.indexNowKey) await write(`${site.indexNowKey}.txt`, site.indexNowKey);
 

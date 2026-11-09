@@ -4,7 +4,7 @@
 // Vars (wrangler.toml): ALLOWED_ORIGIN
 import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduct, rankAlternatives } from '../../scripts/cheapest-lib.mjs';
 import { classifyMatch } from '../../src/v2/logic.mjs';
-import { collectReports } from '../../scripts/telegram-bot.mjs';
+import { collectReports, uhash } from '../../scripts/telegram-bot.mjs';
 import { reviewFlow } from '../../scripts/telegram-bot-flow.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
@@ -195,7 +195,54 @@ async function webhookSecret(token) {
   return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
 }
 const ilToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
-async function handleBot(req, env) {
+
+/* ---------------- Deal Hunter inside the bot: send a product link, get the verdict + affiliate link ---------------- */
+const escH = (t) => String(t ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const ilsT = (n) => `₪${Number(n).toLocaleString('he-IL', { maximumFractionDigits: 2 })}`;
+async function liveCodes(env) {
+  try {
+    const r = await fetch(`${env.SITE_URL || 'https://yeshdeal.com'}/codes.json`, { cf: { cacheTtl: 600 } });
+    const j = await r.json();
+    const now = new Date();
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(now);
+    const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }).format(now));
+    return (j.codes || []).filter((c) => !c.x || c.x > today || (c.x === today && hour < 23));
+  } catch { return []; }
+}
+async function shortAff(env, id, fallback) {
+  try {
+    const r = await aliCall(env, 'aliexpress.affiliate.link.generate', { promotion_link_type: 0, source_values: `https://www.aliexpress.com/item/${id}.html`, tracking_id: env.ALI_TRACKING_ID });
+    const l = r?.promotion_links?.promotion_link?.[0]?.promotion_link;
+    return /^https:\/\/s\.click\.aliexpress\.com\//.test(l || '') ? l : fallback;
+  } catch { return fallback; }
+}
+export async function hunterReply(env, text) {
+  const site = env.SITE_URL || 'https://yeshdeal.com';
+  const { status, body } = await findCheapest(env, text);
+  if (status !== 200 || !body?.original) return { text: `😕 ${escH(body?.message || 'לא הצלחנו לזהות את המוצר. שלחו קישור מלא לעמוד המוצר בעליאקספרס.')}` };
+  const o = body.original;
+  const pool = (body.pool || []).filter((c) => c.price != null && c.link);
+  const same = pool.filter((c) => c.level === 'exact' || c.level === 'likely').sort((a, b) => a.price - b.price);
+  const cheaper = same.length && o.price != null && same[0].price < o.price - 0.5 ? same[0] : null;
+  const t = cheaper || o;
+  const link = await shortAff(env, t.id, t.link);
+  const title = escH(String(o.title || '').slice(0, 90));
+  let msg;
+  if (cheaper) msg = `🎯 <b>מצאנו זול יותר ב־${ilsT(Math.round((o.price - cheaper.price) * 100) / 100)}!</b>\n\n${title}\n${cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר (בדקו גרסה וצבע)'} אצל ${escH(cheaper.shop || 'מוכר אחר')}: <b>${ilsT(cheaper.price)}</b> במקום ${ilsT(o.price)}`;
+  else if (same.length) msg = `👑 <b>אתם קינג! זה המחיר הכי טוב שמצאנו</b>\n\n${title}\n<b>${ilsT(o.price)}</b> · השווינו ל${same.length === 1 ? 'הצעה נוספת של אותו מוצר' : `־${same.length} הצעות של אותו מוצר`}, ואף אחת לא זולה יותר.`;
+  else msg = `🔎 <b>לא מצאנו את אותו מוצר אצל מוכרים אחרים</b>\n\n${title}\n<b>${ilsT(o.price)}</b> · אבל יש דרך לשלם עליו פחות 👇`;
+  // Real coupon estimate: the best code whose minimum the price meets (codes are checked in USD)
+  const codes = await liveCodes(env);
+  const rate = o.usd ? o.price / o.usd : 3.2;
+  const usd = t.usd || (t.price / rate);
+  const fit = codes.filter((c) => c.m <= usd).sort((a, b) => b.d - a.d)[0];
+  if (fit) msg += `\n\n💰 עם הקוד <code>${escH(fit.code)}</code> זה יוצא בערך <b>${ilsT(Math.max(0, Math.round((t.price - fit.d * rate) * 100) / 100))}</b> (ההנחה של $${fit.d} יורדת בקופה, לחיצה על הקוד מעתיקה אותו)`;
+  else if (codes.length) { const first = codes.slice().sort((a, b) => a.m - b.m)[0]; msg += `\n\n💡 הוסיפו לעגלה עוד כ־${ilsT(Math.ceil((first.m - usd) * rate))} ותוכלו להשתמש בקוד <code>${escH(first.code)}</code> ($${first.d} הנחה).`; }
+  msg += '\n\nמחירים לפני משלוח ומע״מ, ועשויים להשתנות.';
+  return { text: msg, html: true, buttons: [[{ text: cheaper ? '🛒 לקנייה במחיר הזה' : '🛒 לקנייה בעליאקספרס', url: link }], [{ text: '🔎 כל התוצאות באתר', url: `${site}/finder/?url=${encodeURIComponent(`https://www.aliexpress.com/item/${o.id}.html`)}` }]] };
+}
+
+async function handleBot(req, env, ctx) {
   if (!env.BOT || !env.TELEGRAM_BOT_TOKEN) return new Response('off', { status: 503 });
   if (req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== await webhookSecret(env.TELEGRAM_BOT_TOKEN)) return new Response('forbidden', { status: 403 });
   const update = await req.json().catch(() => null);
@@ -203,7 +250,20 @@ async function handleBot(req, env) {
   const today = ilToday();
   const site = env.SITE_URL || 'https://yeshdeal.com';
   const state = (await env.BOT.get('state', 'json')) || { reviews: [], flow: {}, reports: {} };
-  const tg = (method, body) => fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
+  var tg = (method, body) => fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
+  // 0) a product link → Deal Hunter (answered in the background so Telegram gets its 200 at once)
+  const mtext = (update.message?.text || '').trim();
+  const flowStep = state.flow?.[uhash(update.message?.from?.id ?? 0)]?.step;
+  if (update.message?.chat?.type === 'private' && /aliexpress\.|^\d{10,20}$/i.test(mtext) && flowStep !== 'text' && flowStep !== 'custom') {
+    const chatId = update.message.chat.id;
+    const work = (async () => {
+      await tg('sendMessage', { chat_id: chatId, text: '🎯 הצייד יצא לציד… סורק מוכרים, כמה שניות.' });
+      const r = await hunterReply(env, mtext).catch(() => ({ text: '😕 עליאקספרס לא ענתה כרגע. נסו שוב בעוד דקה.' }));
+      await tg('sendMessage', { chat_id: chatId, text: r.text, disable_web_page_preview: true, ...(r.html ? { parse_mode: 'HTML' } : {}), ...(r.buttons ? { reply_markup: { inline_keyboard: r.buttons } } : {}) });
+    })();
+    if (ctx?.waitUntil) ctx.waitUntil(work); else await work;
+    return new Response('ok');
+  }
   // 1) the review conversation (buttons + text)
   const rf = reviewFlow(update, state, { today, site });
   let next = rf.state;
@@ -215,7 +275,7 @@ async function handleBot(req, env) {
     const TXT = {
       thanks: (c) => `תודה על הדיווח! 🙏\nרשמנו שהקוד ${c} לא עבד לכם. אם כמה גולשים מדווחים על אותו קוד, נסמן אותו באתר ונבדוק אותו.\n\nבינתיים כדאי לנסות קוד ממדרגה אחרת 👇`,
       unknown: () => 'תודה! הקודים העדכניים באתר 👇',
-      hello: () => 'היי! 👋 אני הבוט של יש דיל!\nכאן מדווחים על קוד שלא עבד וכותבים לנו ביקורת.\n\nמה תרצו לעשות?',
+      hello: () => 'היי! 👋 אני הבוט של יש דיל!\n\n🎯 שלחו לי קישור למוצר מעליאקספרס, ואבדוק אם יש אותו זול יותר וכמה הוא יוצא עם קוד קופון.\n✍️ או כתבו לנו ביקורת.',
     };
     const r = rep.replies[0] || (update.message.chat?.type === 'private' ? { chat: update.message.chat.id, kind: 'hello' } : null);
     if (r) out.push({ chat: r.chat, text: TXT[r.kind](r.code), buttons: [[{ text: '🔥 כל הקודים', url: `${site}/#codes` }], [{ text: '✍️ כתיבת ביקורת', callback_data: 'rv:go' }]] });
@@ -237,7 +297,13 @@ export default {
     const url = new URL(req.url);
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
-    if (url.pathname === '/tg/webhook' && req.method === 'POST') return handleBot(req, env);
+    if (url.pathname === '/tg/webhook' && req.method === 'POST') return handleBot(req, env, ctx);
+    // Preview of the bot's Deal Hunter answer (same text/buttons the bot sends) – for QA.
+    if (url.pathname === '/api/hunter-preview' && req.method === 'GET') {
+      if (limited(req, 'cheapest', RATE.max)) return json(RATE_LIMITED, 429, h);
+      try { return json(await hunterReply(env, url.searchParams.get('url') || ''), 200, h); }
+      catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
+    }
     // Reviews + code reports for the site build (public data only: first names, texts, hashes).
     if (url.pathname === '/api/bot-state' && req.method === 'GET') {
       if (!env.BOT) return json({ error: 'off' }, 503, h);
