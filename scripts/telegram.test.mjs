@@ -204,3 +204,15 @@ test('bot review flow: stars → text → name choice, one review per person', a
   assert.deepEqual(st.reviews.map((r) => [r.name, r.stars]), [['גולש/ת', 4]]);
   assert.deepEqual(st.flow, {});
 });
+
+test('reviews view: same person (first+last name) shown once, anonymous kept, avatars vary', async () => {
+  const { publicReviews } = await import('../src/reviews-view.mjs');
+  const r = publicReviews([
+    { id: '2', h: 'a', name: 'דביר פרש', stars: 5, text: 'x', d: '2026-11-09' },
+    { id: '1', h: 'b', name: 'דביר דוד פרש', stars: 5, text: 'y', d: '2026-11-09' },
+    { id: '3', h: 'c', name: 'גולש/ת', stars: 4, text: 'z', d: '2026-11-08' },
+    { id: '4', h: 'd', name: 'גולש/ת', stars: 5, text: 'w', d: '2026-11-08' },
+  ]);
+  assert.deepEqual(r.map((x) => x.id), ['2', '4', '3']);
+  assert.ok(r.every((x) => x.icon && x.colors && x.colors.length === 2));
+});

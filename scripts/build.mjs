@@ -15,6 +15,7 @@ import { eventContent } from '../src/content/events.mjs';
 import { categories, categoryColors } from '../src/content/categories.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
 import { buildFacebookPage } from './fb-posts.mjs';
+import { publicReviews } from '../src/reviews-view.mjs';
 import { renderCard } from './telegram-card.mjs';
 import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
@@ -639,15 +640,14 @@ ${expired.length ? `<section class="section"><div class="wrap narrow"><details c
 
 ${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה בעליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
 ${BOT ? (() => {
-  const hidden = new Set((site.reviews?.hidden || []).map(String));
-  const rv = (gen.telegram?.reviews || []).filter((r) => !hidden.has(String(r.id))).sort((a, b) => b.d.localeCompare(a.d) || Number(b.id) - Number(a.id));
+  const rv = publicReviews(gen.telegram?.reviews || [], site.reviews?.hidden || []);
   const avg = rv.length ? Math.round((rv.reduce((t, r) => t + r.stars, 0) / rv.length) * 10) / 10 : 0;
   const stars = (n) => `<span class="stars" aria-label="${n} מתוך 5">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`;
-  const cta = `<a class="btn btn-primary" href="https://t.me/${BOT}?start=review" rel="noopener" target="_blank">✍️ כתבו ביקורת</a>`;
-  return `<section class="section reviews" id="reviews"><div class="wrap">
+  const cta = `<a class="btn btn-primary" href="https://t.me/${BOT}?start=review" rel="noopener" target="_blank">כתבו ביקורת ✍️</a>`;
+  return `<section class="section reviews" id="reviews" data-api="${esc((site.cheapest?.apiUrl || '').replace(/\/$/, ''))}"><div class="wrap">
   <div class="rv-head"><div><h2 class="section-title">מה אומרים עלינו</h2>
-  <p class="muted">${rv.length >= 3 ? `${stars(Math.round(avg))} <b>${avg}</b> מתוך 5 · ${rv.length} ביקורות` : 'ביקורות אמיתיות של גולשים'} · כל ביקורת נשלחת מחשבון טלגרם אמיתי, ומופיעה כמו שנכתבה.</p></div>${cta}</div>
-  ${rv.length ? `<div class="rv-grid">${rv.slice(0, 9).map((r) => `<figure class="rv"><div class="rv-top"><span class="rv-av" aria-hidden="true">${esc(r.name.slice(0, 1))}</span><div><b>${esc(r.name)}</b>${stars(r.stars)}</div></div><blockquote>${esc(r.text)}</blockquote><figcaption>${esc(heDate(r.d))} · דרך טלגרם</figcaption></figure>`).join('')}</div>`
+  <p class="muted rv-sum">${rv.length >= 3 ? `${stars(Math.round(avg))} <b>${avg}</b> מתוך 5 · ${rv.length} ביקורות` : 'ביקורות אמיתיות של גולשים'} · כל ביקורת נשלחת מחשבון טלגרם אמיתי, ומופיעה כמו שנכתבה.</p></div>${cta}</div>
+  ${rv.length ? `<div class="rv-grid" id="rv-grid">${rv.slice(0, 9).map((r) => `<figure class="rv"><div class="rv-top"><span class="rv-av" aria-hidden="true" style="background:linear-gradient(150deg,${r.colors[0]},${r.colors[1]})">${r.icon}</span><div><b>${esc(r.name)}</b>${stars(r.stars)}</div></div><blockquote>${esc(r.text)}</blockquote><figcaption>${esc(heDate(r.d))} · דרך טלגרם</figcaption></figure>`).join('')}</div>`
     : `<div class="rv-empty"><b>חסכתם עם קוד מהאתר?</b><p>ספרו לכולם. לוחצים על הכפתור, הבוט שלנו בטלגרם נפתח, ושולחים דירוג וכמה מילים. הביקורת עולה לאתר עם השם הפרטי שלכם.</p>${cta}</div>`}
 </div></section>`;
 })() : ''}

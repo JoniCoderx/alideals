@@ -6,6 +6,7 @@ import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduc
 import { classifyMatch } from '../../src/v2/logic.mjs';
 import { collectReports, uhash } from '../../scripts/telegram-bot.mjs';
 import { reviewFlow } from '../../scripts/telegram-bot-flow.mjs';
+import { publicReviews } from '../../src/reviews-view.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
 const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link';
@@ -402,6 +403,12 @@ export default {
       if (limited(req, 'cheapest', RATE.max)) return json(RATE_LIMITED, 429, h);
       try { return json(await hunterReply(env, url.searchParams.get('url') || ''), 200, h); }
       catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
+    }
+    // Public, de-duplicated reviews for the site (refreshed on page load, so a new review shows within a minute)
+    if (url.pathname === '/api/reviews' && req.method === 'GET') {
+      if (!env.BOT) return json({ reviews: [] }, 200, h);
+      const st = (await env.BOT.get('state', 'json')) || {};
+      return json({ reviews: publicReviews(st.reviews || []).slice(0, 9), total: publicReviews(st.reviews || []).length }, 200, { ...h, 'Cache-Control': 'public, max-age=60' });
     }
     // Reviews + code reports for the site build (public data only: first names, texts, hashes).
     if (url.pathname === '/api/bot-state' && req.method === 'GET') {

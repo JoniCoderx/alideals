@@ -316,6 +316,30 @@
     if (code && code === b.getAttribute('data-code')) markRevealed(id, code);
   });
 
+  /* ---------- Reviews: fetch the latest from the bot (appear within a minute, not after the next build) ---------- */
+  (function () {
+    var sec = document.getElementById('reviews');
+    var api = sec && sec.getAttribute('data-api');
+    if (!api || !window.fetch) return;
+    var e = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var safeColor = function (c) { return /^#[0-9a-f]{6}$/i.test(c || '') ? c : '#e5122f'; };
+    var heD = function (d) { var p = String(d || '').split('-'); return p.length === 3 ? Number(p[2]) + '.' + Number(p[1]) + '.' + p[0] : ''; };
+    var stars = function (n) { n = Math.max(1, Math.min(5, Number(n) || 0)); return '<span class="stars" aria-label="' + n + ' מתוך 5">' + '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i></span>'; };
+    fetch(api + '/api/reviews').then(function (r) { return r.json(); }).then(function (j) {
+      var list = (j && j.reviews) || [];
+      if (!list.length) return;
+      var html = list.map(function (r) {
+        var c = r.colors || [];
+        return '<figure class="rv"><div class="rv-top"><span class="rv-av" aria-hidden="true" style="background:linear-gradient(150deg,' + safeColor(c[0]) + ',' + safeColor(c[1]) + ')">' + e(r.icon) + '</span><div><b>' + e(r.name) + '</b>' + stars(r.stars) + '</div></div><blockquote>' + e(r.text) + '</blockquote><figcaption>' + e(heD(r.d)) + ' · דרך טלגרם</figcaption></figure>';
+      }).join('');
+      var grid = document.getElementById('rv-grid');
+      if (!grid) { var empty = sec.querySelector('.rv-empty'); grid = document.createElement('div'); grid.className = 'rv-grid'; grid.id = 'rv-grid'; if (empty) empty.replaceWith(grid); else sec.querySelector('.wrap').appendChild(grid); }
+      grid.innerHTML = html;
+      var sum = sec.querySelector('.rv-sum');
+      if (sum && list.length >= 3) { var avg = Math.round(list.reduce(function (t, r) { return t + Number(r.stars); }, 0) / list.length * 10) / 10; sum.innerHTML = stars(Math.round(avg)) + ' <b>' + avg + '</b> מתוך 5 · ' + (j.total || list.length) + ' ביקורות · כל ביקורת נשלחת מחשבון טלגרם אמיתי, ומופיעה כמו שנכתבה.'; }
+    }).catch(function () {});
+  })();
+
   /* ---------- Deal Hunter input check (homepage form + finder): only AliExpress product links or ids ---------- */
   var isAliInput = function (v) {
     v = String(v || '').trim();
