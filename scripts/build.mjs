@@ -1170,9 +1170,13 @@ if(!/https?:\\/\\/(s\\.click|a)\\.aliexpress\\.com\\//.test(t)){out.innerHTML='<
 out.innerHTML='<p class="muted">פותח קישור מקוצר…</p>';fetch(${JSON.stringify(PRODUCT_API)}+'/api/resolve?url='+encodeURIComponent(t.trim())).then(function(r){return r.json()}).then(function(j){j.id?show(j.id):out.innerHTML='<p class="muted">לא הצלחנו לזהות את המוצר. נסו את הקישור המלא מהדפדפן.</p>'}).catch(function(){out.innerHTML='<p class="muted">שגיאת רשת. נסו שוב.</p>'})}})();</script>`,
 }));
 
+// The 2.0 preview (/test/) is retired: everything lives on the main site. Old preview links land on the live pages.
+const moved = (to) => `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${to}"><link rel="canonical" href="${abs(to)}"><title>${esc(site.name)}</title><script>location.replace(${JSON.stringify(to)}+location.hash)</script></head><body><a href="${to}">המשך ל${esc(site.name)}</a></body></html>`;
+for (const [from, to] of [['test/', '/'], ['test/hunter/', '/finder/'], ['test/design/', '/'], ['test/c/car/', '/coupon/car/'], ...catalog.collections.map((c) => [`test/top/${c.slug}/`, `/top/${c.slug}/`]), ...['charging', 'audio', 'home', 'gaming', 'outdoor-car'].map((s) => [`test/top/${s}/`, '/top/'])]) await write(`${from}index.html`, moved(to));
+
 await write('404.html', layout({
   title: `הדף לא נמצא | ${site.name}`, description: 'הדף לא נמצא', pathname: '/404.html', noindex: true,
-  body: `<section class="hero"><div class="wrap narrow"><h1>הדף לא נמצא</h1><p class="lead">אבל הקודים כאן.</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
+  body: `<script>(function(){var m=location.pathname.match(/^\/test\/p\/(\d{6,20})\/?$/);if(m)location.replace('/p/?i='+m[1]);else if(/^\/test\//.test(location.pathname))location.replace('/');})();</script><section class="hero"><div class="wrap narrow"><h1>הדף לא נמצא</h1><p class="lead">אבל הקודים כאן.</p><a class="btn btn-primary" href="/">לכל קודי הקופון</a></div></section>`,
 }));
 await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${(SAMPLE_MODE ? [] : sitemap).map(([p, lm]) => `  <url><loc>${abs(p)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
 await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\nDisallow: /admin/\nDisallow: /p/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
