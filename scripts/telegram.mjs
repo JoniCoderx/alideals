@@ -335,7 +335,7 @@ export function collectReports(updates, { reports = {}, codes = [], today }) {
   for (const u of updates) {
     const msg = u.message;
     const m = (msg?.text || '').trim().match(/^\/start\s+r_([A-Za-z0-9]{3,24})$/);
-    if (!m) { if (msg?.chat?.id && /^\/start/.test(msg.text || '')) replies.push({ chat: msg.chat.id, kind: 'hello' }); continue; }
+    if (!m) { if (msg?.chat?.id && /^\/start/.test(msg.text || '') && !/^\/start\s+review$/.test((msg.text || '').trim())) replies.push({ chat: msg.chat.id, kind: 'hello' }); continue; }
     const code = m[1].toUpperCase();
     if (!valid.has(code)) { replies.push({ chat: msg.chat.id, kind: 'unknown', code }); continue; }
     const list = next[code] ? [...next[code]] : [];
@@ -345,6 +345,39 @@ export function collectReports(updates, { reports = {}, codes = [], today }) {
     replies.push({ chat: msg.chat.id, kind: 'thanks', code });
   }
   return { reports: next, replies };
+}
+
+
+/**
+ * Pure: verified reviews written to the bot. The site links to t.me/<bot>?start=review → the bot asks for
+ * a rating + text → the next message from that person becomes a review (one per person; a new one replaces it).
+ * Auto-moderation: 1–5 stars required, 10–400 chars, no links/handles, no profanity. The owner can hide any
+ * review by id (site.json reviews.hidden). Only a one-way hash of the Telegram user id is stored.
+ */
+const BAD = /(זונה|בן זונה|כוס אמא|שרמוט|מניאק|fuck|shit)/i;
+const uhash = (id) => { let h = 2166136261; for (const ch of `yd:${id}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+export function collectReviews(updates, { reviews = [], pending = {}, today }) {
+  let list = [...reviews];
+  const wait = { ...pending };
+  const replies = [];
+  for (const u of updates) {
+    const msg = u.message;
+    if (!msg?.chat?.id || msg.chat.type !== 'private') continue;
+    const text = (msg.text || '').trim();
+    const h = uhash(msg.from?.id ?? msg.chat.id);
+    if (/^\/start\s+review$/.test(text)) { wait[h] = today; replies.push({ chat: msg.chat.id, kind: 'reviewAsk' }); continue; }
+    if (!wait[h] || text.startsWith('/')) continue;
+    delete wait[h];
+    const m = text.match(/^\s*([1-5])\s*(?:\/\s*5)?\s*[-–:,.]?\s*([\s\S]+)$/) || (() => { const st = (text.match(/⭐/g) || []).length; return st >= 1 && st <= 5 ? [null, String(st), text.replace(/⭐/g, '').trim()] : null; })();
+    const body = m ? m[2].replace(/\s+/g, ' ').trim() : '';
+    if (!m || body.length < 10 || body.length > 400 || /https?:|www\.|t\.me|@\w/.test(body) || BAD.test(body)) { replies.push({ chat: msg.chat.id, kind: 'reviewBad' }); continue; }
+    const name = String(msg.from?.first_name || '').replace(/[^\p{L}\s'-]/gu, '').trim().split(/\s+/)[0]?.slice(0, 20) || 'גולש';
+    list = list.filter((r) => r.h !== h);
+    list.push({ id: String(u.update_id), h, name, stars: Number(m[1]), text: body, d: today });
+    replies.push({ chat: msg.chat.id, kind: 'reviewThanks' });
+  }
+  for (const [k, d] of Object.entries(wait)) if (d < today && Date.parse(today) - Date.parse(d) > 3 * 864e5) delete wait[k];
+  return { reviews: list.slice(-200), pending: wait, replies };
 }
 
 /**
@@ -406,7 +439,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const today = process.env.TODAY || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
   const { active } = mergeCoupons(manual.coupons, (gen.sheetCoupons || []).filter((c) => c.type !== 'deal'), today);
   // Keep bot meta (username, code reports, update offset) across runs, whatever happens below.
-  const meta = { bot: gen.telegram?.bot || '', reports: gen.telegram?.reports || {}, updOffset: gen.telegram?.updOffset || 0 };
+  const meta = { bot: gen.telegram?.bot || '', reports: gen.telegram?.reports || {}, updOffset: gen.telegram?.updOffset || 0, reviews: gen.telegram?.reviews || [], reviewWait: gen.telegram?.reviewWait || {} };
   if (token && !dry && !previewDir) {
     try {
       const me = await api(token, 'getMe', new URLSearchParams());
@@ -416,9 +449,14 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
         meta.updOffset = upd.result[upd.result.length - 1].update_id;
         const { reports, replies } = collectReports(upd.result, { reports: meta.reports, codes: active.map((c) => c.code), today });
         meta.reports = reports;
+        const rv = collectReviews(upd.result, { reviews: meta.reviews, pending: meta.reviewWait, today });
+        meta.reviews = rv.reviews; meta.reviewWait = rv.pending; replies.push(...rv.replies);
         const TXT = {
           thanks: (c) => `תודה על הדיווח! 🙏\nרשמנו שהקוד ${c} לא עבד לכם. אם כמה גולשים מדווחים על אותו קוד, נסמן אותו באתר ונבדוק אותו.\n\nבינתיים כדאי לנסות קוד ממדרגה אחרת: ${site.url}/#codes`,
           unknown: () => `תודה! הקוד הזה כבר לא ברשימה הפעילה שלנו. הקודים העדכניים כאן: ${site.url}/#codes`,
+          reviewAsk: () => `תודה שאתם כותבים ביקורת! 🙏\nשלחו בהודעה אחת דירוג מ־1 עד 5 ואחריו כמה מילים, למשל:\n5 חסכתי 30 שקל בהזמנה עם הקוד מהאתר\n\nהביקורת תופיע באתר עם השם הפרטי שלכם.`,
+          reviewThanks: () => `קיבלנו, תודה! ✨ הביקורת תעלה לאתר בעדכון הקרוב: ${site.url}/#reviews`,
+          reviewBad: () => 'לא הצלחנו לקלוט את הביקורת 😅 שלחו שוב דרך הכפתור באתר: דירוג 1–5 ואחריו טקסט קצר (10–400 תווים, בלי קישורים).',
           hello: () => `היי! 👋 אני הבוט של ${site.name}.\nכל הקודים העדכניים לעליאקספרס: ${site.url}\nוהערוץ שלנו: ${site.social.telegram}`,
         };
         for (const r of replies) await api(token, 'sendMessage', new URLSearchParams({ chat_id: String(r.chat), text: TXT[r.kind](r.code), disable_web_page_preview: 'true' })).catch(() => {});

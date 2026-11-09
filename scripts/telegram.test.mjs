@@ -171,3 +171,12 @@ test('worker publishes the item for the current Israel slot', async () => {
   assert.match(calls[1][0], /sendPhoto/);
   assert.equal((await publishQueued(env, new Date('2026-11-08T11:02:00Z'), fakeFetch)).none, '2026-11-08 13');
 });
+
+test('reviews: one per person, rating required, no links, ignores chatter', async () => {
+  const { collectReviews } = await import('./telegram.mjs');
+  const P = (id, uid, t, name = 'דנה כהן') => ({ update_id: id, message: { chat: { id: uid, type: 'private' }, from: { id: uid, first_name: name }, text: t } });
+  const r = collectReviews([P(1, 7, '/start review'), P(2, 7, '5 חסכתי 30 שקל בהזמנה'), P(3, 8, 'סתם הודעה'), P(4, 10, '/start review'), P(5, 10, '5 www.spam.com מבצע'), P(6, 7, '/start review'), P(7, 7, '4 עדכון: עדיין מרוצה מהאתר')], { today: '2026-11-09' });
+  assert.equal(r.reviews.length, 1);
+  assert.deepEqual([r.reviews[0].name, r.reviews[0].stars], ['דנה', 4]);
+  assert.deepEqual(r.replies.map((x) => x.kind), ['reviewAsk', 'reviewThanks', 'reviewAsk', 'reviewBad', 'reviewAsk', 'reviewThanks']);
+});

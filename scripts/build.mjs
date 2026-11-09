@@ -118,6 +118,7 @@ const ICON = {
   arrow: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 5 7 10l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   telegram: `<svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.94 4.3a1.1 1.1 0 0 0-1.5-1.17L2.7 10.1c-.95.38-.9 1.74.07 2.05l4.47 1.4 1.7 5.36c.25.8 1.26 1.04 1.85.45l2.52-2.5 4.53 3.33c.68.5 1.65.12 1.82-.7l2.28-15.2Zm-4.2 3.06-7.6 6.9a.6.6 0 0 0-.19.36l-.33 2.45c-.03.2-.31.22-.37.03l-1.14-3.6a.6.6 0 0 1 .26-.69l9.05-5.6c.2-.13.43.14.32.15Z"/></svg>`,
 };
+const fbBtn = (label, cls = '') => site.social.facebook ? `<a class="btn btn-fb ${cls}" href="${esc(site.social.facebook)}" rel="noopener" target="_blank"><span>${label}</span><svg class="tg-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></a>` : '';
 const tgBtn = (label, cls = '') => site.social.telegram ? `<a class="btn btn-tg ${cls}" href="${esc(site.social.telegram)}" rel="noopener" target="_blank"><span>${label}</span>${ICON.telegram}</a>` : '';
 
 
@@ -468,6 +469,7 @@ function homePage() {
       <div class="hero-cta">
         <a class="btn btn-primary" href="#codes">לכל הקודים ↓</a>
         ${tgBtn('קודים חדשים בטלגרם')}
+        ${fbBtn('פייסבוק')}
       </div>
       ${activeEvent ? `<p class="hero-event"><a href="/sale/${activeEvent.slug}/">🔥 קודי ${esc(activeEvent.name.split(' –')[0])} ←</a></p>` : ''}
     </div>
@@ -589,6 +591,19 @@ ${faqBlock(faq)}
 ${expired.length ? `<section class="section"><div class="wrap narrow"><details class="expired"><summary>קודים שפג תוקפם (${expired.length})</summary><ul>${expired.slice(0, 20).map((c) => `<li><s>${esc(c.code)}</s>: ${money(c.discount, c.currency)} מעל ${money(c.minOrder, c.currency)} (עד ${heDate(c.expires)})</li>`).join('')}</ul></details></div></section>` : ''}
 
 ${coupons.length ? `<div class="sticky-cta" id="sticky-cta" hidden><span>עד <b>${money(Math.max(...coupons.map((c) => c.discount)))}</b> הנחה בעליאקספרס</span><a class="btn btn-primary" href="#calc">מצאו את הקוד שלכם</a></div>` : ''}
+${BOT ? (() => {
+  const hidden = new Set((site.reviews?.hidden || []).map(String));
+  const rv = (gen.telegram?.reviews || []).filter((r) => !hidden.has(String(r.id))).sort((a, b) => b.d.localeCompare(a.d) || Number(b.id) - Number(a.id));
+  const avg = rv.length ? Math.round((rv.reduce((t, r) => t + r.stars, 0) / rv.length) * 10) / 10 : 0;
+  const stars = (n) => `<span class="stars" aria-label="${n} מתוך 5">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`;
+  const cta = `<a class="btn btn-primary" href="https://t.me/${BOT}?start=review" rel="noopener" target="_blank">✍️ כתבו ביקורת</a>`;
+  return `<section class="section reviews" id="reviews"><div class="wrap">
+  <div class="rv-head"><div><h2 class="section-title">מה אומרים עלינו</h2>
+  <p class="muted">${rv.length >= 3 ? `${stars(Math.round(avg))} <b>${avg}</b> מתוך 5 · ${rv.length} ביקורות` : 'ביקורות אמיתיות של גולשים'} · כל ביקורת נשלחת מחשבון טלגרם אמיתי, ומופיעה כמו שנכתבה.</p></div>${cta}</div>
+  ${rv.length ? `<div class="rv-grid">${rv.slice(0, 9).map((r) => `<figure class="rv"><div class="rv-top"><span class="rv-av" aria-hidden="true">${esc(r.name.slice(0, 1))}</span><div><b>${esc(r.name)}</b>${stars(r.stars)}</div></div><blockquote>${esc(r.text)}</blockquote><figcaption>${esc(heDate(r.d))} · דרך טלגרם</figcaption></figure>`).join('')}</div>`
+    : `<div class="rv-empty"><b>חסכתם עם קוד מהאתר?</b><p>ספרו לכולם. לוחצים על הכפתור, הבוט שלנו בטלגרם נפתח, ושולחים דירוג וכמה מילים. הביקורת עולה לאתר עם השם הפרטי שלכם.</p>${cta}</div>`}
+</div></section>`;
+})() : ''}
 ${site.social.telegram || site.social.facebook ? `<section class="section community"><div class="wrap"><div class="comm-box">
   <div class="comm-text"><span class="comm-kicker">הקהילה של יש דיל</span>
   ${gen.telegramMembers?.count >= 100 ? `<p class="comm-count"><b>${Math.floor(gen.telegramMembers.count / 100) * 100 >= 1000 ? (Math.floor(gen.telegramMembers.count / 100) * 100).toLocaleString('en-US') + '+' : gen.telegramMembers.count}</b> חברים בערוץ הטלגרם</p>` : '<p class="comm-count"><b>הצטרפו לקהילה</b></p>'}

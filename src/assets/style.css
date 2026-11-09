@@ -547,3 +547,13 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .adm{display:flex;gap:8px;margin:16px 0}.adm input,.adm-res input{flex:1;min-width:0;padding:12px;border:2px solid #e3dcd6;border-radius:12px;font-size:1rem;width:100%}
 .adm-res{display:grid;gap:10px;margin-top:10px}.adm-btns{display:flex;gap:8px;flex-wrap:wrap}
 .hero-event{margin-top:12px}.hero-event a{display:inline-block;font-weight:800;color:#e5122f;background:#fff1ea;border:2px solid rgba(229,18,47,.25);padding:8px 16px;border-radius:999px;text-decoration:none}
+
+.reviews .rv-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}.reviews .rv-head p{margin:4px 0 0}
+.stars{color:#ffb400;letter-spacing:1px}.stars i{font-style:normal;color:#ddd5cf}
+.rv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.rv{margin:0;background:#fff;border-radius:18px;padding:18px;box-shadow:0 10px 28px rgba(23,22,28,.07);border:1px solid #f0e8e2;display:flex;flex-direction:column;gap:10px}
+.rv-top{display:flex;gap:10px;align-items:center}.rv-top div{display:flex;flex-direction:column}
+.rv-av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(150deg,#ff7a2f,#e5122f)}
+.rv blockquote{margin:0;line-height:1.6;color:#2a2830}.rv figcaption{font-size:.8rem;color:#8a8590;margin-top:auto}
+.rv-empty{background:#fff;border:2px dashed rgba(229,18,47,.3);border-radius:20px;padding:24px;text-align:center}.rv-empty p{max-width:520px;margin:8px auto 14px}
+.hero-event a{text-decoration:none!important}
