@@ -167,7 +167,7 @@ pages['index.html'] = shell({ active: 'home', title: 'יש דיל! 2.0', body: `
 </div></section>
 
 <section class="sec"><div class="wrap">
-  <div class="sec-h"><h2>⭐ אוספי Top 10</h2></div>
+  <div class="sec-h"><h2>⭐ רשימות נבחרות</h2></div>
   <div class="cols">${fixtureCollections.filter((c) => c.items.some((id) => qualified(byId[id]))).map((c) => `<a class="col" href="/test/top/${c.slug}/" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><span>${c.emoji}</span><b>${esc(collTitle(c))}</b><i>לאוסף ←</i></a>`).join('')}
   ${T200_LIVE.map((c) => `<a class="col" href="/test/top/${c.slug}/" style="--a:${colors(c.cat)[0]};--b:${colors(c.cat)[1]}"><span>${c.emoji}</span><b>${esc(c.title)}</b><i>לאוסף ←</i></a>`).join('')}</div>
 </div></section>
