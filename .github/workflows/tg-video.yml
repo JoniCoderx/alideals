@@ -1,0 +1,49 @@
+name: Telegram – post a video to the channel
+# Manual only: posts a video from media/ to the channel with a caption and buttons, then tries to pin it.
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: Video file under media/
+        default: media/yeshdeal-reel.mp4
+      pin:
+        description: Pin the post (true/false)
+        default: 'true'
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send video
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+          FILE: ${{ inputs.file }}
+          PIN: ${{ inputs.pin }}
+        run: |
+          set -e
+          test -n "$TELEGRAM_BOT_TOKEN" || { echo "no bot token"; exit 1; }
+          CHAT="${TELEGRAM_CHANNEL:-@yeshdeall}"
+          T="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN"
+          cat > caption.html <<'EOF'
+          <b>מדריך של 20 שניות: איך לא לשלם יותר מדי באלי אקספרס</b> 🎬
+
+          1. מחשבון הקופונים מראה איזה קוד הכי משתלם לסכום העגלה שלכם
+          2. העתקה בלחיצה אחת ומעבר ישר לאלי אקספרס
+          3. צייד הדילים: מדביקים קישור למוצר ובודקים אם יש אותו דבר בזול יותר אצל מוכר אחר 🎯
+
+          והכי נוח: שולחים קישור למוצר ישר לבוט שלנו, ומקבלים תשובה בטלגרם 🤖
+
+          בלאק פריידיי ב־27.11. זה הזמן להכין רשימה ולבדוק מחירים 🔥
+          EOF
+          sed -i 's/^          //' caption.html
+          KB='{"inline_keyboard":[[{"text":"לאתר ולקודים 🔥","url":"https://yeshdeal.com/?utm_source=telegram&utm_medium=channel&utm_campaign=video-guide"}],[{"text":"צייד הדילים בבוט 🎯","url":"https://t.me/yeshdeall_bot"}]]}'
+          R=$(curl -s "$T/sendVideo" -F "chat_id=$CHAT" -F "video=@$FILE" -F "caption=<caption.html" -F parse_mode=HTML \
+                -F supports_streaming=true -F width=1080 -F height=1920 -F "reply_markup=$KB")
+          echo "$R" | head -c 300; echo
+          echo "$R" | grep -q '"ok":true' || exit 1
+          ID=$(echo "$R" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["message_id"])')
+          if [ "$PIN" = "true" ]; then
+            curl -s "$T/pinChatMessage" -d "chat_id=$CHAT" -d "message_id=$ID" -d disable_notification=true | head -c 200; echo
+          fi
