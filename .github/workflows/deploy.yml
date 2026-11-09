@@ -185,8 +185,15 @@ jobs:
         run: |
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && { grep -q 'binding = "BOT"' wrangler.toml 2>/dev/null || npx -y wrangler@4 kv namespace list 2>/dev/null | grep -q yeshdeal-bot; }; then
             S=$(printf '%s' "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-32)
-            curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" --data-urlencode "url=https://yeshdeal-api.joni0000.workers.dev/tg/webhook" -d "secret_token=$S" --data-urlencode 'allowed_updates=["message"]' | head -c 200; echo
-            curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" -H 'Content-Type: application/json' -d '{"commands":[{"command":"review","description":"כתיבת ביקורת על יש דיל"}]}' | head -c 100; echo
+            T="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN"
+            curl -s "$T/setWebhook" --data-urlencode "url=https://yeshdeal-api.joni0000.workers.dev/tg/webhook" -d "secret_token=$S" --data-urlencode 'allowed_updates=["message","callback_query"]' | head -c 200; echo
+            # Bot profile (shown on the bot's page and before /start)
+            curl -s "$T/setMyName" -H 'Content-Type: application/json' -d '{"name":"יש דיל! | קופונים לעליאקספרס"}' | head -c 120; echo
+            curl -s "$T/setMyShortDescription" -H 'Content-Type: application/json' -d '{"short_description":"הבוט הרשמי של yeshdeal.com: דיווח על קוד שלא עבד וכתיבת ביקורת. הקודים: yeshdeal.com"}' | head -c 120; echo
+            curl -s "$T/setMyDescription" -H 'Content-Type: application/json' -d '{"description":"👋 הבוט הרשמי של יש דיל! (yeshdeal.com), אתר קודי הקופון והדילים של עליאקספרס לישראל.\n\n✍️ כתיבת ביקורת על האתר: /review\n⚠️ דיווח על קוד שלא עבד: דרך הכפתור \"לא עבד לכם? דווחו\" באתר\n🔥 כל הקודים: yeshdeal.com\n📣 הערוץ: @yeshdeall"}' | head -c 120; echo
+            curl -s "$T/setMyCommands" -H 'Content-Type: application/json' -d '{"commands":[{"command":"review","description":"✍️ כתיבת ביקורת על יש דיל"},{"command":"start","description":"👋 התחלה"}]}' | head -c 100; echo
+            # Profile photo = the site logo (Bot API setMyProfilePhoto; ignored if not supported)
+            curl -s "$T/setMyProfilePhoto" -F 'photo={"type":"static","photo":"attach://p"}' -F "p=@../src/assets/bot-photo.jpg" | head -c 200; echo
           else echo "no bot KV – webhook not set"; fi
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

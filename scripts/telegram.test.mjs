@@ -191,3 +191,16 @@ test('queue: dated announcement waits for its day and survives re-plans next to 
   for (const [d, h] of [['2026-11-10', 6], ['2026-11-11', 6]]) q = planQueue({ ...base, queue: q.queue, regular: q.regular, today: d, hour: h });
   assert.equal(q.queue.filter((i) => i.annId === 'ann-x').length, 1);
 });
+
+test('bot review flow: stars → text → name choice, one review per person', async () => {
+  const { reviewFlow } = await import('./telegram-bot-flow.mjs');
+  let st = {}; let id = 1;
+  const from = { id: 9, first_name: 'דנה', last_name: 'כהן' }, chat = { id: 9, type: 'private' };
+  const M = (t) => ({ update_id: id++, message: { from, chat, text: t } });
+  const C = (d) => ({ update_id: id++, callback_query: { id: 'c', from, data: d, message: { chat } } });
+  for (const u of [M('/review'), C('rv:s:5'), M('חסכתי 40 שקל עם הקוד'), C('rv:n:init')]) st = reviewFlow(u, st, { today: '2026-11-09' }).state;
+  assert.deepEqual(st.reviews.map((r) => [r.name, r.stars]), [['דנה כ.', 5]]);
+  for (const u of [M('4 עדכון: עדיין מרוצה מאוד'), C('rv:n:anon')]) st = reviewFlow(u, st, { today: '2026-11-09' }).state;
+  assert.deepEqual(st.reviews.map((r) => [r.name, r.stars]), [['גולש/ת', 4]]);
+  assert.deepEqual(st.flow, {});
+});
