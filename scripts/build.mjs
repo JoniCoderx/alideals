@@ -346,7 +346,7 @@ ${body}
     </div>
     <div>
       <h2>מדריכים</h2>
-      ${['first-time-aliexpress', 'how-to-use-aliexpress-coupon', 'aliexpress-tracking', 'aliexpress-customs-israel', 'aliexpress-payment', 'is-aliexpress-safe', 'aliexpress-returns', 'aliexpress-customer-service'].map((sl) => guides.find((g) => g.slug === sl)).filter(Boolean).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
+      ${['first-time-aliexpress', 'how-to-use-aliexpress-coupon', 'aliexpress-free-shipping-israel', 'aliexpress-coupon-no-minimum', 'aliexpress-tracking', 'aliexpress-customs-israel', 'aliexpress-payment', 'is-aliexpress-safe', 'aliexpress-returns', 'aliexpress-customer-service'].map((sl) => guides.find((g) => g.slug === sl)).filter(Boolean).map((g) => `<a href="/guides/${g.slug}/">${esc(g.short || g.title)}</a>`).join('')}
       <a href="/guides/">כל המדריכים ←</a>
     </div>
     <div>
