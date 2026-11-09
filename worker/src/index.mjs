@@ -221,7 +221,7 @@ export default {
     if (url.pathname === '/api/resolve' && req.method === 'GET') {
       if (limited(req, 'resolve', 30)) return json(RATE_LIMITED, 429, h);
       const parsed = parseProductInput(url.searchParams.get('url') || '');
-      if (!parsed.ok) return json({ error: 'bad_link' }, 400, h);
+      if (!parsed.id && !parsed.shortUrl) return json({ error: 'bad_link' }, 400, h);
       const id = parsed.id || (parsed.shortUrl ? await resolveShortLink(parsed.shortUrl, fetch).catch(() => null) : null);
       return id ? json({ id }, 200, { ...h, 'Cache-Control': 'public, max-age=86400' }) : json({ error: 'not_found' }, 404, h);
     }
