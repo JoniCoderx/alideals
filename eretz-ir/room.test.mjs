@@ -49,3 +49,18 @@ test('room: kick removes the player and notifies them', (t) => {
   assert.ok(!room.players.has(b.id));
   assert.ok(sb.msgs.some(([e]) => e === 'kicked'));
 });
+
+test('room: bye drops the connection right away', (t) => {
+  const room = new Room('7777');
+  t.after(() => room.dispose());
+  const a = room.addPlayer('A');
+  const b = room.addPlayer('B');
+  let disconnect;
+  const sb = { send() {}, close: () => disconnect() };
+  disconnect = room.connect(b, sb);
+  room.connect(a, { send() {} });
+  assert.ok(room.isOnline(b));
+  room.act(b, { type: 'bye' });
+  assert.ok(!room.isOnline(b));
+  assert.ok(room.isOnline(a));
+});

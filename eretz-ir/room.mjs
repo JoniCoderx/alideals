@@ -352,6 +352,11 @@ export class Room {
         this.removePlayer(me.id);
         return null;
       }
+      case 'bye': {
+        // הדף נסגר: מנתקים מיד את החיבורים במקום לחכות שהחיבור יתגלה כמת
+        for (const sink of [...me.conns]) { try { sink.close?.(); } catch {} }
+        return null;
+      }
       case 'rename': {
         const n = cleanName(a.name);
         if (n) me.name = n;

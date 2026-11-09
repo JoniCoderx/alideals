@@ -958,6 +958,11 @@ function confetti() {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && session && (!es || es.readyState === EventSource.CLOSED)) openStream();
 });
-window.addEventListener('pagehide', () => flush());
+window.addEventListener('pagehide', () => {
+  flush();
+  if (!session) return;
+  if (es) { es.close(); es = null; }
+  try { navigator.sendBeacon('/api/action', new Blob([JSON.stringify({ type: 'bye', ...session })], { type: 'application/json' })); } catch {}
+});
 
 boot();

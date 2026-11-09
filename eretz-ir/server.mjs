@@ -70,11 +70,12 @@ function openStream(req, res, q) {
     'X-Accel-Buffering': 'no',
   });
   res.write('retry: 1500\n\n');
+  let disconnect = () => {};
   const sink = {
     send: (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
-    close: () => res.end(),
+    close: () => { res.end(); disconnect(); },
   };
-  const disconnect = room.connect(me, sink);
+  disconnect = room.connect(me, sink);
   const ping = setInterval(() => { try { res.write(': ping\n\n'); } catch {} }, 15_000);
   req.on('close', () => { clearInterval(ping); disconnect(); });
 }
