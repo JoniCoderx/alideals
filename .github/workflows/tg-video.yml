@@ -9,6 +9,9 @@ on:
       pin:
         description: Pin the post (true/false)
         default: 'true'
+      pin_id:
+        description: Only pin this existing message id (no new post)
+        default: ''
 
 jobs:
   post:
@@ -25,3 +28,4 @@ jobs:
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
           FILE: ${{ inputs.file }}
           PIN: ${{ inputs.pin }}
+          PIN_ID: ${{ inputs.pin_id }}

@@ -23,6 +23,13 @@ const keyboard = { inline_keyboard: [
 ] };
 
 const api = (m) => `https://api.telegram.org/bot${token}/${m}`;
+const pinMsg = async (id) => {
+  const p = await (await fetch(api('pinChatMessage'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chat, message_id: Number(id), disable_notification: true }) })).json();
+  console.log(`pin ${id}:`, p.ok ? 'ok' : `${p.error_code} ${p.description}`);
+  return p.ok;
+};
+// Pin-only mode: PIN_ID=<message id> pins an existing post and exits.
+if (process.env.PIN_ID) process.exit((await pinMsg(process.env.PIN_ID)) ? 0 : 1);
 const buf = await readFile(file);
 console.log(`video ${file}: ${(buf.length / 1e6).toFixed(1)} MB`);
 const fd = new FormData();
@@ -37,7 +44,4 @@ fd.set('reply_markup', JSON.stringify(keyboard));
 const r = await (await fetch(api('sendVideo'), { method: 'POST', body: fd })).json();
 if (!r.ok) { console.error('sendVideo failed:', r.error_code, r.description); process.exit(1); }
 console.log('posted message', r.result.message_id);
-if (pin) {
-  const p = await (await fetch(api('pinChatMessage'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chat, message_id: r.result.message_id, disable_notification: true }) })).json();
-  console.log('pin:', p.ok ? 'ok' : `${p.error_code} ${p.description}`);
-}
+if (pin) await pinMsg(r.result.message_id);
