@@ -465,10 +465,10 @@ const heShort = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}.$
 function homePage() {
   const pathname = '/';
   const title = realCodes.length
-    ? `קוד קופון עליאקספרס (AliExpress) ${monthYear}: קודי הנחה עד $${maxDiscount} | ${site.name}`
+    ? `קוד קופון עליאקספרס ${monthYear}: קודי הנחה עד $${maxDiscount} | ${site.name}`
     : `קוד קופון עליאקספרס ${monthYear}: הקודים לישראל | ${site.name}`;
   const description = realCodes.length
-    ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (עלי אקספרס / אלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
+    ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (AliExpress, עלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
     : `קודי הקופון וההנחות של עליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const body = `
@@ -1051,6 +1051,42 @@ function dealsTodayPage() {
   return layout({ title: `דילים של היום בעליאקספרס: ירידות מחיר אמיתיות | ${site.name}`, description: 'מוצרים מעליאקספרס שהמחיר שלהם ירד היום לעומת השבוע האחרון, לפי מעקב מחירים אוטומטי. מחירים בשקלים, דירוג ומספר מכירות, וקישור ישיר.', pathname, body, ld: [bc.ld], noindex: list.length < 3 });
 }
 
+const TOP_GUIDE = {
+  charging: { h: 'מה לבדוק לפני שקונים מטען, סוללה או כבל', li: ['הספק (W) שהמכשיר שלכם תומך בו. מטען חזק יותר לא מזיק, אבל לא יטען מהר יותר ממה שהמכשיר מקבל.', 'סוג התקע: בעמוד המוצר בוחרים EU (תקע אירופאי, מתאים לרוב השקעים בישראל) או מתאם.', 'בכבלים: אורך, והאם הכבל תומך בהספק שהמטען נותן (למשל 100W ומעלה ללפטופ).', 'בסוללות ניידות לטיסה: עד 100Wh (בערך 27,000mAh) מותר בדרך כלל בתיק יד. בודקים מול חברת התעופה.'] },
+  earbuds: { h: 'מה לבדוק לפני שקונים אוזניות', li: ['סוג: In-Ear (בתוך האוזן) מול קליפס פתוח (שומעים גם את הסביבה). זה ההבדל הכי גדול בחוויה.', 'ביטול רעשים (ANC) מופיע רק בחלק מהדגמים, ובודקים שזה ANC ולא רק "הפחתת רעשים בשיחות".', 'גרסת Bluetooth וקודקים (למשל LDAC) חשובים רק אם הטלפון שלכם תומך בהם.', 'בוחרים בעמוד המוצר את הגרסה הנכונה: חלק מהמוכרים מוכרים כמה דגמים באותו עמוד.'] },
+  home: { h: 'מה לבדוק לפני שקונים מוצרים לבית ולמטבח', li: ['מתח ותקע: מכשירים חשמליים צריכים 220–240V ותקע EU או מתאם.', 'מידות: בודקים בטבלת המפרט, לא רק בתמונה.', 'חומרים שבאים במגע עם מזון: מחפשים ציון של חומר בטוח למזון בעמוד המוצר.', 'ביקורות עם תמונות של קונים אחרים מראות את הגודל והאיכות האמיתיים.'] },
+  'desk-gaming': { h: 'מה לבדוק לפני שקונים ציוד למחשב ולגיימינג', li: ['במקלדות: פריסה (מלאה / 87 מקשים), ושאין רק אותיות שפה אחרת על המקשים אם זה חשוב לכם.', 'חיבור: חוטי, 2.4GHz או Bluetooth. "Tri-mode" אומר שלושתם.', 'בכוננים: סוג החיבור (M.2 NVMe, PCIe 3.0 או 4.0) חייב להתאים ללוח האם.', 'בוחרים את הגרסה הנכונה בעמוד המוצר: נפח, צבע ופריסה.'] },
+  'car-travel': { h: 'מה לבדוק לפני שקונים אביזרים לרכב ולטיולים', li: ['מטענים לרכב: הספק כולל מול הספק לכל יציאה.', 'משאבות ושואבים: סוללה מובנית מול חיבור למצת, ולחץ מקסימלי (PSI) לצמיגים.', 'מחזיקי טלפון: התאמה לגודל הטלפון ולכיסוי שלכם, ואם צריך MagSafe.', 'בטיחות בנהיגה: מתקינים כך שלא מסתירים שדה ראייה או כרית אוויר.'] },
+};
+const PRICE_BANDS = [
+  { slug: 'under-50', emoji: '🪙', title: 'מוצרים מומלצים מעליאקספרס עד 50 שקל', max: 50, min: 0, intro: 'מוצרים מהרשימות הנבחרות שלנו שהמחיר שלהם היום עד 50 שקל, לפני משלוח ומע״מ. כל מוצר כאן עבר את אותו סף איכות: דירוג גבוה ומאות עד אלפי מכירות.' },
+  { slug: 'under-100', emoji: '💯', title: 'מוצרים מומלצים מעליאקספרס עד 100 שקל', max: 100, min: 50.01, intro: 'מוצרים מהרשימות הנבחרות שלנו שהמחיר שלהם היום בין 50 ל־100 שקל, לפני משלוח ומע״מ. מוצרים עד 50 שקל נמצאים ברשימה נפרדת.' },
+];
+const bandList = (b) => Object.values(topItems).filter((x) => x.live && x.price >= b.min && x.price <= b.max && safeLink(x.link) && x.rating >= (catalog.criteria?.minRating || 92) && x.sold >= (catalog.criteria?.minSold || 300)).sort((a, b2) => b2.sold - a.sold);
+
+function priceBandPage(b) {
+  const pathname = `/top/${b.slug}/`;
+  const list = bandList(b);
+  const bc = breadcrumbs([{ name: 'מוצרים מומלצים', url: '/top/' }, { name: b.title.replace(' מעליאקספרס', ''), url: pathname }]);
+  const other = PRICE_BANDS.find((x) => x.slug !== b.slug);
+  const body = `
+<section class="hero hero-sm"><div class="wrap narrow">${bc.html}
+  <h1>${esc(b.title)}</h1>
+  <p class="lead">${esc(b.intro)}</p>
+  <p class="muted small">המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}. הרשימה מתעדכנת אוטומטית: מוצר שהמחיר שלו עלה מעל ${b.max} שקל יורד ממנה. משלוח ומע״מ מחושבים בקופה.</p>
+</div></section>
+<section class="section"><div class="wrap narrow">
+  <ol class="top-list">${list.map((x, i) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="top-${b.slug}">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; }).join('')}</ol>
+  <div class="prose">
+    <h2>איך לקנות בזול עוד יותר</h2>
+    <p>בהזמנה קטנה, קוד קופון יכול להוריד חלק משמעותי מהמחיר. אם העגלה קצת מתחת למינימום של הקוד הראשון, שווה לשלב שני מוצרים מהרשימה בהזמנה אחת. <a href="/#calc">המחשבון</a> אומר בדיוק כמה חסר לכם, ו<a href="/guides/aliexpress-coupon-no-minimum/">המדריך להזמנות קטנות</a> מסביר מה עוד אפשר לעשות.</p>
+    <p>רשימות נוספות: <a href="/top/${other.slug}/">${esc(other.title.replace(' מעליאקספרס', ''))}</a> · <a href="/top/">כל הרשימות</a> · <a href="/deals-today/">דילים של היום</a></p>
+  </div>
+</div></section>`;
+  const ld = [bc.ld, { '@context': 'https://schema.org', '@type': 'ItemList', name: b.title, itemListElement: list.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.title })) }];
+  return layout({ title: `${b.title} | ${site.name}`, description: `${list.length} מוצרים שבחרנו מעליאקספרס ב${b.title.split(' ').slice(-3).join(' ')}: דירוג גבוה, אלפי מכירות ומחיר בשקלים שמתעדכן כל שעה. קישור ישיר לכל מוצר.`, pathname, body, ld, noindex: list.length < 5 });
+}
+
 function topIndexPage() {
   const pathname = '/top/';
   const bc = breadcrumbs([{ name: 'מוצרים מומלצים', url: pathname }]);
@@ -1061,6 +1097,17 @@ function topIndexPage() {
 </div></section>
 <section class="section"><div class="wrap"><div class="top-grid">
   ${catalog.collections.map((c) => { const l = topList(c); return l.length ? `<a class="top-card" href="/top/${c.slug}/"><span class="top-emoji" aria-hidden="true">${c.emoji}</span><h2>${esc(l.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${l.length} `))}</h2><div class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</div><span class="top-more">לרשימה ←</span></a>` : ''; }).join('')}
+</div>
+<div class="top-grid" style="margin-top:14px">${PRICE_BANDS.filter((b) => bandList(b).length >= 5).map((b) => `<a class="top-card" href="/top/${b.slug}/"><span class="top-emoji" aria-hidden="true">${b.emoji}</span><h2>${esc(b.title.replace(' מעליאקספרס', ''))}</h2><span class="muted">${bandList(b).length} מוצרים, מחירים מעודכנים</span><span class="top-more">לרשימה ←</span></a>`).join('')}</div>
+<div class="prose" style="margin-top:22px">
+  <h2>איך אנחנו בוחרים</h2>
+  <ol>
+    <li><b>מתחילים מנתונים:</b> מוצרים שזמינים במשלוח לישראל, עם דירוג חיובי של ${catalog.criteria?.minRating || 92}% ומעלה ולפחות ${catalog.criteria?.minSold || 300} מכירות לפי עליאקספרס.</li>
+    <li><b>סינון ידני:</b> מעדיפים מותגים וחנויות מוכרות, ומוציאים מוצרים בגרסה שלא מתאימה לישראל (למשל תקע או פריסת מקלדת).</li>
+    <li><b>שם ברור בעברית:</b> לכל מוצר כותבים שם קצר שמתאר מה הוא באמת, במקום הכותרת הארוכה של המוכר.</li>
+    <li><b>מחיר חי:</b> המחיר נבדק מול עליאקספרס בכל עדכון של האתר (בערך פעם בשעה). מוצר שלא עומד בתנאים יורד מהרשימה.</li>
+  </ol>
+  <p>לא בדקנו את המוצרים פיזית. הבחירה מבוססת על נתוני המכירות והדירוג, על המפרט ועל ניסיון בקנייה מעליאקספרס. לפני הקנייה בודקים בעמוד המוצר את הגרסה, הצבע וסוג התקע.</p>
 </div>
 ${affCta('top')}
 </div></section>`;
@@ -1081,7 +1128,8 @@ function topPage(c) {
 <section class="section"><div class="wrap narrow"><ol class="top-list">
   ${list.map((x, i) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><span class="top-rank">${i + 1}</span><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h2>${esc(x.title)}</h2><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="top">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; }).join('')}
 </ol>
-<p class="muted">לפני התשלום: בחרו <a href="/#calc">קוד קופון לפי סכום העגלה</a> וחסכו עוד. רשימות נוספות: ${catalog.collections.filter((o) => o.slug !== c.slug).map((o) => `<a href="/top/${o.slug}/">${esc(o.title.replace(/^\d+\s/, ''))}</a>`).join(' · ')}</p>
+${TOP_GUIDE[c.slug] ? `<div class="prose"><h2>${esc(TOP_GUIDE[c.slug].h)}</h2><ul>${TOP_GUIDE[c.slug].li.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>` : ''}
+<p class="muted">לפני התשלום: בחרו <a href="/#calc">קוד קופון לפי סכום העגלה</a> וחסכו עוד. לפי תקציב: <a href="/top/under-50/">עד 50 שקל</a> · <a href="/top/under-100/">עד 100 שקל</a>. רשימות נוספות: ${catalog.collections.filter((o) => o.slug !== c.slug).map((o) => `<a href="/top/${o.slug}/">${esc(o.title.replace(/^\d+\s/, ''))}</a>`).join(' · ')}</p>
 </div></section>`;
   const ld = [bc.ld, { '@context': 'https://schema.org', '@type': 'ItemList', name: title, itemListElement: list.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.title })) }];
   return layout({ title: `${title} מעליאקספרס | ${site.name}`, description: `${title}: מוצרים מעליאקספרס עם דירוג גבוה, אלפי מכירות ומשלוח לישראל. מחירים מעודכנים וקישור ישיר לכל מוצר.`.slice(0, 160), pathname, body, ld });
@@ -1168,13 +1216,31 @@ await page('/deals-today/', dealsTodayPage(), { index: dealsToday.length >= 3, l
 if (catalog.collections.some((c) => topList(c).length)) {
   await page('/top/', topIndexPage(), { lastmod: today });
   for (const c of catalog.collections) if (topList(c).length) await page(`/top/${c.slug}/`, topPage(c), { lastmod: today });
+  for (const b of PRICE_BANDS) await page(`/top/${b.slug}/`, priceBandPage(b), { index: bandList(b).length >= 5, lastmod: today });
 }
 await page('/guides/', guidesIndexPage(), { lastmod: guides.map((g) => g.updated).sort().pop() });
 for (const g of guides) await page(`/guides/${g.slug}/`, guidePage(g), { lastmod: g.updated });
 await page('/about/', staticPage('/about/', 'אודות', `
 <p><b>${esc(site.name)}</b> הוא אתר עצמאי שמרכז את קודי הקופון של עליאקספרס לקונים מישראל, במקום אחד ובעברית.</p>
 <p>הקודים נאספים ממקורות פומביים ומתוכנית השותפים של עליאקספרס, ונבדקים מול יותר ממקור אחד לפני שהם עולים לאתר. קודים שפג תוקפם יורדים מהרשימה אוטומטית, והכל מסודר לפי סכום ההזמנה כדי שיהיה קל למצוא את הקוד המתאים. קודים שקונים פרסמו בפורומים מוצגים בנפרד ומסומנים "לא נבדק".</p>
-<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a></p>`, `מה זה ${site.name}, מאיפה מגיעים קודי הקופון לעליאקספרס שמופיעים באתר, ואיך פונים אלינו עם קוד חדש או קוד שלא עובד.`));
+<h2>מה תמצאו באתר</h2>
+<ul>
+  <li><a href="/#codes">קודי קופון לעליאקספרס</a>, מסודרים לפי סכום העגלה, עם <a href="/#calc">מחשבון</a> שבוחר את הקוד שמתאים לכם.</li>
+  <li><a href="/finder/">צייד הדילים</a>: מדביקים קישור למוצר, והכלי מחפש את אותו מוצר אצל מוכרים אחרים ומחשב כמה הוא יוצא עם קוד קופון.</li>
+  <li><a href="/top/">רשימות מוצרים נבחרים</a> ו<a href="/deals-today/">דילים של היום</a>, עם מחירים שנבדקים מול עליאקספרס בכל עדכון.</li>
+  <li><a href="/guides/">מדריכים</a> לקונים מישראל: תשלום, משלוחים, מכס ומע״מ, החזרות ומחלוקות.</li>
+</ul>
+<h2>איך אנחנו עובדים</h2>
+<ul>
+  <li><b>נתונים מהמקור:</b> מחירים, דירוגים ומספר מכירות מגיעים מה־API הרשמי של תוכנית השותפים של עליאקספרס. ליד כל מחיר כתוב מתי הוא נבדק.</li>
+  <li><b>מה שאנחנו לא יודעים, כתוב:</b> דמי משלוח ומע״מ לא מגיעים מה־API, ולכן אנחנו לא מציגים אותם כמחיר סופי. מחיר עם קוד קופון מסומן כהערכה.</li>
+  <li><b>בלי ביקורות מומצאות:</b> לא בדקנו את המוצרים פיזית, ואנחנו לא כותבים שכן. ביקורות באתר מגיעות רק מגולשים אמיתיים דרך הבוט שלנו בטלגרם.</li>
+  <li><b>המדריכים נבדקים מול מקורות:</b> בנושאים כמו מכס ומע״מ אנחנו מסתמכים על הודעות רשמיות ודיווחים בעיתונות הכלכלית, ומעדכנים כשהכללים משתנים.</li>
+</ul>
+<h2>איך האתר מתממן</h2>
+<p>חלק מהקישורים באתר הם קישורי שותפים: כשקונים דרכם, עליאקספרס משלמת לנו עמלה קטנה, בלי תוספת למחיר שלכם. זה לא משפיע על הקודים או על המוצרים שאנחנו מציגים. פרטים מלאים ב<a href="/disclosure/">גילוי הנאות</a>. האתר עצמאי, ואינו קשור ל־AliExpress או ל־Alibaba Group.</p>
+<h2>צרו קשר</h2>
+<p>יש לכם קוד שעבד ולא מופיע כאן, או קוד שלא עובד? כתבו לנו: <a href="mailto:${esc(site.contactEmail)}">${esc(site.contactEmail)}</a>, או דווחו בלחיצה על "לא עבד לכם? דווחו" ליד הקוד. אפשר גם לכתוב לנו ב<a href="${esc(site.social.telegram)}" rel="noopener" target="_blank">ערוץ הטלגרם</a>.</p>`, `מה זה ${site.name}, מאיפה מגיעים קודי הקופון לעליאקספרס שמופיעים באתר, ואיך פונים אלינו עם קוד חדש או קוד שלא עובד.`));
 await page('/disclosure/', staticPage('/disclosure/', 'גילוי נאות', `
 <p>${esc(site.name)} משתתף בתוכנית השותפים של עליאקספרס (AliExpress Portals). חלק מהקישורים באתר הם קישורי שותפים: כשלוחצים עליהם וקונים, אנחנו עשויים לקבל עמלה מעליאקספרס.</p>
 <p>העמלה לא מייקרת את המחיר שלכם, ולא משפיעה על סדר הקודים. הם מסודרים לפי סכום ההזמנה.</p>
