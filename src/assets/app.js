@@ -335,17 +335,26 @@
         .then(function (res) {
           var j = res.j || {};
           if (!res.ok) { status(h(j.message || 'משהו השתבש. נסו שוב.'), true); return; }
-          var alts = j.alternatives || [];
-          track('finder_result', { found: alts.length });
+          var o = j.original || {};
+          var pool = (j.pool || []).filter(function (c) { return c && c.price != null && safe(c.link); });
+          var same = pool.filter(function (c) { return c.level === 'exact' || c.level === 'likely'; }).sort(function (a, b) { return a.price - b.price; });
+          var cheaper = same.length && o.price != null && same[0].price < o.price - 0.5 ? same[0] : null;
+          track('finder_result', { same: same.length, cheaper: cheaper ? 1 : 0 });
           var html = '';
-          if (alts.length) {
-            html += '<h2 class="section-title">מצאנו ' + alts.length + ' אפשרויות זולות יותר 🎉</h2>';
-            html += alts.map(function (a, i) { return card(a, i === 0 ? 'best' : ''); }).join('');
-          } else {
-            html += '<div class="finder-status">👍 לא מצאנו את המוצר זול יותר. כנראה שהמחיר שבחרתם כבר טוב.</div>';
+          if (cheaper) {
+            html += '<div class="verdict win"><span class="v-emoji">🎯</span><div><b>מצאנו זול יותר ב־' + ils(Math.round((o.price - cheaper.price) * 100) / 100) + '</b><p>' + (cheaper.level === 'exact' ? 'אותו דגם' : 'כנראה אותו מוצר, בדקו גרסה וצבע') + ' אצל ' + h(cheaper.shop || 'מוכר אחר') + ': ' + ils(cheaper.price) + '</p></div><a class="btn btn-primary" href="' + h(safe(cheaper.link)) + '" rel="nofollow sponsored" data-finder="' + h(cheaper.id) + '">לקנייה במחיר הזה</a></div>';
+          } else if (safe(o.link)) {
+            html += '<div class="verdict king"><span class="v-emoji">👑</span><div><b>אתם קינג! זה המחיר הכי טוב שמצאנו</b><p>בדקנו ' + h(j.checked || pool.length) + ' הצעות ולא מצאנו את אותו מוצר בפחות. עכשיו רק להוסיף קוד קופון לפי סכום העגלה.</p></div><a class="btn btn-primary" href="' + h(safe(o.link)) + '" rel="nofollow sponsored" data-finder="' + h(o.id) + '">לקנייה בעליאקספרס</a></div>';
           }
-          html += '<h2 class="section-title">המוצר שהדבקתם</h2>' + card(j.original || {}, 'orig');
-          html += '<p class="muted">מוצרים דומים לפי שם וקטגוריה. לפני שקונים, בודקים בעמוד המוצר שזה בדיוק אותו מוצר: צבע, גרסה, מידה ומפרט. אל תשכחו להוסיף <a href="/#calc">קוד קופון</a>.</p>';
+          var groups = [['exact', '✅ אותו דגם', 'שם דגם זהה, בלי סתירה במאפיינים'], ['likely', '🟡 כנראה אותו מוצר', 'דומה מאוד. בודקים גרסה, צבע ומפרט לפני שקונים'], ['similar', '🔁 חלופות דומות', 'מוצרים קשורים, לא בהכרח אותו מוצר']];
+          groups.forEach(function (g) {
+            var list = pool.filter(function (c) { return (c.level || 'similar') === g[0]; }).sort(function (a, b) { return a.price - b.price; }).slice(0, g[0] === 'similar' ? 3 : 5);
+            if (!list.length) return;
+            html += '<h2 class="section-title">' + g[1] + '</h2><p class="muted">' + g[2] + '</p>';
+            html += list.map(function (c) { var x = {}; for (var k in c) x[k] = c[k]; x.savings = o.price != null && g[0] !== 'similar' ? Math.round((o.price - c.price) * 100) / 100 : 0; x.savingsPct = 0; return card(x, c === cheaper ? 'best' : ''); }).join('');
+          });
+          html += '<h2 class="section-title">המוצר שהדבקתם</h2>' + card(o, 'orig');
+          html += '<p class="muted">ההשוואה לפי שם הדגם ומאפיינים כמו קיבולת, הספק וסוג תקע. מחירים בשקלים לפני משלוח ומע״מ, ועשויים להשתנות. אל תשכחו להוסיף <a href="/#calc">קוד קופון</a>.</p>';
           fout.innerHTML = html;
           fout.scrollIntoView({ behavior: 'smooth', block: 'start' });
         })

@@ -561,3 +561,4 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 @media (max-width:760px){.info-grid.info-stack{display:grid;grid-template-columns:minmax(0,1fr);overflow:visible}.info-grid.info-stack>*{min-width:0;width:auto}}
 .hero-event a{color:#c20e28}
 .btn-fb{background:#1464d8}.btn-fb:hover{background:#0f55bd}
+.verdict{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:16px 18px;border-radius:18px;margin:14px 0;background:linear-gradient(135deg,#fff4ec,#ffe6e9);border:2px solid rgba(229,18,47,.25)}.verdict .v-emoji{font-size:34px}.verdict div{flex:1;min-width:200px}.verdict b{font-size:1.15rem}.verdict p{margin:4px 0 0}.verdict.win{background:linear-gradient(135deg,#ecfff3,#e3f7ff);border-color:rgba(20,150,80,.3)}

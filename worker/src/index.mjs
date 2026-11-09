@@ -3,6 +3,7 @@
 // Secrets (wrangler secret put): ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID
 // Vars (wrangler.toml): ALLOWED_ORIGIN
 import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduct, rankAlternatives } from '../../scripts/cheapest-lib.mjs';
+import { classifyMatch } from '../../src/v2/logic.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
 const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link';
@@ -122,6 +123,8 @@ export async function findCheapest(env, input, fetchImpl = fetch) {
       if (h) { c.title = h.product_title || c.title; c.price = Number(h.target_sale_price) || c.price; c.link = h.promotion_link || c.link; }
     }
   }
+  // Confidence on the sellers' English titles: exact (shared model, no conflicts) / likely / similar.
+  for (const c of pool) { const m = classifyMatch({ title: enTitle }, { title: c.enTitle || c.title }); c.level = m.level; c.reasons = m.reasons; }
   return { status: 200, body: { original, alternatives: cheaper, pool, checked: candidates.length, at: new Date().toISOString() } };
 }
 
@@ -250,7 +253,7 @@ export default {
 
     // Cache by product id (or by the raw input for short links).
     const parsed = parseProductInput(input);
-    const cacheKey = new Request(`https://cache.yeshdeal/cheapest/v4/${parsed.id || encodeURIComponent(parsed.shortUrl || input)}`);
+    const cacheKey = new Request(`https://cache.yeshdeal/cheapest/v5/${parsed.id || encodeURIComponent(parsed.shortUrl || input)}`);
     const cache = typeof caches !== 'undefined' ? caches.default : null;
     if (cache) { const hit = await cache.match(cacheKey); if (hit) { const r = new Response(hit.body, hit); for (const [k, v] of Object.entries(h)) r.headers.set(k, v); return r; } }
 
