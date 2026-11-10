@@ -30,6 +30,22 @@ const pinMsg = async (id) => {
 };
 // Pin-only mode: PIN_ID=<message id> pins an existing post and exits.
 if (process.env.PIN_ID) process.exit((await pinMsg(process.env.PIN_ID)) ? 0 : 1);
+// Spec mode: SPEC=media/posts/<name>.json → { photo|video, caption (HTML), buttons } posted as one message.
+if (process.env.SPEC) {
+  const spec = JSON.parse(await readFile(process.env.SPEC, 'utf8'));
+  const media = spec.video || spec.photo;
+  const fd = new FormData();
+  fd.set('chat_id', chat);
+  fd.set(spec.video ? 'video' : 'photo', new Blob([await readFile(media)], { type: spec.video ? 'video/mp4' : 'image/png' }), basename(media));
+  fd.set('caption', spec.caption);
+  fd.set('parse_mode', 'HTML');
+  fd.set('reply_markup', JSON.stringify({ inline_keyboard: spec.buttons || [] }));
+  const r = await (await fetch(api(spec.video ? 'sendVideo' : 'sendPhoto'), { method: 'POST', body: fd })).json();
+  if (!r.ok) { console.error('send failed:', r.error_code, r.description); process.exit(1); }
+  console.log('posted message', r.result.message_id, `https://t.me/${String(chat).replace(/^@/, '')}/${r.result.message_id}`);
+  if (pin && r.result.message_id) await pinMsg(r.result.message_id);
+  process.exit(0);
+}
 const buf = await readFile(file);
 console.log(`video ${file}: ${(buf.length / 1e6).toFixed(1)} MB`);
 const fd = new FormData();

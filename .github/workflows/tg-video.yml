@@ -12,6 +12,9 @@ on:
       pin_id:
         description: Only pin this existing message id (no new post)
         default: ''
+      spec:
+        description: Post a prepared photo/video post from media/posts/<name>.json instead
+        default: ''
 
 jobs:
   post:
@@ -29,3 +32,4 @@ jobs:
           FILE: ${{ inputs.file }}
           PIN: ${{ inputs.pin }}
           PIN_ID: ${{ inputs.pin_id }}
+          SPEC: ${{ inputs.spec }}
