@@ -460,9 +460,12 @@ export default {
       if (limited(req, 'search', 20)) return json(RATE_LIMITED, 429, h);
       const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
       try {
-        return await cachedJSON(ctx, `search/v1/${lang}/${encodeURIComponent(q.toLowerCase())}`, 1800, h, async () => {
-          const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: 20, page_no: 1 });
-          const items = (r?.products?.product || []).map(normalizeProduct);
+        // sort=volume: best sellers first, and only listings with a real track record (88%+ positive reviews, 50+ sold).
+        const best = url.searchParams.get('sort') === 'volume';
+        return await cachedJSON(ctx, `search/v2/${lang}/${best ? 'best' : 'all'}/${encodeURIComponent(q.toLowerCase())}`, 1800, h, async () => {
+          const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: best ? 50 : 20, page_no: 1, ...(best ? { sort: 'LAST_VOLUME_DESC' } : {}) });
+          let items = (r?.products?.product || []).map(normalizeProduct);
+          if (best) items = items.filter((p) => p.price > 0 && p.link && (p.rating || 0) >= 88 && p.sold >= 50).slice(0, 20);
           return { status: 200, body: { q, count: items.length, items, checkedAt: new Date().toISOString() } };
         });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
