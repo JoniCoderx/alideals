@@ -719,3 +719,5 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cat-tile{filter:saturate(.8) brightness(.72)}}
 :root[data-theme="dark"] .cat-tile{filter:saturate(.8) brightness(.72)}
 @media(max-width:700px){.band-count{position:static;order:5;margin-top:8px;backdrop-filter:none}}
+.search-bc{padding-top:14px}
+.search-bc+.psearch{padding-top:10px}

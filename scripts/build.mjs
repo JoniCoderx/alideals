@@ -273,7 +273,7 @@ function layout({ title, description, pathname, body, ld = [], noindex = false, 
   const nav = [
     ['/', 'קודי קופון'],
     ...(FINDER_API ? [['/finder/', 'צייד הדילים 🎯']] : []),
-    ['/coupon/', 'קטגוריות'],
+    ...(FINDER_API && site.search?.enabled ? [['/search/', 'חיפוש 🔎']] : [['/coupon/', 'קטגוריות']]),
     ['/top/', 'מומלצים'],
     ['/deals-today/', 'דילים של היום'],
     ...(allProducts().length ? [['/deals/', 'דילים']] : []),
@@ -834,6 +834,25 @@ function finderPage() {
   });
 }
 
+// /search/: product search first; the coupon categories (SEO landing pages) as shortcuts below.
+function searchPage() {
+  const pathname = '/search/';
+  const bc = breadcrumbs([{ name: 'חיפוש מוצרים', url: pathname }]);
+  const body = `
+<div class="wrap search-bc">${bc.html}</div>
+${searchSection({ h1: true })}
+<section class="section"><div class="wrap">
+  <h2 class="section-title">קופונים לפי קטגוריה</h2>
+  <p class="muted">קודי המבצע עובדים על רוב האתר. בכל קטגוריה יש גם טיפים לקנייה חכמה בתחום.</p>
+  <div class="cat-grid">${categories.map((c) => catCard(c, `קופון עליאקספרס ל${c.short}`)).join('')}</div>
+</div></section>`;
+  return layout({
+    title: `חיפוש מוצרים באלי אקספרס בעברית, במחיר בשקלים | ${site.name}`,
+    description: 'מחפשים מוצר באלי אקספרס? כותבים בעברית ומקבלים רק מוצרים עם הרבה מכירות וביקורות טובות, במחיר בשקלים עם משלוח לישראל. חינם, בלי הרשמה.',
+    pathname, body, ld: [bc.ld],
+  });
+}
+
 function categoryHubPage() {
   const pathname = '/coupon/';
   const bc = breadcrumbs([{ name: 'קופונים לפי קטגוריה', url: pathname }]);
@@ -1044,12 +1063,12 @@ const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && (!topA
 // "נבחרי יש דיל": editor-approved products with the premium brand images, live price + affiliate link.
 const picksData = (await readJSON('data/v2/telegram-products.json', { items: [] })).items;
 // Product search (Hebrew in, real AliExpress results out; every result is an affiliate link). Needs the Worker API.
-function searchSection() {
+function searchSection({ h1 = false } = {}) {
   if (!FINDER_API || !site.search?.enabled) return '';
   return `<section class="section psearch" id="search" data-api="${esc(FINDER_API)}"><div class="wrap">
   <div class="ps-box">
     <span class="ps-tag">חדש · חיפוש מוצרים 🔎</span>
-    <h2 class="ps-title">מה אתם מחפשים באלי אקספרס?</h2>
+    ${h1 ? '<h1 class="ps-title">מה אתם מחפשים באלי אקספרס?</h1>' : '<h2 class="ps-title">מה אתם מחפשים באלי אקספרס?</h2>'}
     <p class="ps-lead">כותבים בעברית, ומקבלים רק מוצרים עם הרבה מכירות וביקורות טובות, במחיר בשקלים עם משלוח לישראל.</p>
     <form class="ps-form" role="search" action="/" method="get">
       <input type="search" name="q" dir="rtl" enterkeyhint="search" autocomplete="off" maxlength="80" placeholder="למשל: אוזניות אלחוטיות" aria-label="חיפוש מוצר באלי אקספרס">
@@ -1315,6 +1334,7 @@ await page('/new-user/', newUserPage(), { lastmod: dataUpdated });
 await page('/existing-user/', existingUserPage(), { lastmod: dataUpdated });
 await page('/coupon/', categoryHubPage(), { lastmod: dataUpdated });
 await page('/finder/', finderPage(), { lastmod: dataUpdated, index: !!FINDER_API });
+if (FINDER_API && site.search?.enabled) await page('/search/', searchPage(), { lastmod: dataUpdated });
 for (const c of categories) await page(`/coupon/${c.slug}/`, categoryPage(c), { lastmod: dataUpdated });
 
 // Atom feed of active codes: lets Telegram/WhatsApp bots and feed readers pick up new codes automatically.
