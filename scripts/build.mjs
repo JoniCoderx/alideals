@@ -382,7 +382,7 @@ ${body}
   <a class="share-wa" id="modal-share" href="https://wa.me/" target="_blank" rel="noopener">שלחו את הקוד לחבר בוואטסאפ</a>
 </dialog>
 ${!FINDER_API ? `<aside class="promo-toast" id="promo-toast" hidden aria-label="חדש באתר"><button type="button" class="pt-x" aria-label="סגירה">×</button><b>🎯 בקרוב: צייד הדילים</b><span>אתם שולחים קישור למוצר, הצייד יסרוק את המוכרים ויחפש הצעות זולות יותר.</span><a href="/finder/">להכיר את הצייד ←</a></aside>` : ''}
-<script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets) })}</script>
+<script>window.SITE=${scriptJSON({ url: site.url, name: site.name, links: Object.fromEntries(goTargets), tg: site.social.telegram || '', bot: BOT })}</script>
 <script src="/assets/app.js?v=${BUILD_ID}" defer></script>
 </body>
 </html>`;
@@ -466,10 +466,10 @@ const heShort = (d) => { const [, m, dd] = d.split('-'); return `${Number(dd)}.$
 function homePage() {
   const pathname = '/';
   const title = realCodes.length
-    ? `קוד קופון עליאקספרס ${monthYear}: קודי הנחה עד $${maxDiscount} | ${site.name}`
-    : `קוד קופון עליאקספרס ${monthYear}: הקודים לישראל | ${site.name}`;
+    ? `קוד קופון אלי אקספרס ${monthYear}: עד $${maxDiscount} הנחה | ${site.name}`
+    : `קוד קופון אלי אקספרס ${monthYear}: הקודים לישראל | ${site.name}`;
   const description = realCodes.length
-    ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (AliExpress, עלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
+    ? `${realCodes.length} קודי הנחה פעילים לעליאקספרס (AliExpress, אלי אקספרס, עלי אקספרס) לקונים מישראל, מ-$${Math.min(...realCodes.map((c) => c.discount))} ועד $${maxDiscount} לפי סכום ההזמנה. עודכן ב-${updatedHe}, בלי הרשמה.`
     : `קודי הקופון וההנחות של עליאקספרס לקונים מישראל, מסודרים לפי סכום ההזמנה. עודכן ב-${updatedHe}.`;
   const hotProducts = allProducts().sort((a, b) => b.sold - a.sold).slice(0, 8);
   const body = `
@@ -752,7 +752,7 @@ function eventPage(ev) {
   ${faqItems.length ? `<h2 class="section-title">שאלות נפוצות על ${esc(short)}</h2><div class="faq">${faqItems.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>` : ''}
 </div></section>`;
   return layout({
-    title: ownLive.length ? `קוד קופון עליאקספרס ${le(short)} ${year}: עד $${Math.max(...ownLive.map((c) => c.discount))} הנחה לישראל | ${site.name}` : `${short.includes('עליאקספרס') ? `קוד קופון ${le(short)}` : `קוד קופון עליאקספרס ${le(short)}`} ${year} | ${site.name}`,
+    title: ownLive.length ? `קוד קופון אלי אקספרס ${le(short)} ${year}: עד $${Math.max(...ownLive.map((c) => c.discount))} הנחה לישראל | ${site.name}` : `${short.includes('עליאקספרס') ? `קוד קופון ${le(short)}` : `קוד קופון עליאקספרס ${le(short)}`} ${year} | ${site.name}`,
     description: ownLive.length
       ? `כל קודי ההנחה של עליאקספרס ${le(short)} לקונים מישראל, מ-$${Math.min(...ownLive.map((c) => c.discount))} ועד $${Math.max(...ownLive.map((c) => c.discount))} לפי סכום העגלה.${ownLive.some((c) => c.expires) ? ` בתוקף עד ${heShort(ownLive.map((c) => c.expires).filter(Boolean).sort().pop())}.` : ''} בוחרים קוד ומעתיקים בקליק.`
       : `קודי הקופון של עליאקספרס ${le(short)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
@@ -829,7 +829,7 @@ function categoryHubPage() {
   <p class="muted"><a href="/">לכל קודי הקופון ←</a></p>
 </div></section>`;
   return layout({
-    title: `קופונים לעליאקספרס לפי קטגוריה ${monthYear} | ${site.name}`,
+    title: `קופונים לאלי אקספרס לפי קטגוריה ${monthYear} | ${site.name}`,
     description: 'קופונים לעלי אקספרס לפי קטגוריה: בגדים, נעליים, טלפונים, אוזניות, בית, ילדים ועוד. קודי מבצע לישראל + טיפים לקנייה חכמה.',
     pathname, body, ld: [bc.ld],
   });
@@ -919,7 +919,7 @@ function newUserPage() {
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `קופון עליאקספרס למשתמש חדש והזמנה ראשונה – ${monthYear} | ${site.name}`,
+    title: `קופון אלי אקספרס למשתמש חדש והזמנה ראשונה – ${monthYear} | ${site.name}`,
     description: 'נרשמים לעליאקספרס בפעם הראשונה? כך מקבלים את הטבת ההצטרפות ומוסיפים עליה קוד הנחה לישראל. כל השלבים להזמנה הראשונה, בעברית.',
     pathname, body, ld: [bc.ld, faqLd(items)],
   });
@@ -959,7 +959,7 @@ function existingUserPage() {
   <div class="faq">${items.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>
 </div></section>`;
   return layout({
-    title: `קוד קופון עליאקספרס למשתמש קיים ${monthYear} | ${site.name}`,
+    title: `קוד קופון אלי אקספרס למשתמש קיים ${monthYear} | ${site.name}`,
     description: `קודי קופון לעלי אקספרס שעובדים גם בחשבון קיים${realCodes.length ? `, עד $${maxDiscount} הנחה לפי סכום ההזמנה` : ''}, ועוד דרכים לחסוך למי שכבר הזמין. עודכן ב-${updatedHe}.`,
     pathname, body, ld: [bc.ld, faqLd(items)],
   });
@@ -1001,7 +1001,7 @@ const topItems = {};
           const r = await fetch(`${API}/api/products?ids=${ids.slice(i, i + 20).join(',')}`, { headers: { Origin: site.url } });
           const j = await r.json();
           if (!j.items) throw new Error(j.error || 'no items');
-          for (const p of j.items) { const it = Object.values(topItems).find((x) => x.id === String(p.id)); if (it && p.price) Object.assign(it, { price: p.price, orig: p.originalPrice, rating: p.rating ?? it.rating, sold: p.sold ?? it.sold, image: p.image || it.image, link: p.link || it.link, live: true }); }
+          for (const p of j.items) { const it = Object.values(topItems).find((x) => x.id === String(p.id)); if (it && p.price) Object.assign(it, { price: p.price, orig: p.originalPrice, commission: p.commission ?? null, rating: p.rating ?? it.rating, sold: p.sold ?? it.sold, image: p.image || it.image, link: p.link || it.link, live: true }); }
           break;
         } catch (e) { await new Promise((ok) => setTimeout(ok, 1500)); }
       }
@@ -1027,6 +1027,8 @@ const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && (!topA
 const picksData = (await readJSON('data/v2/telegram-products.json', { items: [] })).items;
 function picksSection() {
   const list = picksData.map((x) => ({ ...x, live: topItems[x.id.slice(-7)] })).filter((x) => x.live && x.live.live !== false && x.live.price > 0 && safeLink(x.live.link));
+  // All picks already pass the quality bar; among them, higher-commission products come first (stable order otherwise).
+  list.sort((a, b) => (b.live.commission || 0) - (a.live.commission || 0));
   if (list.length < 3) return '';
   return `<section class="section picks" id="picks"><div class="wrap">
   <div class="section-head"><h2 class="section-title">נבחרי יש דיל ⭐</h2><a class="more" href="/top/">לכל ההמלצות ←</a></div>

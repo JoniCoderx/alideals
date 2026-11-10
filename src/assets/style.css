@@ -634,3 +634,5 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .ft-error{font-size:.88rem;padding:7px 12px}
 .picks-note{margin-inline-start:6px;opacity:.8}
 .rv-av{font-size:20px}
+.back-sheet .bs-rep{color:#fff;opacity:.7;font-weight:600;font-size:.82rem;text-decoration:underline;margin-top:2px}
+.back-sheet .bs-join{font-size:1.02rem}

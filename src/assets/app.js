@@ -129,6 +129,7 @@
     var copying = copy(code); // start while the page has focus
     markRevealed(id, code);
     try { sessionStorage.setItem('rev:' + id, code); } catch (e) {}
+    try { sessionStorage.setItem('yd-back', JSON.stringify({ code: code, t: Date.now() })); } catch (e) {}
     track('coupon_reveal', { coupon_id: id, coupon_code: code });
 
     copying.then(function (copied) {
@@ -315,6 +316,35 @@
     try { code = sessionStorage.getItem('rev:' + id); } catch (e) {}
     if (code && code === b.getAttribute('data-code')) markRevealed(id, code);
   });
+
+  /* ---------- Back from AliExpress: invite to the Telegram channel (where new codes come out first) ---------- */
+  (function () {
+    var S = window.SITE || {};
+    if (!S.tg) return;
+    function show() {
+      var d = null;
+      try { d = JSON.parse(sessionStorage.getItem('yd-back') || 'null'); } catch (e) {}
+      if (!d || !d.code || Date.now() - d.t < 4000) return;
+      try { sessionStorage.removeItem('yd-back'); if (localStorage.getItem('yd-tg-joined')) return; } catch (e) {}
+      if (document.getElementById('back-sheet')) return;
+      var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+      var el = document.createElement('aside');
+      el.className = 'promo-toast back-sheet'; el.id = 'back-sheet'; el.setAttribute('aria-label', 'קודים חדשים בטלגרם');
+      el.innerHTML = '<button type="button" class="pt-x" aria-label="סגירה">×</button>' +
+        '<b>קודים חדשים יוצאים קודם בטלגרם 🔔</b>' +
+        '<span>כשעליאקספרס מוציאה קודים חדשים (גם לבלאק פריידיי), הם מגיעים לערוץ שלנו לפני כולם. חינם, בלי ספאם.</span>' +
+        '<a class="bs-join" href="' + e(S.tg) + '" target="_blank" rel="noopener">הצטרפו לערוץ ←</a>' +
+        (S.bot ? '<a class="bs-rep" href="https://t.me/' + e(S.bot) + '?start=r_' + encodeURIComponent(d.code) + '" target="_blank" rel="noopener">הקוד ' + e(d.code) + ' לא עבד? דווחו לנו</a>' : '');
+      document.body.appendChild(el);
+      var close = function () { el.classList.remove('is-in'); setTimeout(function () { el.remove(); }, 350); };
+      el.querySelector('.pt-x').addEventListener('click', close);
+      el.querySelector('.bs-join').addEventListener('click', function () { try { localStorage.setItem('yd-tg-joined', '1'); } catch (x) {} track('tg_join_back', {}); setTimeout(close, 300); });
+      requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('is-in'); }); });
+      track('back_sheet', {});
+    }
+    window.addEventListener('pageshow', function () { setTimeout(show, 600); });
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') setTimeout(show, 600); });
+  })();
 
   /* ---------- Reviews: fetch the latest from the bot (appear within a minute, not after the next build) ---------- */
   (function () {

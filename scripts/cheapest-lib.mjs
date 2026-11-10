@@ -82,6 +82,8 @@ export function normalizeProduct(p) {
     shop: p.shop_name ?? '',
     categoryId: p.first_level_category_id ?? p.second_level_category_id ?? null,
     link: p.promotion_link ?? p.link ?? '',
+    // Affiliate commission % for this product (used only to order already-qualified picks).
+    commission: pct(p.commission_rate ?? p.commission),
   };
 }
 

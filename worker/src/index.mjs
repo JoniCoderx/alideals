@@ -9,7 +9,7 @@ import { reviewFlow } from '../../scripts/telegram-bot-flow.mjs';
 import { publicReviews } from '../../src/reviews-view.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
-const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link';
+const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link,commission_rate';
 const CACHE_TTL = 6 * 3600; // seconds
 const RATE = { windowMs: 60_000, max: 12 }; // per IP per minute (per isolate – a soft guard)
 const hits = new Map();
@@ -443,7 +443,7 @@ export default {
       const call = () => aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, ...(raw ? {} : { fields: FIELDS }), product_ids: ids.join(','), country: 'IL' });
       try {
         if (raw) { const r = await call(); return json({ raw: r?.products?.product || [], checkedAt: new Date().toISOString() }, 200, h); }
-        return await cachedJSON(ctx, `products/v1/${lang}/${[...ids].sort().join(',')}`, 1800, h, async () => {
+        return await cachedJSON(ctx, `products/v2/${lang}/${[...ids].sort().join(',')}`, 1800, h, async () => {
           let r = await call().catch(() => null);
           if (!r) { await new Promise((ok) => setTimeout(ok, 1100)); r = await call(); } // 1 call/s API limit: retry once
           return { status: 200, body: { items: (r?.products?.product || []).map(normalizeProduct), checkedAt: new Date().toISOString() } };
