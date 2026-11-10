@@ -16,6 +16,7 @@ import { categories, categoryColors } from '../src/content/categories.mjs';
 import { minifyCSS, minifyHTML } from './minify.mjs';
 import { buildFacebookPage } from './fb-posts.mjs';
 import { publicReviews } from '../src/reviews-view.mjs';
+import { SEARCH_CHIPS } from '../src/search-he.mjs';
 import { renderCard } from './telegram-card.mjs';
 import { mergeCoupons, mergeDeals, groupTiers, safeLink, normDate, daysBetween, slug } from './lib.mjs';
 
@@ -591,6 +592,7 @@ ${FINDER_API ? `<section class="section finder-promo" id="hunter"><div class="wr
 </section>
 
 ${picksSection()}
+${searchSection()}
 <section class="section" id="more-ways"><div class="wrap">
   <h2 class="section-title">עוד דרכים לחסוך בעליאקספרס</h2>
   <div class="deal-grid">${deals.map(dealCard).join('')}</div>
@@ -1041,6 +1043,24 @@ const topList = (c) => c.items.map((k) => topItems[k]).filter((x) => x && (!topA
 
 // "נבחרי יש דיל": editor-approved products with the premium brand images, live price + affiliate link.
 const picksData = (await readJSON('data/v2/telegram-products.json', { items: [] })).items;
+// Product search (Hebrew in, real AliExpress results out; every result is an affiliate link). Needs the Worker API.
+function searchSection() {
+  if (!FINDER_API || !site.search?.enabled) return '';
+  return `<section class="section psearch" id="search" data-api="${esc(FINDER_API)}"><div class="wrap">
+  <div class="ps-box">
+    <span class="ps-tag">חדש · חיפוש מוצרים 🔎</span>
+    <h2 class="ps-title">מה אתם מחפשים באלי אקספרס?</h2>
+    <p class="ps-lead">כותבים בעברית, ומקבלים רק מוצרים עם הרבה מכירות וביקורות טובות, במחיר בשקלים עם משלוח לישראל.</p>
+    <form class="ps-form" role="search" action="/" method="get">
+      <input type="search" name="q" dir="rtl" enterkeyhint="search" autocomplete="off" maxlength="80" placeholder="למשל: אוזניות אלחוטיות, כיסוי לאייפון 15" aria-label="חיפוש מוצר באלי אקספרס">
+      <button class="btn btn-primary" type="submit">חיפוש</button>
+    </form>
+    <div class="ps-chips" aria-label="חיפושים פופולריים">${SEARCH_CHIPS.map(([e, t]) => `<button type="button" class="ps-chip" data-q="${esc(t)}">${esc(t)} ${e}</button>`).join('')}</div>
+  </div>
+  <div class="ps-results" id="ps-results" aria-live="polite"></div>
+</div></section>`;
+}
+
 function picksSection() {
   const list = picksData.map((x) => ({ ...x, live: topItems[x.id.slice(-7)] })).filter((x) => x.live && x.live.live !== false && x.live.price > 0 && safeLink(x.live.link));
   // All picks already pass the quality bar; among them, higher-commission products come first (stable order otherwise).

@@ -121,5 +121,9 @@
   "cheapest": {
     "_comment": "כתובת ה-Worker של 'צייד הדילים' (למשל https://yeshdeal-api.<account>.workers.dev). ריק = הפיצ'ר מוסתר מהתפריט והעמוד noindex.",
     "apiUrl": "https://yeshdeal-api.joni0000.workers.dev"
+  },
+  "search": {
+    "_comment": "Product search on the homepage (Worker /api/search). Turn on after checking results.",
+    "enabled": false
   }
 }

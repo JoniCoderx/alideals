@@ -237,3 +237,33 @@ test('daily deal: real drops only, no repeats within 14 days, honest wording', a
   assert.equal(post.buttons[0][0].url, base.link);
   assert.ok(!/undefined|NaN/.test(post.text));
 });
+
+test('search: Hebrew queries become precise English keywords', async () => {
+  const { translateQuery } = await import('../src/search-he.mjs');
+  const cases = {
+    'אוזניות אלחוטיות': 'wireless earbuds',
+    'כיסוי לאייפון 15 פרו מקס שקוף': 'iphone case 15 pro max transparent',
+    'מגן מסך לאייפון 16 פרו': 'screen protector iphone 16 pro',
+    'סוללה ניידת 20000 בייסוס': 'power bank 20000 baseus',
+    'תיק גב לבית ספר': 'backpack school',
+    'האוזניות': 'earbuds',
+    'שואב אבק לרכב': 'car vacuum cleaner',
+    'baseus 65w': 'baseus 65w',
+  };
+  for (const [he, en] of Object.entries(cases)) assert.equal(translateQuery(he).en, en, he);
+  assert.equal(translateQuery('בלה בלה').understood, false);
+});
+
+test('search: results stay on topic, need a track record, and rank matching details first', async () => {
+  const { translateQuery, rankResults } = await import('../src/search-he.mjs');
+  const t = translateQuery('סוללה ניידת בייסוס');
+  const p = (id, en, extra = {}) => ({ id, en, title: en, price: 50, link: 'https://s.click.aliexpress.com/s/x', rating: 96, sold: 1000, ...extra });
+  const out = rankResults([
+    p('lamp', 'USB LED night lamp', { sold: 90000 }),                 // off topic → dropped
+    p('pb1', 'Power Bank 20000mAh fast charging', { sold: 5000 }),
+    p('pb2', 'Baseus Power Bank 10000mAh 20W', { sold: 800 }),        // has the brand → first
+    p('weak', 'Power bank 30000mAh', { rating: 70 }),                 // poor reviews → dropped
+    p('new', 'Power bank mini', { sold: 3 }),                         // no track record → dropped
+  ], t);
+  assert.deepEqual(out.map((x) => x.id), ['pb2', 'pb1']);
+});

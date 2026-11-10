@@ -7,6 +7,7 @@ import { classifyMatch } from '../../src/v2/logic.mjs';
 import { collectReports, uhash, pickDailyDeal, dailyDealPost } from '../../scripts/telegram-bot.mjs';
 import { reviewFlow } from '../../scripts/telegram-bot-flow.mjs';
 import { publicReviews } from '../../src/reviews-view.mjs';
+import { translateQuery, rankResults, SEARCH_CHIPS } from '../../src/search-he.mjs';
 
 const GATEWAY = 'https://api-sg.aliexpress.com/sync';
 const FIELDS = 'product_id,product_title,product_main_image_url,sale_price,sale_price_currency,original_price,shop_id,sku_id,target_sale_price,target_original_price,target_sale_price_currency,target_app_sale_price,target_app_sale_price_currency,app_sale_price,discount,evaluate_rate,lastest_volume,shop_name,first_level_category_id,second_level_category_id,promotion_link,commission_rate';
@@ -457,16 +458,25 @@ export default {
       if (!env.ALI_APP_KEY || !env.ALI_APP_SECRET) return json({ error: 'not_configured' }, 503, h);
       const q = (url.searchParams.get('q') || '').trim().slice(0, 80);
       if (q.length < 2) return json({ error: 'bad_query' }, 400, h);
-      if (limited(req, 'search', 20)) return json(RATE_LIMITED, 429, h);
-      const lang = url.searchParams.get('lang') === 'EN' ? 'EN' : 'HE';
+      if (limited(req, 'search', 30)) return json(RATE_LIMITED, 429, h);
+      // Hebrew is translated to English keywords (AliExpress search is English-only), then every result is checked
+      // against the product type in its English title, so a search for "סוללה ניידת" never returns lamps.
+      const t = translateQuery(q);
+      if (!t.understood) return json({ q, understood: false, items: [], chips: SEARCH_CHIPS.map((c) => c[1]) }, 200, { ...h, 'Cache-Control': 'public, max-age=3600' });
+      const key = `search/v3/${encodeURIComponent(t.en.toLowerCase())}/${encodeURIComponent(t.soft.join(' '))}`;
       try {
-        // sort=volume: best sellers first, and only listings with a real track record (88%+ positive reviews, 50+ sold).
-        const best = url.searchParams.get('sort') === 'volume';
-        return await cachedJSON(ctx, `search/v2/${lang}/${best ? 'best' : 'all'}/${encodeURIComponent(q.toLowerCase())}`, 1800, h, async () => {
-          const r = await aliCall(env, 'aliexpress.affiliate.product.query', { target_currency: 'ILS', target_language: lang, tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: q, ship_to_country: 'IL', page_size: best ? 50 : 20, page_no: 1, ...(best ? { sort: 'LAST_VOLUME_DESC' } : {}) });
-          let items = (r?.products?.product || []).map(normalizeProduct);
-          if (best) items = items.filter((p) => p.price > 0 && p.link && (p.rating || 0) >= 88 && p.sold >= 50).slice(0, 20);
-          return { status: 200, body: { q, count: items.length, items, checkedAt: new Date().toISOString() } };
+        return await cachedJSON(ctx, key, 6 * 3600, h, async () => {
+          const base = { target_currency: 'ILS', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: t.en, ship_to_country: 'IL', page_size: 50, page_no: 1, sort: 'LAST_VOLUME_DESC' };
+          const [enR, heR] = await Promise.all([
+            aliCall(env, 'aliexpress.affiliate.product.query', { ...base, target_language: 'EN' }),
+            aliCall(env, 'aliexpress.affiliate.product.query', { ...base, target_language: 'HE' }).catch(() => null),
+          ]);
+          const he = new Map((heR?.products?.product || []).map((p) => [String(p.product_id), String(p.product_title || '').trim()]));
+          const all = (enR?.products?.product || []).map((p) => { const n = normalizeProduct(p); return { ...n, en: n.title, title: he.get(n.id) || n.title }; });
+          let items = rankResults(all, t);
+          if (items.length < 4) items = rankResults(all, t, { minRating: 85, minSold: 10 });
+          const out = items.map((p) => ({ id: p.id, title: p.title, image: p.image, price: p.price, originalPrice: p.originalPrice, rating: p.rating, sold: p.sold, link: p.link }));
+          return { status: 200, body: { q, en: t.en, understood: true, count: out.length, items: out, checkedAt: new Date().toISOString() } };
         });
       } catch (e) { return json({ error: 'api_error', message: String(e.message).slice(0, 200) }, 502, h); }
     }

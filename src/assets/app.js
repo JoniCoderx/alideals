@@ -346,6 +346,72 @@
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') setTimeout(show, 600); });
   })();
 
+  /* ---------- Product search: Hebrew query → real AliExpress results (affiliate links) ---------- */
+  (function () {
+    var sec = document.getElementById('search');
+    var api = sec && sec.getAttribute('data-api');
+    if (!api || !window.fetch) return;
+    var form = sec.querySelector('.ps-form'), input = form.querySelector('input'), out = document.getElementById('ps-results');
+    var e = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var ils = function (n) { return '₪' + Number(n).toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var sold = function (n) { n = Number(n) || 0; var s = n >= 10000 ? 1000 : n >= 1000 ? 100 : 10; return (Math.floor(n / s) * s).toLocaleString('he-IL') + '+'; };
+    var safe = function (u) { return /^https:\/\/s\.click\.aliexpress\.com\//.test(u || '') ? u : ''; };
+    var img = function (u) { return /^https:\/\/[a-z0-9.-]*(alicdn|aliexpress-media)\.com\//.test(u || '') ? (/\.(jpe?g|png|webp)$/i.test(u) ? u + '_350x350.jpg' : u) : ''; };
+    var ctrl = null, last = null, sortBy = 'best', seq = 0;
+    var card = function (p) {
+      var off = p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
+      return '<a class="ps-card" href="' + e(safe(p.link)) + '" target="_blank" rel="nofollow sponsored noopener" data-ctx="search">' +
+        '<span class="ps-img"><img src="' + e(img(p.image)) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' + (off >= 5 ? '<i class="ps-off">-' + off + '%</i>' : '') + '</span>' +
+        '<span class="ps-t">' + e(p.title) + '</span>' +
+        '<span class="ps-meta">⭐ ' + Math.round(p.rating) + '% · ' + sold(p.sold) + ' נמכרו</span>' +
+        '<span class="ps-p"><b>' + ils(p.price) + '</b>' + (off >= 5 ? '<s>' + ils(p.originalPrice) + '</s>' : '') + '</span>' +
+        '<span class="ps-cta">לצפייה בעליאקספרס ‹</span></a>';
+    };
+    var chipsHtml = function () { return Array.prototype.map.call(sec.querySelectorAll('.ps-chips .ps-chip'), function (c) { return '<button type="button" class="ps-chip" data-q="' + e(c.getAttribute('data-q')) + '">' + e(c.textContent) + '</button>'; }).join(''); };
+    var msg = function (title, text, chips) { out.innerHTML = '<div class="ps-msg"><b>' + title + '</b>' + text + (chips ? '<div class="ps-chips" style="justify-content:center;flex-wrap:wrap">' + chipsHtml() + '</div>' : '') + '</div>'; };
+    var render = function () {
+      var j = last; if (!j) return;
+      var list = (j.items || []).filter(function (p) { return safe(p.link) && p.price > 0; }).slice();
+      if (sortBy === 'cheap') list.sort(function (a, b) { return a.price - b.price; });
+      if (sortBy === 'off') list.sort(function (a, b) { return (b.originalPrice ? 1 - b.price / b.originalPrice : 0) - (a.originalPrice ? 1 - a.price / a.originalPrice : 0); });
+      if (sortBy === 'sold') list.sort(function (a, b) { return b.sold - a.sold; });
+      var tabs = [['best', 'מומלץ'], ['cheap', 'הכי זול'], ['off', 'הנחה הכי גדולה'], ['sold', 'הכי נמכרים']];
+      out.innerHTML = '<div class="ps-head"><b>' + list.length + ' מוצרים ל"' + e(j.q) + '"</b><span>רק 88%+ ביקורות חיוביות ועם היסטוריית מכירות</span></div>' +
+        '<div class="ps-sort" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" aria-selected="' + (t[0] === sortBy) + '" class="' + (t[0] === sortBy ? 'on' : '') + '" data-sort="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+        '<div class="ps-grid">' + list.map(card).join('') + '</div>' +
+        '<p class="ps-note">המחירים מעליאקספרס, לפני משלוח ומע״מ, ויכולים להשתנות. בתשלום מוסיפים <a href="#calc">קוד קופון לפי סכום העגלה</a> וזה יוצא עוד פחות.</p>';
+    };
+    var search = function (q) {
+      q = String(q || '').trim().slice(0, 80);
+      if (q.length < 2) { input.focus(); return; }
+      input.value = q;
+      sec.querySelectorAll('.ps-box .ps-chip').forEach(function (c) { c.classList.toggle('on', c.getAttribute('data-q') === q); });
+      if (ctrl) ctrl.abort();
+      var id = ++seq;
+      ctrl = window.AbortController ? new AbortController() : null;
+      out.innerHTML = '<div class="ps-head"><b>מחפשים "' + e(q) + '"…</b><span>בודקים מוכרים, מחירים וביקורות</span></div><div class="ps-grid">' + new Array(8).join('<div class="ps-card ps-sk"><span class="ps-img"></span><span class="ps-t">.</span><span class="ps-p">.</span></div>') + '</div>';
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+      try { history.replaceState(null, '', '?q=' + encodeURIComponent(q) + '#search'); } catch (x) {}
+      track('search', { search_term: q });
+      fetch(api + '/api/search?q=' + encodeURIComponent(q), ctrl ? { signal: ctrl.signal } : {}).then(function (r) { return r.json(); }).then(function (j) {
+        clearTimeout(timer);
+        if (id !== seq) return;
+        if (j && j.understood === false) return msg('לא הבנו מה לחפש 🤔', 'נסו לכתוב את סוג המוצר, למשל "אוזניות אלחוטיות" או "כיסוי לאייפון 15". אפשר גם באנגלית.', true);
+        if (j && j.error === 'rate_limited') return msg('רגע, יותר מדי חיפושים', 'נסו שוב בעוד דקה.');
+        if (!j || !j.items) return msg('החיפוש לא זמין כרגע', 'נסו שוב בעוד רגע.');
+        if (!j.items.length) return msg('לא מצאנו מוצרים מספיק טובים 🔍', 'אין תוצאות עם מספיק מכירות וביקורות טובות. נסו מילה כללית יותר, או אחד החיפושים האלה:', true);
+        last = j; sortBy = 'best'; render();
+      }).catch(function () { clearTimeout(timer); if (id !== seq) return; msg('החיפוש לקח יותר מדי זמן', 'נסו שוב בעוד רגע.'); });
+    };
+    form.addEventListener('submit', function (ev) { ev.preventDefault(); input.blur(); search(input.value); });
+    sec.addEventListener('click', function (ev) {
+      var c = ev.target.closest('.ps-chip'); if (c) { search(c.getAttribute('data-q')); out.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      var s = ev.target.closest('[data-sort]'); if (s) { sortBy = s.getAttribute('data-sort'); render(); }
+    });
+    var q0 = null; try { q0 = new URLSearchParams(location.search).get('q'); } catch (x) {}
+    if (q0) search(q0);
+  })();
+
   /* ---------- Reviews: fetch the latest from the bot (appear within a minute, not after the next build) ---------- */
   (function () {
     var sec = document.getElementById('reviews');
