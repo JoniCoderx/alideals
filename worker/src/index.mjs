@@ -400,10 +400,10 @@ async function handleBot(req, env, ctx) {
     const TXT = {
       thanks: (c) => `תודה על הדיווח! 🙏\nרשמנו שהקוד ${c} לא עבד לכם. אם כמה גולשים מדווחים על אותו קוד, נסמן אותו באתר ונבדוק אותו.\n\nבינתיים כדאי לנסות קוד ממדרגה אחרת 👇`,
       unknown: () => 'תודה! הקודים העדכניים באתר 👇',
-      hello: () => 'היי! 👋 אני הבוט של יש דיל!\n\n🎯 שלחו לי קישור למוצר מעליאקספרס, ואבדוק אם יש אותו זול יותר וכמה הוא יוצא עם קוד קופון.\n✍️ או כתבו לנו ביקורת.',
+      hello: () => 'היי, כאן צייד הדילים של יש דיל! 🎯\n\nשלחו לי קישור למוצר מאלי אקספרס (מהאפליקציה: שיתוף ← העתקת קישור), ואבדוק אם מוכר אחר מוכר בדיוק את אותו מוצר בפחות, וכמה הוא יוצא עם קוד קופון.\n\nאפשר גם לכתוב לנו ביקורת ✍️',
     };
     const r = rep.replies[0] || (update.message.chat?.type === 'private' ? { chat: update.message.chat.id, kind: 'hello' } : null);
-    if (r) out.push({ chat: r.chat, text: TXT[r.kind](r.code), buttons: [[{ text: '🔥 כל הקודים', url: `${site}/#codes` }], [{ text: '✍️ כתיבת ביקורת', callback_data: 'rv:go' }]] });
+    if (r) out.push({ chat: r.chat, text: TXT[r.kind](r.code), buttons: [[{ text: 'כל הקודים 🔥', url: `${site}/#codes` }], [{ text: 'כתיבת ביקורת ✍️', callback_data: 'rv:go' }]] });
   }
   await env.BOT.put('state', JSON.stringify({ ...next, at: new Date().toISOString() }));
   for (const o of out.slice(0, 3)) {
