@@ -326,6 +326,23 @@ export function translateQuery(q) {
 }
 
 /**
+ * Is this listing the product itself (not an accessory for it)? The product type must appear near the start of the
+ * English title and before any "for …" ("Cleaning pen for earbuds", "Charger for Galaxy Watch" are accessories).
+ */
+export function onTopic(title, t) {
+  if (!t.must.every((re) => re.test(title))) return false;
+  if (!t.must.length) return true;
+  const at = title.search(t.must[0]);
+  const forAt = title.search(/\b(for|compatible with|replacement|fits)\b/i);
+  if (at > 80 || (forAt >= 0 && at > forAt)) return false;
+  // Another product type named before ours means it's that product ("COB LED Work Light ... Power Bank" is a lamp).
+  const before = title.slice(0, at).toLowerCase();
+  return !OTHER_NOUNS.some((n) => new RegExp(`\\b${n}s?\\b`).test(before) && !t.must[0].test(n));
+}
+const OTHER_NOUNS = ['lamp', 'light', 'flashlight', 'torch', 'lantern', 'fan', 'cable', 'case', 'cover', 'holder', 'mount', 'stand', 'charger', 'strap', 'band',
+  'box', 'bag', 'organizer', 'sticker', 'film', 'protector', 'brush', 'pen', 'mat', 'pouch', 'sleeve', 'adapter', 'hub', 'speaker', 'keyboard', 'mouse', 'cleaner', 'kit'];
+
+/**
  * Filters and orders search results: on topic (must), real track record (rating/sold), then
  * more matching soft terms first, then best sellers. `items` need an English title in `en` (or `title`).
  */
@@ -333,8 +350,12 @@ export function rankResults(items, t, { minRating = 88, minSold = 50, limit = 20
   const seen = new Set();
   return items
     .filter((p) => p && p.price > 0 && p.link && (p.rating || 0) >= minRating && (p.sold || 0) >= minSold)
-    .filter((p) => { const title = String(p.en || p.title || ''); return t.must.every((re) => re.test(title)); })
-    .filter((p) => { const k = String(p.id); if (seen.has(k)) return false; seen.add(k); return true; })
+    .filter((p) => onTopic(String(p.en || p.title || ''), t))
+    .filter((p) => {
+      // one listing per product: same id, or the same opening words (the same item from several sellers)
+      const k = String(p.id), k2 = String(p.en || p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').slice(0, 6).join(' ');
+      if (seen.has(k) || seen.has(k2)) return false; seen.add(k); seen.add(k2); return true;
+    })
     .map((p) => { const title = String(p.en || p.title || '').toLowerCase(); const score = t.soft.reduce((s, w) => s + (title.includes(w) ? 1 : 0), 0); return { p, score }; })
     .sort((a, b) => b.score - a.score || b.p.sold - a.p.sold)
     .slice(0, limit)

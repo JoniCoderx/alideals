@@ -463,7 +463,7 @@ export default {
       // against the product type in its English title, so a search for "סוללה ניידת" never returns lamps.
       const t = translateQuery(q);
       if (!t.understood) return json({ q, understood: false, items: [], chips: SEARCH_CHIPS.map((c) => c[1]) }, 200, { ...h, 'Cache-Control': 'public, max-age=3600' });
-      const key = `search/v3/${encodeURIComponent(t.en.toLowerCase())}/${encodeURIComponent(t.soft.join(' '))}`;
+      const key = `search/v4/${encodeURIComponent(t.en.toLowerCase())}/${encodeURIComponent(t.soft.join(' '))}`;
       try {
         return await cachedJSON(ctx, key, 6 * 3600, h, async () => {
           const base = { target_currency: 'ILS', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: t.en, ship_to_country: 'IL', page_size: 50, page_no: 1, sort: 'LAST_VOLUME_DESC' };
@@ -475,6 +475,13 @@ export default {
           const all = (enR?.products?.product || []).map((p) => { const n = normalizeProduct(p); return { ...n, en: n.title, title: he.get(n.id) || n.title }; });
           let items = rankResults(all, t);
           if (items.length < 4) items = rankResults(all, t, { minRating: 85, minSold: 10 });
+          // Hebrew titles for results the Hebrew list didn't include (one detail call, only when needed)
+          const missing = items.filter((p) => !he.has(p.id)).map((p) => p.id).slice(0, 20);
+          if (missing.length) {
+            const d = await aliCall(env, 'aliexpress.affiliate.productdetail.get', { target_currency: 'ILS', target_language: 'HE', tracking_id: env.ALI_TRACKING_ID, fields: 'product_id,product_title', product_ids: missing.join(','), country: 'IL' }).catch(() => null);
+            for (const p of d?.products?.product || []) if (p.product_title) he.set(String(p.product_id), String(p.product_title).trim());
+            items = items.map((p) => ({ ...p, title: he.get(p.id) || p.title }));
+          }
           const out = items.map((p) => ({ id: p.id, title: p.title, image: p.image, price: p.price, originalPrice: p.originalPrice, rating: p.rating, sold: p.sold, link: p.link }));
           return { status: 200, body: { q, en: t.en, understood: true, count: out.length, items: out, checkedAt: new Date().toISOString() } };
         });

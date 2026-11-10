@@ -267,3 +267,24 @@ test('search: results stay on topic, need a track record, and rank matching deta
   ], t);
   assert.deepEqual(out.map((x) => x.id), ['pb2', 'pb1']);
 });
+
+test('search: accessories and look-alikes are not the product', async () => {
+  const { translateQuery, onTopic } = await import('../src/search-he.mjs');
+  const ear = translateQuery('אוזניות אלחוטיות'), pb = translateQuery('סוללה ניידת'), sw = translateQuery('שעון חכם'), cs = translateQuery('כיסוי לאייפון 15');
+  assert.equal(onTopic('Lenovo LP40 Pro TWS Wireless Earphones Bluetooth 5.4', ear), true);
+  assert.equal(onTopic('Cleaning Pen for Earbuds Airpods Soft Brush', ear), false);
+  assert.equal(onTopic('Vention 10000mAh Power Bank 22.5W', pb), true);
+  assert.equal(onTopic('Toocki USB Type C Cable Fast Charging for Power Bank iPhone', pb), false);
+  assert.equal(onTopic('USB Charger for Samsung Galaxy Watch 7 6 5 Smart Watch', sw), false);
+  assert.equal(onTopic('Smart Watch Men Bluetooth Call 1.43 AMOLED', sw), true);
+  assert.equal(onTopic('Magnetic Clear Case for iPhone 17 16 15 Pro Max', cs), true);
+});
+
+test('search: another product named first is that product', async () => {
+  const { translateQuery, onTopic } = await import('../src/search-he.mjs');
+  const pb = translateQuery('סוללה ניידת'), ear = translateQuery('אוזניות'), led = translateQuery('פס לד');
+  assert.equal(onTopic('Portable COB LED Work Light USB Rechargeable Magnetic Power Bank', pb), false);
+  assert.equal(onTopic('Power Bank 20000mAh with LED Light Display', pb), true);
+  assert.equal(onTopic('Bluetooth Speaker Earbuds 2 in 1 TWS', ear), false);
+  assert.equal(onTopic('RGB LED Strip Lights 5m Bluetooth Control', led), true);
+});
