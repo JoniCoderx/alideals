@@ -363,7 +363,7 @@
       return '<a class="ps-card" href="' + e(safe(p.link)) + '" target="_blank" rel="nofollow sponsored noopener" data-ctx="search">' +
         '<span class="ps-img"><img src="' + e(img(p.image)) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' + (off >= 5 ? '<i class="ps-off">-' + off + '%</i>' : '') + '</span>' +
         '<span class="ps-t">' + e(p.title) + '</span>' +
-        '<span class="ps-meta">⭐ ' + Math.round(p.rating) + '% · ' + sold(p.sold) + ' נמכרו</span>' +
+        '<span class="ps-meta">⭐ <bdi dir="ltr">' + Math.round(p.rating) + '%</bdi> · <bdi dir="ltr">' + sold(p.sold) + '</bdi> נמכרו</span>' +
         '<span class="ps-p"><b>' + ils(p.price) + '</b>' + (off >= 5 ? '<s>' + ils(p.originalPrice) + '</s>' : '') + '</span>' +
         '<span class="ps-cta">לצפייה בעליאקספרס ‹</span></a>';
     };
