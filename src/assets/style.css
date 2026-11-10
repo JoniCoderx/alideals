@@ -689,3 +689,4 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ps-form{border-color:#4a2a22}:root:not([data-theme="light"]) .ps-img{background:#24232b}:root:not([data-theme="light"]) .ps-sk .ps-img,:root:not([data-theme="light"]) .ps-sk .ps-t,:root:not([data-theme="light"]) .ps-sk .ps-p{background:linear-gradient(90deg,#24232b 25%,#2e2d36 50%,#24232b 75%);background-size:200% 100%}}
 :root[data-theme="dark"] .ps-form{border-color:#4a2a22}:root[data-theme="dark"] .ps-img{background:#24232b}
 :root[data-theme="dark"] .ps-sk .ps-img,:root[data-theme="dark"] .ps-sk .ps-t,:root[data-theme="dark"] .ps-sk .ps-p{background:linear-gradient(90deg,#24232b 25%,#2e2d36 50%,#24232b 75%);background-size:200% 100%}
+.ps-box .ps-chips{-webkit-mask-image:linear-gradient(to left,#000 85%,transparent);mask-image:linear-gradient(to left,#000 85%,transparent);padding-inline-end:24px}

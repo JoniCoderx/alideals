@@ -376,7 +376,7 @@
       if (sortBy === 'off') list.sort(function (a, b) { return (b.originalPrice ? 1 - b.price / b.originalPrice : 0) - (a.originalPrice ? 1 - a.price / a.originalPrice : 0); });
       if (sortBy === 'sold') list.sort(function (a, b) { return b.sold - a.sold; });
       var tabs = [['best', 'מומלץ'], ['cheap', 'הכי זול'], ['off', 'הנחה הכי גדולה'], ['sold', 'הכי נמכרים']];
-      out.innerHTML = '<div class="ps-head"><b>' + list.length + ' מוצרים ל"' + e(j.q) + '"</b><span>רק 88%+ ביקורות חיוביות ועם היסטוריית מכירות</span></div>' +
+      out.innerHTML = '<div class="ps-head"><b>' + list.length + ' מוצרים ל"' + e(j.q) + '"</b><span>רק מוצרים עם 88% ביקורות חיוביות ומעלה</span></div>' +
         '<div class="ps-sort" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" aria-selected="' + (t[0] === sortBy) + '" class="' + (t[0] === sortBy ? 'on' : '') + '" data-sort="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
         '<div class="ps-grid">' + list.map(card).join('') + '</div>' +
         '<p class="ps-note">המחירים מעליאקספרס, לפני משלוח ומע״מ, ויכולים להשתנות. בתשלום מוסיפים <a href="#calc">קוד קופון לפי סכום העגלה</a> וזה יוצא עוד פחות.</p>';

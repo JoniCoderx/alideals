@@ -124,6 +124,6 @@
   },
   "search": {
     "_comment": "Product search on the homepage (Worker /api/search). Turn on after checking results.",
-    "enabled": false
+    "enabled": true
   }
 }

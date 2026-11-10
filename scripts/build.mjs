@@ -1052,7 +1052,7 @@ function searchSection() {
     <h2 class="ps-title">מה אתם מחפשים באלי אקספרס?</h2>
     <p class="ps-lead">כותבים בעברית, ומקבלים רק מוצרים עם הרבה מכירות וביקורות טובות, במחיר בשקלים עם משלוח לישראל.</p>
     <form class="ps-form" role="search" action="/" method="get">
-      <input type="search" name="q" dir="rtl" enterkeyhint="search" autocomplete="off" maxlength="80" placeholder="למשל: אוזניות אלחוטיות, כיסוי לאייפון 15" aria-label="חיפוש מוצר באלי אקספרס">
+      <input type="search" name="q" dir="rtl" enterkeyhint="search" autocomplete="off" maxlength="80" placeholder="למשל: אוזניות אלחוטיות" aria-label="חיפוש מוצר באלי אקספרס">
       <button class="btn btn-primary" type="submit">חיפוש</button>
     </form>
     <div class="ps-chips" aria-label="חיפושים פופולריים">${SEARCH_CHIPS.map(([e, t]) => `<button type="button" class="ps-chip" data-q="${esc(t)}">${esc(t)} ${e}</button>`).join('')}</div>
