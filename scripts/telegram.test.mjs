@@ -216,3 +216,24 @@ test('reviews view: same person (first+last name) shown once, anonymous kept, av
   assert.deepEqual(r.map((x) => x.id), ['2', '4', '3']);
   assert.ok(r.every((x) => x.icon && x.colors && x.colors.length === 2));
 });
+
+test('daily deal: real drops only, no repeats within 14 days, honest wording', async () => {
+  const { pickDailyDeal, dailyDealPost } = await import('./telegram-bot.mjs');
+  const base = { title: 'סוללת גיבוי Baseus 45W, קיבולת 10000mAh', link: 'https://s.click.aliexpress.com/e/x', rating: 98, sold: 35948, since: '2026-11-09' };
+  const list = [
+    { ...base, id: 'a', price: 90, was: 100, drop: 10 },   // posted 5 days ago → skipped
+    { ...base, id: 'b', price: 95, was: 100, drop: 5 },    // drop too small
+    { ...base, id: 'c', price: 80, was: 100, drop: 20, rating: 80 }, // weak rating
+    { ...base, id: 'd', price: 88, was: 100, drop: 12 },
+  ].sort((x, y) => y.drop - x.drop);
+  const pick = pickDailyDeal(list, { posted: { a: '2026-11-05' }, today: '2026-11-10' });
+  assert.equal(pick.id, 'd');
+  assert.equal(pickDailyDeal(list, { posted: { a: '2026-10-20', d: '2026-11-09' }, today: '2026-11-10' }).id, 'a');
+  assert.equal(pickDailyDeal([list.find((x) => x.id === 'b')], { today: '2026-11-10' }), null);
+  const post = dailyDealPost(pick, { site: 'https://yeshdeal.com', today: '2026-11-10' });
+  assert.match(post.text, /המציאה של היום: המחיר ירד ב־12%/);
+  assert.match(post.text, /₪88<\/b> במקום ₪100, ירידה אמיתית מאתמול/);
+  assert.match(post.text, /35,000\+ נמכרו/);
+  assert.equal(post.buttons[0][0].url, base.link);
+  assert.ok(!/undefined|NaN/.test(post.text));
+});

@@ -743,11 +743,12 @@ function eventPage(ev) {
     <h2>איך מתכוננים ${esc(le(short))}</h2>
     <ol>
       <li>מוסיפים לעגלה כבר עכשיו את המוצרים שרוצים. ככה רואים מה המחיר לפני המבצע ומה ההנחה האמיתית.</li>
-      <li>אוספים קופונים ממרכז הקופונים של עליאקספרס כשהם נפתחים, ומטבעות באפליקציה.</li>
+      <li>כשהמבצע נפתח, אוספים את הקופונים שעליאקספרס מציגה בעמוד המבצע ובאפליקציה, וגם מטבעות. הם בדרך כלל מצטברים עם קוד המבצע.</li>
       <li>בפתיחת המבצע חוזרים לעמוד הזה, בוחרים קוד לפי סכום העגלה ב<a href="/#calc">מחשבון</a> ומשלמים מהר, לפני שהמכסה נגמרת.</li>
     </ol>
     <p>עוד: <a href="/guides/aliexpress-sales-calendar/">לוח המבצעים השנתי</a> · <a href="/guides/stacking-aliexpress-discounts/">איך משלבים הנחות</a> · <a href="/guides/how-to-use-aliexpress-coupon/">איך מפעילים קוד</a></p>
   </div>
+  ${ev.end >= today ? saleShoppingList(ev, short) : ''}
   ${affCta('sale')}
   ${faqItems.length ? `<h2 class="section-title">שאלות נפוצות על ${esc(short)}</h2><div class="faq">${faqItems.map((f) => `<details><summary><h3>${esc(f.q)}</h3></summary><p>${esc(f.a)}</p></details>`).join('')}</div>` : ''}
 </div></section>`;
@@ -758,6 +759,21 @@ function eventPage(ev) {
       : `קודי הקופון של עליאקספרס ${le(short)} ${year} לקונים מישראל, לפי מדרגות, מתי המבצע מתחיל ואיך מתכוננים כדי לחסוך יותר.`,
     pathname, body, ld: faqItems.length ? [bc.ld, faqLd(faqItems)] : [bc.ld],
   });
+}
+
+// Sale pages: a ready shopping list from the curated lists (live prices, same quality bar as /top/), so people
+// can fill the cart before the sale and compare prices when it opens. Every product link is an affiliate link.
+const SALE_CAT = { charging: 'מטענים, סוללות וכבלים', earbuds: 'אוזניות', home: 'לבית ולמטבח', 'desk-gaming': 'שולחן עבודה וגיימינג', 'car-travel': 'לרכב ולטיולים' };
+function saleShoppingList(ev, short) {
+  const groups = catalog.collections.map((c) => ({ c, items: topList(c).slice().sort((a, b) => b.sold - a.sold).slice(0, 3) })).filter((g) => g.items.length);
+  if (!groups.length) return '';
+  const card = (x) => { const off = x.orig > x.price ? Math.round((1 - x.price / x.orig) * 100) : 0; return `<li class="top-item"><a class="top-img" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="sale-${esc(ev.slug)}"><img src="${esc(x.image)}_220x220.jpg" alt="${esc(x.title)}" width="110" height="110" loading="lazy" referrerpolicy="no-referrer"></a><div class="top-body"><h4>${esc(x.title)}</h4><p class="top-meta">${Math.round(x.rating)}% ביקורות חיוביות · ${Number(x.sold).toLocaleString('he-IL')} נמכרו</p><p class="top-price"><b>${ilsFmt(x.price)}</b>${off >= 5 ? `<s>${ilsFmt(x.orig)}</s><span class="pp-off">-${off}%</span>` : ''}</p><a class="btn btn-primary" href="${esc(x.link)}" ${OUT} target="_blank" data-ctx="sale-${esc(ev.slug)}">לצפייה בעליאקספרס ${ICON.arrow}</a></div></li>`; };
+  return `<div class="sale-list" id="shopping-list">
+  <h2 class="section-title">רשימת קניות ל${esc(le(short))}: מה שווה לשים בעגלה כבר עכשיו 🛒</h2>
+  <p class="muted">מוצרים מהרשימות הנבחרות שלנו, עם 92% ביקורות חיוביות ומעלה ולפחות 300 מכירות. מוסיפים לעגלה עכשיו, וכשהמבצע נפתח בודקים כמה המחיר ירד, מוסיפים קוד לפי סכום העגלה ומשלמים. המחירים מעליאקספרס, ${esc(topAt)}. המחיר המחוק הוא המחיר המקורי שעליאקספרס מציגה.</p>
+  ${groups.map((g) => `<h3 class="sale-cat">${esc(SALE_CAT[g.c.slug] || g.c.title)} ${g.c.emoji || ''}</h3><ol class="top-list sale-top">${g.items.map(card).join('')}</ol><p class="sale-more"><a href="/top/${esc(g.c.slug)}/">לכל הרשימה ←</a></p>`).join('')}
+  <p class="muted small">רוצים לדעת כשמחיר של מוצר יורד? שלחו את הקישור לבוט <a href="https://t.me/${esc(BOT)}" rel="noopener" target="_blank">@${esc(BOT)}</a> ולחצו "תודיעו לי". ואת המוצרים שכבר ירדו במחיר תמצאו ב<a href="/deals-today/">דילים של היום</a>.</p>
+</div>`;
 }
 
 const FINDER_API = (site.cheapest?.apiUrl || '').replace(/\/$/, '');
@@ -1341,7 +1357,9 @@ await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmln
 await write('robots.txt', SAMPLE_MODE ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /telegram-state.json\nDisallow: /tg-queue/\nDisallow: /admin/\nDisallow: /p/\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 await write('.nojekyll', '');
 const trackedIds = [...new Set([...Object.values(topItems).map((x) => x.id), ...productPool.filter((p) => p.rating >= (catalog.criteria?.minRating || 92) && p.sold >= (catalog.criteria?.minSold || 300)).map((p) => p.id)])].slice(0, 120);
-await write('tracked.json', JSON.stringify({ at: new Date().toISOString(), ids: trackedIds }));
+// Editorial titles (where we wrote one) so price-drop posts and /deals-today/ read well instead of raw API titles.
+const trackedTitles = Object.fromEntries(Object.entries(topItems).filter(([k]) => catalog.titles?.[k]).map(([k, x]) => [x.id, catalog.titles[k]]));
+await write('tracked.json', JSON.stringify({ at: new Date().toISOString(), ids: trackedIds, titles: trackedTitles }));
 // Live coupon tiers for the Telegram bot's Deal Hunter (the codes are public on the site anyway).
 await write('codes.json', JSON.stringify({ at: new Date().toISOString(), codes: realCodes.filter((c) => c.code && (c.currency || 'USD') === 'USD').map((c) => ({ code: c.code, d: c.discount, m: c.minOrder, x: c.expires || '' })) }));
 if (gen.telegram?.posted) await write('telegram-state.json', JSON.stringify(gen.telegram));

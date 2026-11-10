@@ -4,7 +4,7 @@
 // Vars (wrangler.toml): ALLOWED_ORIGIN
 import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduct, rankAlternatives } from '../../scripts/cheapest-lib.mjs';
 import { classifyMatch } from '../../src/v2/logic.mjs';
-import { collectReports, uhash } from '../../scripts/telegram-bot.mjs';
+import { collectReports, uhash, pickDailyDeal, dailyDealPost } from '../../scripts/telegram-bot.mjs';
 import { reviewFlow } from '../../scripts/telegram-bot-flow.mjs';
 import { publicReviews } from '../../src/reviews-view.mjs';
 
@@ -206,7 +206,9 @@ async function livePrices(env, ids) {
 async function trackPrices(env) {
   if (!env.BOT) return { skipped: 'no kv' };
   const site = env.SITE_URL || 'https://yeshdeal.com';
-  const ids = ((await (await fetch(`${site}/tracked.json`, { cf: { cacheTtl: 600 } })).json().catch(() => ({}))).ids || []).slice(0, 120);
+  const tracked = await (await fetch(`${site}/tracked.json`, { cf: { cacheTtl: 600 } })).json().catch(() => ({}));
+  const ids = (tracked.ids || []).slice(0, 120);
+  const titles = tracked.titles || {};
   if (!ids.length) return { skipped: 'no ids' };
   const live = await livePrices(env, ids);
   const hist = (await env.BOT.get('prices', 'json')) || {};
@@ -214,7 +216,7 @@ async function trackPrices(env) {
   for (const [id, p] of Object.entries(live)) {
     const h = (hist[id]?.h || []).filter((x) => x.d !== day || x.p <= p.price);
     if (!h.some((x) => x.d === day)) h.push({ d: day, p: p.price });
-    hist[id] = { t: p.title, img: p.image, l: p.link, r: p.rating, s: p.sold, o: p.originalPrice, h: h.slice(-21) };
+    hist[id] = { t: titles[id] || p.title, img: p.image, l: p.link, r: p.rating, s: p.sold, o: p.originalPrice, h: h.slice(-21) };
   }
   await env.BOT.put('prices', JSON.stringify(hist));
   return { tracked: Object.keys(live).length };
@@ -233,6 +235,36 @@ async function dealsToday(env) {
     if (drop >= 3) items.push({ id, title: x.t, image: x.img, link: x.l, rating: x.r, sold: x.s, price: now.p, was: max, drop, since: before[0].d });
   }
   return items.sort((a, b) => b.drop - a.drop).slice(0, 24);
+}
+// "המציאה של היום": at 21:00 Israel time the biggest real drop (re-checked live) replaces the night post.
+// At most one a day; the same product isn't posted again for 14 days. No qualifying drop → the regular post goes out.
+const DEAL_HOUR = 21;
+export async function postDailyDeal(env) {
+  if (!env.BOT || !env.TELEGRAM_BOT_TOKEN || !env.TG_CHAT) return { skipped: 'not configured' };
+  const today = ilDay();
+  const st = (await env.BOT.get('dotd', 'json')) || { posted: {} };
+  if (st.last === today) return { skipped: 'already posted today' };
+  const list = await dealsToday(env);
+  let pick = null;
+  for (let i = 0; i < 3; i++) {
+    const cand = pickDailyDeal(list, { posted: st.posted, today });
+    if (!cand) break;
+    const live = (await livePrices(env, [cand.id]))[cand.id];
+    if (live && live.price <= cand.price * 1.02 && live.price < cand.was * 0.92) { pick = { ...cand, price: live.price }; break; }
+    list.splice(list.indexOf(cand), 1); // the price went back up since it was recorded: try the next one
+  }
+  if (!pick) return { none: 'no real drop today' };
+  const site = env.SITE_URL || 'https://yeshdeal.com';
+  const link = await shortAff(env, pick.id, pick.link);
+  const post = dailyDealPost({ ...pick, link }, { site, today });
+  const api = (method, body) => fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+  const markup = { inline_keyboard: post.buttons };
+  let r = pick.image ? await api('sendPhoto', { chat_id: env.TG_CHAT, photo: pick.image, caption: post.text, parse_mode: 'HTML', reply_markup: markup }) : { ok: false };
+  if (!r.ok) r = await api('sendMessage', { chat_id: env.TG_CHAT, text: post.text, parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: markup });
+  if (!r.ok) return { error: r.description };
+  const keep = Object.fromEntries(Object.entries(st.posted).filter(([, d]) => d >= new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)));
+  await env.BOT.put('dotd', JSON.stringify({ last: today, posted: { ...keep, [pick.id]: today } }));
+  return { posted: pick.id, drop: post.drop };
 }
 async function checkWatches(env) {
   if (!env.BOT || !env.TELEGRAM_BOT_TOKEN) return { skipped: true };
@@ -382,7 +414,10 @@ async function handleBot(req, env, ctx) {
 
 export default {
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(publishQueued(env).then((r) => console.log('telegram slot', JSON.stringify(r))).catch((e) => console.log('telegram slot error', e.message)));
+    const ilHour = israelNow(new Date(event.scheduledTime || Date.now())).hour;
+    const deal = ilHour === DEAL_HOUR ? postDailyDeal(env).catch((e) => ({ error: e.message })) : Promise.resolve(null);
+    ctx.waitUntil(deal.then((d) => { if (d) console.log('daily deal', JSON.stringify(d)); return d?.posted ? { replacedBy: 'daily deal' } : publishQueued(env); })
+      .then((r) => console.log('telegram slot', JSON.stringify(r))).catch((e) => console.log('telegram slot error', e.message)));
     ctx.waitUntil(dispatchWorkflow(env).then((r) => console.log('clock dispatch', JSON.stringify(r))).catch((e) => console.log('clock error', e.message)));
     const hr = new Date(event.scheduledTime || Date.now()).getUTCHours();
     if (hr % 6 === 3) ctx.waitUntil(trackPrices(env).then((r) => console.log('prices', JSON.stringify(r))).catch((e) => console.log('prices error', e.message)));

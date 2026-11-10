@@ -636,3 +636,9 @@ a.soon-card:hover{background:rgba(255,255,255,.12)}
 .rv-av{font-size:20px}
 .back-sheet .bs-rep{color:#fff;opacity:.7;font-weight:600;font-size:.82rem;text-decoration:underline;margin-top:2px}
 .back-sheet .bs-join{font-size:1.02rem}
+.sale-list{margin:34px 0 10px}
+.sale-cat{font-size:1.12rem;margin:22px 0 10px}
+.sale-top .top-item{grid-template-columns:96px 1fr}
+.sale-top .top-body h4{font-size:1rem;margin:0 0 4px;line-height:1.35}
+.sale-more{margin:6px 0 0;font-weight:700}
+@media(max-width:420px){.sale-top .top-item{grid-template-columns:76px minmax(0,1fr)}}

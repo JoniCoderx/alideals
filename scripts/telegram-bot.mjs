@@ -63,3 +63,37 @@ export function collectReviews(updates, { reviews = [], pending = {}, today }) {
   return { reviews: list.slice(-200), pending: wait, replies };
 }
 
+
+/* ---------------- "המציאה של היום": one real price drop a day in the channel ---------------- */
+const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+/**
+ * Pure: picks today's deal from real recorded drops (sorted by drop, biggest first).
+ * Rules: drop ≥ minDrop%, ≥ minRating% positive reviews (when known), not posted in the last `gapDays` days.
+ */
+export function pickDailyDeal(list = [], { posted = {}, today, minDrop = 8, minRating = 90, gapDays = 14 } = {}) {
+  return list.find((x) => x && x.drop >= minDrop && x.price > 0 && x.was > x.price && x.link
+    && (x.rating == null || x.rating >= minRating)
+    && !(posted[x.id] && daysBetween(posted[x.id], today) < gapDays)) || null;
+}
+const shortTitle = (t, n = 80) => { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= n) return t; const cut = t.slice(0, n); return cut.slice(0, Math.max(cut.lastIndexOf(' '), n - 15)).replace(/[\s,،\-–]+$/, '') + '…'; };
+const roundDown = (n) => { n = Number(n); const step = n >= 10000 ? 1000 : n >= 1000 ? 100 : 10; return Math.floor(n / step) * step; };
+const ils = (n) => `₪${Number(n).toLocaleString('he-IL', { maximumFractionDigits: 2 })}`;
+const escT = (t) => String(t ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+/** Pure: the channel post for the daily deal (HTML caption + buttons). Only real numbers, checked right before posting. */
+export function dailyDealPost(d, { site, today }) {
+  const drop = Math.round((1 - d.price / d.was) * 100);
+  const when = d.since && daysBetween(d.since, today) <= 1 ? 'מאתמול' : 'לעומת השבוע האחרון';
+  const facts = [d.rating ? `${Math.round(d.rating)}% ביקורות חיוביות` : '', d.sold >= 100 ? `${roundDown(d.sold).toLocaleString('he-IL')}+ נמכרו` : ''].filter(Boolean).join(' · ');
+  const text = [
+    `<b>המציאה של היום: המחיר ירד ב־${drop}% 🔥</b>`,
+    '',
+    escT(shortTitle(d.title)),
+    '',
+    `<b>${ils(d.price)}</b> במקום ${ils(d.was)}, ירידה אמיתית ${when} 📉`,
+    facts ? `${facts} ⭐` : '',
+    '',
+    'המחיר נבדק עכשיו בעליאקספרס ויכול להשתנות. עם קוד קופון לפי סכום העגלה זה יוצא עוד פחות 👇',
+  ].filter((l, i, a) => l !== '' || a[i - 1] !== '').join('\n');
+  const buttons = [[{ text: 'לקנייה במחיר הזה 🛒', url: d.link }], [{ text: 'כל המוצרים שירדו היום 📉', url: `${site}/deals-today/?utm_source=telegram&utm_medium=channel&utm_campaign=daily-deal` }]];
+  return { text, buttons, drop };
+}
