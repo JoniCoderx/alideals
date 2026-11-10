@@ -262,7 +262,7 @@ function topbar() {
 /* ------------------------------------------------------------------ */
 const BUILD_ID = Date.now().toString(36);
 const INLINE_CSS = minifyCSS(await fs.readFile(path.join(ROOT, 'src/assets/style.css'), 'utf8'));
-const USD_ILS = Number(gen.fx?.usdIls) || Number(site.fx?.usdIls) || 3.7;
+const USD_ILS = Number(gen.fx?.usdIls) || Number(site.fx?.usdIls) || 3.16;
 const verification = site.verification || {};
 
 function layout({ title, description, pathname, body, ld = [], noindex = false, ogType = 'website', share = null }) {

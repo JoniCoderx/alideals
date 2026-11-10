@@ -108,8 +108,8 @@
     }
   ],
   "fx": {
-    "_comment": "שער גיבוי למחשבון העגלה. מתעדכן אוטומטית מ-open.er-api.com בכל בנייה.",
-    "usdIls": 3.7
+    "_comment": "שער גיבוי בלבד (כשהשער החי לא נטען ואין שער קודם). השער החי מתעדכן מ-open.er-api.com בכל בנייה. עודכן ל-10.11.2026.",
+    "usdIls": 3.16
   },
   "verification": {
     "_comment": "קודי אימות מ-Google Search Console ו-Bing Webmaster Tools (רק הערך של content).",

@@ -233,7 +233,7 @@
   tiers = tiers.filter(function (t) { return !expired(t.x); });
   var currency = 'USD';
   try { currency = localStorage.getItem('calc-cur') || 'USD'; } catch (e) {}
-  var rate = calc ? Number(calc.getAttribute('data-rate')) || 3.7 : 3.7;
+  var rate = calc ? Number(calc.getAttribute('data-rate')) || 3.16 : 3.16;
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var fmt = function (n) { return '$' + (Math.round(n * 100) / 100).toLocaleString('en-US'); };
 
@@ -487,7 +487,7 @@
         '<a class="btn ' + (kind === 'orig' ? 'btn-ghost' : 'btn-primary') + '" href="' + h(link) + '" rel="nofollow sponsored" data-finder="' + h(p.id) + '">' + (kind === 'orig' ? 'למוצר המקורי' : 'לקנייה בעליאקספרס') + '</a></div></div>';
     };
     // Real estimate with our coupon codes: the best code whose minimum the product price meets (codes are checked in USD).
-    var fRate = Number(ff.getAttribute('data-rate')) || 3.7, fTiers = [];
+    var fRate = Number(ff.getAttribute('data-rate')) || 3.16, fTiers = [];
     try { fTiers = JSON.parse(ff.getAttribute('data-tiers') || '[]').filter(function (t) { return !expired(t.x); }); } catch (e) {}
     var couponEst = function (priceIls) {
       if (priceIls == null || !fTiers.length) return '';
