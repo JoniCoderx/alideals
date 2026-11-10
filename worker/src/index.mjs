@@ -450,7 +450,9 @@ export default {
     if (url.pathname === '/api/bot-state' && req.method === 'GET') {
       if (!env.BOT) return json({ error: 'off' }, 503, h);
       const st = (await env.BOT.get('state', 'json')) || {};
-      return json({ reviews: st.reviews || [], reports: st.reports || {}, at: st.at || null }, 200, { ...h, 'Cache-Control': 'no-store' });
+      // Public: reporters appear only as an opaque hash (the site counts distinct reporters; Telegram user ids never leave KV).
+      const reports = Object.fromEntries(Object.entries(st.reports || {}).map(([code, list]) => [code, (list || []).map((r) => ({ d: r.d, u: uhash(r.u) }))]));
+      return json({ reviews: st.reviews || [], reports, at: st.at || null }, 200, { ...h, 'Cache-Control': 'no-store' });
     }
     if (url.pathname === '/health') return json({ ok: true, configured: !!(env.ALI_APP_KEY && env.ALI_APP_SECRET) }, 200, h);
     // Keyword search (Hebrew/English) – used by the 2.0 preview and for diagnostics. Short, cached, rate-limited by Cloudflare.

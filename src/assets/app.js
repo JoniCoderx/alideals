@@ -74,6 +74,15 @@
     return Promise.resolve(fallback());
   }
 
+  // One event per real trip to AliExpress. Clicks ≠ purchases: orders and commissions come only from the AliExpress portal.
+  var lastAff = { k: '', t: 0 };
+  function affClick(kind, id, ctx) {
+    var k = kind + ':' + id, now = Date.now();
+    if (k === lastAff.k && now - lastAff.t < 3000) return;
+    lastAff = { k: k, t: now };
+    track('affiliate_click', { link_type: kind, item_id: id, placement: ctx || location.pathname });
+  }
+
   function toast(msg) {
     var t = document.createElement('div');
     t.className = 'toast'; t.textContent = msg; t.setAttribute('role', 'status');
@@ -107,7 +116,7 @@
       if (left <= 0) {
         clearInterval(timer); timer = null;
         var box2 = $('modal-countdown'); if (box2) box2.querySelector('span').textContent = '🚀 פותחים את עליאקספרס!';
-        track('auto_open', { target_id: id }); goNow(id); return;
+        affClick('coupon', id, 'auto_open'); goNow(id); return;
       }
       onTick(left);
     }, 1000);
@@ -171,10 +180,14 @@
     var g = e.target.closest('[data-go]');
     if (g) {
       var gid = g.getAttribute('data-go');
-      track('outbound_click', { target_id: gid });
+      affClick('coupon', gid, g.getAttribute('data-ctx') || 'go');
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // let "open in new tab" work
       e.preventDefault(); stopCountdown(); goNow(gid); return;
     }
+
+    // Product links straight to AliExpress (picks, lists, search, deals today, sale lists)
+    var al = e.target.closest('a[href^="https://s.click.aliexpress.com/"]');
+    if (al && !al.hasAttribute('data-go')) { affClick('product', al.getAttribute('data-pid') || '', al.getAttribute('data-ctx') || ''); }
 
     var p = e.target.closest('[data-product]');
     if (p) { track('product_click', { product_id: p.getAttribute('data-product') }); return; }
@@ -360,7 +373,7 @@
     var ctrl = null, last = null, sortBy = 'best', seq = 0;
     var card = function (p) {
       var off = p.originalPrice > p.price ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
-      return '<a class="ps-card" href="' + e(safe(p.link)) + '" target="_blank" rel="nofollow sponsored noopener" data-ctx="search">' +
+      return '<a class="ps-card" href="' + e(safe(p.link)) + '" target="_blank" rel="nofollow sponsored noopener" data-ctx="search" data-pid="' + e(p.id) + '">' +
         '<span class="ps-img"><img src="' + e(img(p.image)) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' + (off >= 5 ? '<i class="ps-off">-' + off + '%</i>' : '') + '</span>' +
         '<span class="ps-t">' + e(p.title) + '</span>' +
         '<span class="ps-meta">⭐ <bdi dir="ltr">' + Math.round(p.rating) + '%</bdi> · <bdi dir="ltr">' + sold(p.sold) + '</bdi> נמכרו</span>' +
