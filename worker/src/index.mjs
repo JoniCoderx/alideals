@@ -465,7 +465,7 @@ export default {
       // against the product type in its English title, so a search for "סוללה ניידת" never returns lamps.
       const t = translateQuery(q);
       if (!t.understood) return json({ q, understood: false, items: [], chips: SEARCH_CHIPS.map((c) => c[1]) }, 200, { ...h, 'Cache-Control': 'public, max-age=3600' });
-      const key = `search/v6/${encodeURIComponent(t.en.toLowerCase())}/${encodeURIComponent(t.soft.join(' '))}`;
+      const key = `search/v7/${encodeURIComponent(t.en.toLowerCase())}/${encodeURIComponent(t.soft.join(' '))}`;
       try {
         return await cachedJSON(ctx, key, 6 * 3600, h, async () => {
           const base = { target_currency: 'ILS', tracking_id: env.ALI_TRACKING_ID, fields: FIELDS, keywords: t.en, ship_to_country: 'IL', page_size: 50, page_no: 1, sort: 'LAST_VOLUME_DESC' };

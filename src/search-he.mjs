@@ -11,7 +11,7 @@ const R = (s) => new RegExp(s, 'i');
 // Product types (the "head" of a query). Longest Hebrew phrase wins. m = regex the English title must match.
 const HEADS = [
   // audio
-  [['אוזניות אלחוטיות', 'אוזניות בלוטוס', 'אוזניות בלוטות', 'אוזניות תוך אוזן', 'איירפודס', 'אירפודס'], 'wireless earbuds', 'earbud|earphone|headphone|headset|tws|in-ear|ear buds|airpod', 'tips|hook|wing|foam|silicone cover'],
+  [['אוזניות אלחוטיות', 'אוזניות בלוטוס', 'אוזניות בלוטות', 'אוזניות תוך אוזן', 'איירפודס', 'אירפודס'], 'wireless earbuds', 'earbud|earphone|headphone|headset|tws|in-ear|ear buds|airpod', 'tips|hook|wing|foam|silicone cover|wired|3\\.5 ?mm|type-c earphone|type c earphone|in-line'],
   [['אוזניות קשת', 'אוזניות מעל האוזן', 'אוזניות על האוזן', 'אוזניות מבטלות רעשים'], 'over ear headphones', 'headphone|headset|over-ear|over ear'],
   [['אוזניות גיימינג'], 'gaming headset', 'headset|headphone'],
   [['אוזניות ספורט', 'אוזניות לריצה'], 'sports earphones', 'earbud|earphone|headphone|headset|tws|bone conduction|open ear'],
