@@ -240,21 +240,24 @@ async function dealsToday(env) {
 // "המציאה של היום": at 21:00 Israel time the biggest real drop (re-checked live) replaces the night post.
 // At most one a day; the same product isn't posted again for 14 days. No qualifying drop → the regular post goes out.
 const DEAL_HOUR = 21;
-export async function postDailyDeal(env) {
+export async function postDailyDeal(env, { dry = false } = {}) {
   if (!env.BOT || !env.TELEGRAM_BOT_TOKEN || !env.TG_CHAT) return { skipped: 'not configured' };
   const today = ilDay();
   const st = (await env.BOT.get('dotd', 'json')) || { posted: {} };
-  if (st.last === today) return { skipped: 'already posted today' };
+  if (st.last === today && !dry) return { skipped: 'already posted today' };
   const list = await dealsToday(env);
   let pick = null;
+  const tried = [];
   for (let i = 0; i < 3; i++) {
     const cand = pickDailyDeal(list, { posted: st.posted, today });
     if (!cand) break;
     const live = (await livePrices(env, [cand.id]))[cand.id];
+    tried.push({ id: cand.id, recorded: cand.price, was: cand.was, live: live ? live.price : null });
     if (live && live.price <= cand.price * 1.02 && live.price < cand.was * 0.92) { pick = { ...cand, price: live.price }; break; }
     list.splice(list.indexOf(cand), 1); // the price went back up since it was recorded: try the next one
   }
-  if (!pick) return { none: 'no real drop today' };
+  if (dry) return { dry: true, candidates: list.length, tried, pick: pick ? { id: pick.id, title: pick.title, price: pick.price, was: pick.was } : null };
+  if (!pick) return { none: 'no real drop today', tried };
   const site = env.SITE_URL || 'https://yeshdeal.com';
   const link = await shortAff(env, pick.id, pick.link);
   const post = dailyDealPost({ ...pick, link }, { site, today });
@@ -429,6 +432,10 @@ export default {
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (url.pathname === '/tg/webhook' && req.method === 'POST') return handleBot(req, env, ctx);
+    if (url.pathname === '/api/daily-deal-check' && req.method === 'GET') {
+      if (limited(req, 'dealcheck', 4)) return json(RATE_LIMITED, 429, h);
+      return json(await postDailyDeal(env, { dry: true }).catch((e) => ({ error: String(e.message).slice(0, 200) })), 200, { ...h, 'Cache-Control': 'no-store' });
+    }
     if (url.pathname === '/api/deals-today' && req.method === 'GET') return json({ items: await dealsToday(env), at: new Date().toISOString() }, 200, { ...h, 'Cache-Control': 'no-store' });
     if (url.pathname === '/api/track-now' && req.method === 'POST') {
       if (!env.TELEGRAM_BOT_TOKEN || req.headers.get('X-Key') !== await webhookSecret(env.TELEGRAM_BOT_TOKEN)) return json({ error: 'forbidden' }, 403, h);
