@@ -288,3 +288,18 @@ test('search: another product named first is that product', async () => {
   assert.equal(onTopic('Bluetooth Speaker Earbuds 2 in 1 TWS', ear), false);
   assert.equal(onTopic('RGB LED Strip Lights 5m Bluetooth Control', led), true);
 });
+
+test('search: per-type accessory filters', async () => {
+  const { translateQuery, onTopic } = await import('../src/search-he.mjs');
+  const T = (q) => translateQuery(q);
+  assert.equal(onTopic('Earbuds Cleaning Pen Soft Brush Cleaner Kit', T('אוזניות אלחוטיות')), false);
+  assert.equal(onTopic('Mechanical Keyboard Keychain Fidget Toy 4 Keys', T('מקלדת מכנית')), false);
+  assert.equal(onTopic('AJAZZ AK820 Pro Mechanical Keyboard Wireless 75%', T('מקלדת מכנית')), true);
+  assert.equal(onTopic('Men Dress Pants Slim Business Trousers', T('שמלה שחורה')), false);
+  assert.equal(onTopic('Black Mini Dress Spaghetti Strap Women', T('שמלה שחורה')), true);
+  assert.equal(onTopic('Dash Cam Holder Mount Universal Bracket', T('מצלמת רכב')), false);
+  assert.equal(onTopic('70mai Dash Cam 4K Front and Rear', T('מצלמת רכב')), true);
+  assert.equal(onTopic('PD 60W Fast Charger Cable USB C to USB C', T('מטען מהיר')), false);
+  assert.equal(onTopic('240W GaN Fast Charger 5 in 1 USB C', T('מטען מהיר')), true);
+  assert.equal(onTopic('Building Blocks Toy Set for Kids', T('צעצועים לילדים')), true);
+});

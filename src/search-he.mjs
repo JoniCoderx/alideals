@@ -11,12 +11,12 @@ const R = (s) => new RegExp(s, 'i');
 // Product types (the "head" of a query). Longest Hebrew phrase wins. m = regex the English title must match.
 const HEADS = [
   // audio
-  [['אוזניות אלחוטיות', 'אוזניות בלוטוס', 'אוזניות בלוטות', 'אוזניות תוך אוזן', 'איירפודס', 'אירפודס'], 'wireless earbuds', 'earbud|earphone|headphone|headset|tws|in-ear|ear buds|airpod'],
+  [['אוזניות אלחוטיות', 'אוזניות בלוטוס', 'אוזניות בלוטות', 'אוזניות תוך אוזן', 'איירפודס', 'אירפודס'], 'wireless earbuds', 'earbud|earphone|headphone|headset|tws|in-ear|ear buds|airpod', 'tips|hook|wing|foam|silicone cover'],
   [['אוזניות קשת', 'אוזניות מעל האוזן', 'אוזניות על האוזן', 'אוזניות מבטלות רעשים'], 'over ear headphones', 'headphone|headset|over-ear|over ear'],
   [['אוזניות גיימינג'], 'gaming headset', 'headset|headphone'],
   [['אוזניות ספורט', 'אוזניות לריצה'], 'sports earphones', 'earbud|earphone|headphone|headset|tws|bone conduction|open ear'],
   [['אוזניות עצם', 'אוזניות פתוחות'], 'open ear headphones', 'bone conduction|open ear|open-ear|air conduction|earbud|earphone|headphone'],
-  [['אוזניות', 'אוזנייה'], 'earbuds', 'earbud|earphone|headphone|headset|tws|airpod'],
+  [['אוזניות', 'אוזנייה'], 'earbuds', 'earbud|earphone|headphone|headset|tws|airpod', 'tips|hook|wing|foam'],
   [['רמקול בלוטוס', 'רמקול נייד', 'רמקול אלחוטי', 'רמקול'], 'bluetooth speaker', 'speaker|soundbar|boombox'],
   [['סאונדבר', 'מקרן קול'], 'soundbar', 'soundbar|sound bar'],
   [['מיקרופון דש', 'מיקרופון אלחוטי'], 'wireless lavalier microphone', 'microphone|mic\\b|lavalier'],
@@ -31,12 +31,12 @@ const HEADS = [
   [['מטען לרכב'], 'car charger', 'car charger|car charging|cigarette'],
   [['מטען לאייפון', 'מטען לאיפון'], 'iphone fast charger', 'charger|charging head|gan|adapter|plug'],
   [['מטען למחשב נייד', 'מטען ללפטופ', 'מטען למקבוק'], 'laptop charger gan', 'charger|gan|adapter'],
-  [['מטען מהיר', 'מטען קיר', 'מטען לטלפון', 'מטען', 'ראש מטען'], 'fast charger', 'charger|charging head|gan|adapter|plug'],
+  [['מטען מהיר', 'מטען קיר', 'מטען לטלפון', 'מטען', 'ראש מטען'], 'fast charger', 'charger|charging head|gan|adapter|plug', 'cable|cord|wire|magnetic tip'],
   [['כבל לאייפון', 'כבל לאיפון', 'כבל לייטנינג'], 'iphone charging cable', 'cable|cord|wire'],
   [['כבל hdmi', 'כבל לטלוויזיה'], 'hdmi cable', 'hdmi|cable'],
   [['כבל טעינה', 'כבל usb', 'כבל type c', 'כבל טייפ סי', 'כבל'], 'charging cable', 'cable|cord|wire'],
-  [['סוללה ניידת', 'סוללת גיבוי', 'מטען נייד', 'פאוורבנק', 'פאוור בנק', 'סוללה חיצונית'], 'power bank', 'power ?bank|powerbank|battery pack|external battery|portable charger'],
-  [['מחזיק טלפון לרכב', 'מעמד לטלפון לרכב', 'מחזיק לרכב', 'מעמד לרכב', 'תושבת לרכב', 'מחזיק טלפון'], 'car phone holder', 'holder|mount|stand|bracket'],
+  [['סוללה ניידת', 'סוללת גיבוי', 'מטען נייד', 'פאוורבנק', 'פאוור בנק', 'סוללה חיצונית'], 'power bank', 'power ?bank|powerbank|battery pack|external battery|portable charger', 'case|cover|pouch|cable|bag'],
+  [['מחזיק טלפון לרכב', 'מעמד לטלפון לרכב', 'מחזיק לרכב', 'מעמד לרכב', 'תושבת לרכב', 'מחזיק טלפון'], 'car phone holder', 'holder|mount|stand|bracket', 'plate|disc|disk|sticker|filler|gap|organizer|seat'],
   [['מחזיק טלפון לאופניים', 'מחזיק לאופניים', 'מחזיק לאופנוע'], 'bike phone holder', 'holder|mount|bracket'],
   [['מעמד לטלפון', 'מעמד לפלאפון', 'מעמד לטאבלט'], 'phone stand', 'stand|holder|mount'],
   [['מקל סלפי'], 'selfie stick', 'selfie'],
@@ -47,8 +47,8 @@ const HEADS = [
   [['דיסק קשיח', 'כונן', 'אס אס די'], 'ssd', 'ssd|nvme|hard drive|hdd|solid state'],
   [['טאבלט'], 'tablet', 'tablet|pad\\b'],
   // computer & gaming
-  [['מקלדת מכנית'], 'mechanical keyboard', 'keyboard'],
-  [['מקלדת אלחוטית', 'מקלדת'], 'keyboard', 'keyboard'],
+  [['מקלדת מכנית'], 'mechanical keyboard', 'keyboard', 'keycap|key cap|keychain|switch puller|wrist rest|cover'],
+  [['מקלדת אלחוטית', 'מקלדת'], 'keyboard', 'keyboard', 'keycap|key cap|keychain|cover|sticker|wrist rest'],
   [['עכבר אלחוטי', 'עכבר גיימינג', 'עכבר'], 'mouse', 'mouse|mice'],
   [['משטח לעכבר', 'פד לעכבר'], 'mouse pad', 'mouse pad|mousepad|desk mat'],
   [['מעמד למחשב נייד', 'מעמד ללפטופ', 'מעמד למחשב'], 'laptop stand', 'stand|holder'],
@@ -63,7 +63,7 @@ const HEADS = [
   [['מצלמת אקסטרים', 'מצלמת אקשן', 'גו פרו'], 'action camera', 'action camera|sports camera|action cam'],
   [['מצלמה'], 'camera', 'camera|cam\\b'],
   // wearables
-  [['שעון חכם', 'שעון ספורט', 'סמארטווטש'], 'smart watch', 'smart ?watch|smartwatch'],
+  [['שעון חכם', 'שעון ספורט', 'סמארטווטש'], 'smart watch', 'smart ?watch|smartwatch', 'band|strap|charger|cable|protector|film|case|box|stand|dock'],
   [['צמיד חכם', 'צמיד כושר', 'צמיד ספורט'], 'smart band', 'band|bracelet|fitness tracker'],
   [['רצועה לאפל ווטש', 'רצועה לשעון אפל'], 'apple watch band', 'band|strap|bracelet'],
   [['רצועה לשעון', 'רצועת שעון', 'רצועה'], 'watch band', 'band|strap|bracelet'],
@@ -106,7 +106,7 @@ const HEADS = [
   [['מדבקות קיר', 'מדבקה', 'מדבקות'], 'wall stickers', 'sticker|decal'],
   [['מחצלת', 'שטיחון'], 'door mat', 'mat|rug'],
   // kitchen
-  [['מטחנת קפה', 'מטחנה'], 'coffee grinder', 'grinder'],
+  [['מטחנת קפה', 'מטחנה'], 'coffee grinder', 'grinder', 'dosing|ring|funnel|brush|distributor|tamper|cleaning'],
   [['מכונת קפה', 'מקציף חלב', 'מקציף'], 'coffee machine', 'coffee|espresso|frother'],
   [['קומקום חשמלי', 'קומקום'], 'electric kettle', 'kettle'],
   [['בלנדר', 'בלנדר נייד', 'מעבד מזון'], 'portable blender', 'blender|juicer|food processor'],
@@ -123,7 +123,7 @@ const HEADS = [
   [['מצית', 'מצית חשמלי'], 'electric lighter', 'lighter'],
   [['טוסטר', 'סיר טיגון', 'נינג\'ה', 'אייר פרייר'], 'air fryer', 'fryer|toaster'],
   // car
-  [['מצלמת רכב', 'מצלמת דרך', 'מצלמה לרכב'], 'dash cam', 'dash ?cam|dashcam|car camera|dvr|recorder'],
+  [['מצלמת רכב', 'מצלמת דרך', 'מצלמה לרכב'], 'dash cam', 'dash ?cam|dashcam|car camera|dvr|recorder', 'holder|mount|bracket|suction|hardwire|power cord|cable'],
   [['מדחס לצמיגים', 'משאבה לצמיגים', 'מדחס', 'משאבת אוויר'], 'tire inflator', 'inflator|air pump|compressor'],
   [['כיסוי למושב', 'כיסויים למושבים', 'כיסוי מושב'], 'car seat cover', 'seat cover|cushion'],
   [['ארגונית לרכב', 'אביזרים לרכב', 'גאדג\'טים לרכב'], 'car accessories', 'car|vehicle|auto'],
@@ -161,7 +161,7 @@ const HEADS = [
   [['מכנסיים קצרים', 'שורטים', 'מכנס קצר'], 'shorts', 'shorts'],
   [['טרנינג', 'מכנסי טרנינג'], 'sweatpants', 'sweatpant|jogger|track pant|trouser|pant'],
   [['מכנסיים', 'מכנס'], 'pants', 'pant|trouser|jogger'],
-  [['שמלה', 'שמלות'], 'dress', 'dress'],
+  [['שמלה', 'שמלות'], 'dress', 'dress', 'pant|trouser|shirt|shoe|suit|sock|boot'],
   [['חצאית'], 'skirt', 'skirt'],
   [['פיג\'מה', 'פיגמה'], 'pajamas', 'pajama|pyjama|sleepwear|nightwear'],
   [['בגד ים', 'ביקיני', 'בגדי ים'], 'swimsuit', 'swim|bikini|beachwear'],
@@ -173,7 +173,7 @@ const HEADS = [
   [['כפכפים', 'כפכף', 'נעלי בית', 'סלייד'], 'slippers', 'slipper|slide|flip flop|sandal'],
   [['סנדלים', 'סנדל'], 'sandals', 'sandal'],
   [['מגפיים', 'מגף'], 'boots', 'boot'],
-  [['תיק גב', 'תרמיל'], 'backpack', 'backpack|rucksack'],
+  [['תיק גב', 'תרמיל'], 'backpack', 'backpack|rucksack', 'pin|badge|keychain|pendant|charm'],
   [['תיק צד', 'תיק כתף', 'פאוץ\''], 'crossbody bag', 'bag|pouch'],
   [['תיק', 'תיקים'], 'bag', 'bag|tote|purse|handbag'],
   [['ארנק', 'מחזיק כרטיסים'], 'wallet', 'wallet|card holder|purse'],
@@ -268,7 +268,7 @@ const NIQQUD = /[֑-ׇ]/g;
 const norm = (s) => String(s || '').replace(NIQQUD, '').replace(/[״"]/g, '"').replace(/[׳`']/g, '\'').replace(/[־–—]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
 
 // Index: every Hebrew phrase → head entry, longest first.
-const HEAD_INDEX = HEADS.flatMap(([he, en, m]) => he.map((p) => [norm(p), { en, m }])).sort((a, b) => b[0].split(' ').length - a[0].split(' ').length || b[0].length - a[0].length);
+const HEAD_INDEX = HEADS.flatMap(([he, en, m, x]) => he.map((p) => [norm(p), { en, m, x }])).sort((a, b) => b[0].split(' ').length - a[0].split(' ').length || b[0].length - a[0].length);
 const MOD_INDEX = Object.entries(MODS).map(([he, en]) => [norm(he), en]).sort((a, b) => b[0].split(' ').length - a[0].split(' ').length || b[0].length - a[0].length);
 
 // Lighter forms of a Hebrew word: drop a leading ו/ה/ל/ב/מ/ש/כ (one or two), plural/feminine endings.
@@ -322,7 +322,8 @@ export function translateQuery(q) {
   const en = [head?.en, ...parts.sort((a, b) => a[0] - b[0]).map((x) => x[1])].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
   // A query of only Latin words (e.g. "baseus 65w") is already English: the brand/model must appear in the title.
   const must = head ? [R(head.m)] : latin.filter((w) => /[a-z]{3,}/i.test(w)).slice(0, 2).map((w) => R(w.replace(/[.+\-]/g, '\\$&')));
-  return { en, head: head?.en || '', must, soft: extra.map((s) => s.toLowerCase()), understood: !!(head || latin.length), unknown };
+  const not = head?.x ? R(`\\b(${head.x})`) : null;
+  return { en, head: head?.en || '', must, not, soft: extra.map((s) => s.toLowerCase()), understood: !!(head || latin.length), unknown };
 }
 
 /**
@@ -332,6 +333,9 @@ export function translateQuery(q) {
 export function onTopic(title, t) {
   if (!t.must.every((re) => re.test(title))) return false;
   if (!t.must.length) return true;
+  if (t.not && t.not.test(title.slice(0, 90))) return false;
+  const acc = title.slice(0, 70).match(ACCESSORY);
+  if (acc && !t.must[0].test(acc[0])) return false;
   const at = title.search(t.must[0]);
   const forAt = title.search(/\b(for|compatible with|replacement|fits)\b/i);
   if (at > 80 || (forAt >= 0 && at > forAt)) return false;
@@ -339,6 +343,8 @@ export function onTopic(title, t) {
   const before = title.slice(0, at).toLowerCase();
   return !OTHER_NOUNS.some((n) => new RegExp(`\\b${n}s?\\b`).test(before) && !t.must[0].test(n));
 }
+// Strong signs of an accessory/part/toy version of a product (checked at the start of the title).
+const ACCESSORY = /\b(cleaning|cleaner|clean pen|ear ?tips|eartips|replacement|spare|parts|keychain|key ?chain|keyring|fidget|stickers?|decals?|skins?|dust plug|anti-?dust plug|dummy|model toy|miniature|toy)\b/i;
 const OTHER_NOUNS = ['lamp', 'light', 'flashlight', 'torch', 'lantern', 'fan', 'cable', 'case', 'cover', 'holder', 'mount', 'stand', 'charger', 'strap', 'band',
   'box', 'bag', 'organizer', 'sticker', 'film', 'protector', 'brush', 'pen', 'mat', 'pouch', 'sleeve', 'adapter', 'hub', 'speaker', 'keyboard', 'mouse', 'cleaner', 'kit'];
 
