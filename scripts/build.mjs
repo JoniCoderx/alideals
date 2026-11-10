@@ -1113,8 +1113,8 @@ const TOP_GUIDE = {
   'car-travel': { h: 'מה לבדוק לפני שקונים אביזרים לרכב ולטיולים', li: ['מטענים לרכב: הספק כולל מול הספק לכל יציאה.', 'משאבות ושואבים: סוללה מובנית מול חיבור למצת, ולחץ מקסימלי (PSI) לצמיגים.', 'מחזיקי טלפון: התאמה לגודל הטלפון ולכיסוי שלכם, ואם צריך MagSafe.', 'בטיחות בנהיגה: מתקינים כך שלא מסתירים שדה ראייה או כרית אוויר.'] },
 };
 const PRICE_BANDS = [
-  { slug: 'under-50', emoji: '🪙', title: 'מוצרים מומלצים מעליאקספרס עד 50 שקל', max: 50, min: 0, intro: 'מוצרים מהרשימות הנבחרות שלנו שהמחיר שלהם היום עד 50 שקל, לפני משלוח ומע״מ. כל מוצר כאן עבר את אותו סף איכות: דירוג גבוה ומאות עד אלפי מכירות.' },
-  { slug: 'under-100', emoji: '💯', title: 'מוצרים מומלצים מעליאקספרס עד 100 שקל', max: 100, min: 50.01, intro: 'מוצרים מהרשימות הנבחרות שלנו שהמחיר שלהם היום בין 50 ל־100 שקל, לפני משלוח ומע״מ. מוצרים עד 50 שקל נמצאים ברשימה נפרדת.' },
+  { slug: 'under-50', emoji: '🪙', price: 50, tag: 'מציאות קטנות ששוות כל שקל', title: 'מוצרים מומלצים מעליאקספרס עד 50 שקל', max: 50, min: 0, intro: 'מוצרים מהרשימות הנבחרות שלנו שהמחיר שלהם היום עד 50 שקל, לפני משלוח ומע״מ. כל מוצר כאן עבר את אותו סף איכות: דירוג גבוה ומאות עד אלפי מכירות.' },
+  { slug: 'under-100', emoji: '💯', price: 100, tag: 'שדרוגים שווים במחיר שפוי', title: 'מוצרים מומלצים מעליאקספרס עד 100 שקל', max: 100, min: 50.01, intro: 'מוצרים מהרשימות הנבחרות שלנו שהמחיר שלהם היום בין 50 ל־100 שקל, לפני משלוח ומע״מ. מוצרים עד 50 שקל נמצאים ברשימה נפרדת.' },
 ];
 const bandList = (b) => Object.values(topItems).filter((x) => x.live && x.price >= b.min && x.price <= b.max && safeLink(x.link) && x.rating >= (catalog.criteria?.minRating || 92) && x.sold >= (catalog.criteria?.minSold || 300)).sort((a, b2) => b2.sold - a.sold);
 
@@ -1125,6 +1125,7 @@ function priceBandPage(b) {
   const other = PRICE_BANDS.find((x) => x.slug !== b.slug);
   const body = `
 <section class="hero hero-sm"><div class="wrap narrow">${bc.html}
+  <div class="band-chip band-${b.price}" aria-hidden="true"><span>עד</span><b><small>₪</small>${b.price}</b></div>
   <h1>${esc(b.title)}</h1>
   <p class="lead">${esc(b.intro)}</p>
   <p class="muted small">המחירים נבדקו מול עליאקספרס ב־${esc(topAt)}. הרשימה מתעדכנת אוטומטית: מוצר שהמחיר שלו עלה מעל ${b.max} שקל יורד ממנה. משלוח ומע״מ מחושבים בקופה. המחיר המחוק הוא המחיר המקורי שעליאקספרס מציגה.</p>
@@ -1151,9 +1152,9 @@ function topIndexPage() {
 </div></section>
 <section class="section"><div class="wrap">
   ${PRICE_BANDS.some((b) => bandList(b).length >= 5) ? `<h2 class="section-title">לפי תקציב</h2>
-  <div class="top-grid top-grid-2">${PRICE_BANDS.filter((b) => bandList(b).length >= 5).map((b) => { const l = bandList(b); return `<a class="top-card" href="/top/${b.slug}/"><span class="top-card-head"><span class="top-emoji" aria-hidden="true">${b.emoji}</span><span class="top-count">${l.length} מוצרים</span></span><h3>${esc(b.title.replace(' מעליאקספרס', ''))}</h3><span class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</span><span class="top-more">לרשימה ←</span></a>`; }).join('')}</div>` : ''}
+  <div class="top-grid top-grid-2">${PRICE_BANDS.filter((b) => bandList(b).length >= 5).map((b) => { const l = bandList(b); return `<a class="top-card band-card band-${b.price}" href="/top/${b.slug}/" aria-label="${esc(b.title)}"><span class="band-hero"><span class="band-count">${l.length} מוצרים</span><span class="band-upto">עד</span><span class="band-price"><small>₪</small>${b.price}</span><span class="band-tag">${esc(b.tag)}</span></span><span class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</span><span class="top-more">לרשימה ←</span></a>`; }).join('')}</div>` : ''}
   <h2 class="section-title">לפי קטגוריה</h2>
-  <div class="top-grid top-grid-5">${catalog.collections.map((c) => { const l = topList(c); return l.length ? `<a class="top-card" href="/top/${c.slug}/"><span class="top-card-head"><span class="top-emoji" aria-hidden="true">${c.emoji}</span><span class="top-count">${l.length} מוצרים</span></span><h3>${esc((l.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${l.length} `)).replace(/^\d+\s/, ''))}</h3><span class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</span><span class="top-more">לרשימה ←</span></a>` : ''; }).join('')}</div>
+  <div class="top-grid top-grid-5">${catalog.collections.map((c) => { const l = topList(c); return l.length ? `<a class="top-card cat-card cat-${esc(c.slug)}" href="/top/${c.slug}/"><span class="top-card-head"><span class="cat-tile" aria-hidden="true">${c.emoji}</span><span class="top-count">${l.length} מוצרים</span></span><h3>${esc((l.length === c.items.length ? c.title : c.title.replace(/^\d+\s/, `${l.length} `)).replace(/^\d+\s/, ''))}</h3><span class="top-thumbs">${l.slice(0, 4).map((x) => `<img src="${esc(x.image)}_120x120.jpg" alt="" width="60" height="60" loading="lazy" referrerpolicy="no-referrer">`).join('')}</span><span class="top-more">לרשימה ←</span></a>` : ''; }).join('')}</div>
 <div class="prose" style="margin-top:22px">
   <h2>איך אנחנו בוחרים</h2>
   <ol>
