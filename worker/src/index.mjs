@@ -215,8 +215,9 @@ async function trackPrices(env) {
   const hist = (await env.BOT.get('prices', 'json')) || {};
   const day = ilDay();
   for (const [id, p] of Object.entries(live)) {
-    const h = (hist[id]?.h || []).filter((x) => x.d !== day || x.p <= p.price);
-    if (!h.some((x) => x.d === day)) h.push({ d: day, p: p.price });
+    // Today's point is the LATEST price seen (not the day's low): a short dip that already ended is not a deal.
+    const h = (hist[id]?.h || []).filter((x) => x.d !== day);
+    h.push({ d: day, p: p.price });
     hist[id] = { t: titles[id] || p.title, img: p.image, l: p.link, r: p.rating, s: p.sold, o: p.originalPrice, h: h.slice(-21) };
   }
   await env.BOT.put('prices', JSON.stringify(hist));
@@ -248,7 +249,7 @@ export async function postDailyDeal(env, { dry = false } = {}) {
   const list = await dealsToday(env);
   let pick = null;
   const tried = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 6; i++) {
     const cand = pickDailyDeal(list, { posted: st.posted, today });
     if (!cand) break;
     const live = (await livePrices(env, [cand.id]))[cand.id];
