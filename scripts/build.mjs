@@ -659,7 +659,7 @@ ${site.social.telegram || site.social.facebook ? `<section class="section commun
 </div></div></section>` : ''}
 <section class="section"><div class="wrap narrow"><p class="disclosure">גילוי נאות: חלק מהקישורים באתר הם קישורי שותפים. כשקונים דרכם אנחנו עשויים לקבל עמלה מעליאקספרס, בלי תוספת למחיר שלכם. <a href="/disclosure/">עוד פרטים</a></p></div></section>`;
 
-  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)], share: { title: 'יש דיל! לפני שקונים בעליאקספרס, עוברים כאן', description: 'הקוד שמתאים בדיוק לסכום ההזמנה שלך, מחשבון שמראה כמה יוצא בסוף, וערוץ טלגרם עם הדילים של היום. חינם, בעברית, מתעדכן כל שעה.', image: '/assets/og-share.jpg' } });
+  return layout({ title, description, pathname, body, ld: [websiteLd, orgLd, faqLd(faq)], share: { title: 'יש דיל! לפני שקונים בעליאקספרס, עוברים כאן', description: 'הקוד שמתאים בדיוק לסכום ההזמנה שלך, מחשבון שמראה כמה יוצא בסוף, וערוץ טלגרם עם הדילים של היום. חינם, בעברית, מתעדכן כל יום.', image: '/assets/og-share.jpg' } });
 }
 
 function dealsIndexPage() {
@@ -1102,7 +1102,7 @@ function priceBandPage(b) {
   </div>
 </div></section>`;
   const ld = [bc.ld, { '@context': 'https://schema.org', '@type': 'ItemList', name: b.title, itemListElement: list.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.title })) }];
-  return layout({ title: `${b.title} | ${site.name}`, description: `${list.length} מוצרים שבחרנו מעליאקספרס ב${b.title.split(' ').slice(-3).join(' ')}: דירוג גבוה, אלפי מכירות ומחיר בשקלים שמתעדכן כל שעה. קישור ישיר לכל מוצר.`, pathname, body, ld, noindex: list.length < 5 });
+  return layout({ title: `${b.title} | ${site.name}`, description: `${list.length} מוצרים שבחרנו מעליאקספרס ב${b.title.split(' ').slice(-3).join(' ')}: דירוג גבוה, אלפי מכירות ומחיר בשקלים שמתעדכן כמה פעמים ביום. קישור ישיר לכל מוצר.`, pathname, body, ld, noindex: list.length < 5 });
 }
 
 function topIndexPage() {
