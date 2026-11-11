@@ -195,13 +195,16 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     },
     // "Code of the moment": one code, big, with the cart range it fits.
     spot() {
-      const pick = real
+      // Sale days: codes for everyday carts (minimum up to $200) first; the big-ticket ones only when those are on gap.
+      const saleNow = events.some((e) => e.start <= today && e.end >= today);
+      const pool = saleNow && real.some((c) => c.minOrder <= 200 && fresh(`spot|${c.code}`, spotGapDays)) ? real.filter((c) => c.minOrder <= 200) : real;
+      const pick = pool
         .map((c, i) => ({ c, i, id: `spot|${c.code}`, last: state.history[`spot|${c.code}`] || '' }))
         .filter(({ id }) => fresh(id, spotGapDays))
         .sort((a, b) => a.last.localeCompare(b.last) || (b.c.featured ? 1 : 0) - (a.c.featured ? 1 : 0) || a.i - b.i)[0];
       if (!pick) return null;
       const c = pick.c;
-      const next = real[pick.i + 1];
+      const next = real[real.indexOf(c) + 1];
       const range = next ? `מ־${money(c.minOrder, c.currency)} עד ${money((next.minOrder - 0.01).toFixed(2), c.currency)}` : `מ־${money(c.minOrder, c.currency)} ומעלה`;
       const until = c.expires ? `בתוקף עד ${heDate(c.expires)}` : '';
       return [pick.id, {
@@ -306,7 +309,9 @@ export function planQueue({ queue = [], regular = {}, today, hour, days = 2, eve
   // products/codes (the next hour's post is kept so nothing changes at the last minute).
   const MONEY = new Set(['product', 'spot', 'event', 'new', 'ending', 'countdown', 'weekly']);
   const saleOn = (d) => events.some((e) => e.start <= d && e.end >= d);
-  keep = keep.filter((q) => q.annId || MONEY.has(q.kind) || !saleOn(q.date) || q.date > addDays(today, 1) || (q.date === today && q.hour <= hour + 1));
+  // On sale days the 'code of the moment' should fit a normal cart: big-ticket codes (minimum over $200) are re-planned.
+  const bigTicket = (q) => q.kind === 'spot' && Number((String(q.card?.bigLabel || '').match(/\$(\d+)/) || [])[1]) > 200;
+  keep = keep.filter((q) => q.annId || (MONEY.has(q.kind) && !(saleOn(q.date) && bigTicket(q) && !(q.date === today && q.hour <= hour + 1))) || !saleOn(q.date) || q.date > addDays(today, 1) || (q.date === today && q.hour <= hour + 1));
   // A new one-time announcement jumps the queue: it replaces the next planned slot.
   const annList = announcements || telegramAnnouncements;
   const pending = annList.find((a) => (!a.on || a.on <= today) && !(reg.history || {})[a.id] && !keep.some((q) => q.annId === a.id));
