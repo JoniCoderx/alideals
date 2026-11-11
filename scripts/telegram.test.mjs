@@ -303,3 +303,18 @@ test('search: per-type accessory filters', async () => {
   assert.equal(onTopic('240W GaN Fast Charger 5 in 1 USB C', T('מטען מהיר')), true);
   assert.equal(onTopic('Building Blocks Toy Set for Kids', T('צעצועים לילדים')), true);
 });
+
+test('sale mode: during a live sale every slot plans products/codes, tips planned before are replaced', async () => {
+  const { planQueue } = await import('./telegram.mjs');
+  const events = [{ slug: '11-11', name: '11.11', start: '2026-11-01', end: '2026-11-18' }];
+  const coupons = [8, 12, 20, 37, 60].map((d, i) => ({ id: 'c' + i, code: 'ILAFF' + d, discount: d, minOrder: d * 5, currency: 'USD', expires: '2026-11-18' }));
+  const { readFile } = await import('node:fs/promises');
+  const products = JSON.parse(await readFile(new URL('../data/v2/telegram-products.json', import.meta.url), 'utf8')).items;
+  const oldTip = { key: '2026-11-11|prime', date: '2026-11-11', hour: 19, kind: 'tip', text: 'tip', buttons: [] };
+  const { telegramAnnouncements } = await import('../src/content/telegram-posts.mjs');
+  const posted = Object.fromEntries(telegramAnnouncements.map((x) => [x.id, '2026-11-01']));
+  const q = planQueue({ queue: [oldTip], regular: { history: posted }, today: '2026-11-11', hour: 13, days: 1, events, coupons, siteUrl: 'https://yeshdeal.com', affLink: 'https://s.click.aliexpress.com/e/_x', products });
+  const list = q.queue.filter((x) => x.date === '2026-11-11' && x.hour > 13);
+  assert.ok(list.length >= 3, 'plans the rest of the day');
+  assert.ok(list.every((x) => ['product', 'spot'].includes(x.kind)), JSON.stringify(list.map((x) => x.kind)));
+});

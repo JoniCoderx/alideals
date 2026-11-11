@@ -253,8 +253,11 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     });
   }
 
-  // 2) The slot's preferred content.
-  for (const kind of slot.prefer) {
+  // 2) The slot's preferred content. During a live sale (11.11, Black Friday…) every slot is about buying:
+  //    products and codes first, the evergreen tips only if those run out.
+  const saleDay = events.some((e) => e.start <= today && e.end >= today);
+  const prefer = saleDay ? [...new Set([...slot.prefer.filter((k) => k === 'product' || k === 'spot'), 'product', 'spot', ...slot.prefer])] : slot.prefer;
+  for (const kind of prefer) {
     const r = makers[kind]?.();
     if (r) return done(r[0], r[1]);
   }
@@ -299,6 +302,11 @@ export function planQueue({ queue = [], regular = {}, today, hour, days = 2, eve
     const productSlots = new Set(SLOTS.filter((sl) => sl.prefer.includes('product')).map((sl) => sl.from));
     keep = keep.filter((q) => q.annId || q.kind === 'product' || !productSlots.has(q.hour) || (q.date === today && q.hour <= hour + 1));
   }
+  // Sale days: already-planned tips/guides/features for today and tomorrow are dropped and re-planned as
+  // products/codes (the next hour's post is kept so nothing changes at the last minute).
+  const MONEY = new Set(['product', 'spot', 'event', 'new', 'ending', 'countdown', 'weekly']);
+  const saleOn = (d) => events.some((e) => e.start <= d && e.end >= d);
+  keep = keep.filter((q) => q.annId || MONEY.has(q.kind) || !saleOn(q.date) || q.date > addDays(today, 1) || (q.date === today && q.hour <= hour + 1));
   // A new one-time announcement jumps the queue: it replaces the next planned slot.
   const annList = announcements || telegramAnnouncements;
   const pending = annList.find((a) => (!a.on || a.on <= today) && !(reg.history || {})[a.id] && !keep.some((q) => q.annId === a.id));
