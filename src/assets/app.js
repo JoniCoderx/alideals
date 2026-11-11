@@ -14,6 +14,8 @@
   var ilHour = (function () { try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: 'numeric', hour12: false }).format(new Date())); } catch (e) { return 0; } })();
   var expired = function (d) { return !!d && (d < today || (d === today && ilHour >= 23)); };
 
+  // "היום 11.11!" only on that day (Israel time), even if the page was built before midnight.
+  (function () { var a = document.querySelector('.topbar a[data-peak]'); if (a && a.getAttribute('data-peak') !== today) a.textContent = a.getAttribute('data-alt'); })();
   // Hide codes that expired since the last build (in case a scheduled build was missed).
   (function () {
     var t = document.getElementById('promo-toast');

@@ -254,6 +254,13 @@ function topbar() {
   const text = live
     ? `קודי ${esc(short)} בתוקף${activeEvent.end ? ` עד ${heShort(activeEvent.end)}` : ' עכשיו'} 🔥 לכל הקודים`
     : activeEvent.start <= today ? `⏳ ${esc(short)} כאן. הקודים לישראל יעלו לכאן ברגע שעליאקספרס תפרסם אותם` : `⏳ ${esc(short)} מתחיל ${days === 1 ? 'מחר' : `בעוד ${days} ימים`}. כך מתכוננים`;
+  // The sale's main day (11.11 itself, Black Friday itself) gets its own line; the browser swaps back
+  // to the regular line once that day is over in Israel, in case no build ran after midnight.
+  const peak = activeEvent.slug === '11-11' ? `${activeEvent.start.slice(0, 4)}-11-11` : activeEvent.slug === 'black-friday' ? activeEvent.start : '';
+  if (live && peak === today) {
+    const alt = `${text} ←`;
+    return `<div class="topbar"><a href="/sale/${activeEvent.slug}/" data-peak="${peak}" data-alt="${esc(alt)}">היום ${esc(short)}! כל הקודים לישראל 🔥 ←</a></div>`;
+  }
   return `<div class="topbar"><a href="/sale/${activeEvent.slug}/">${text} ←</a></div>`;
 }
 
