@@ -39,7 +39,8 @@ const I = {
     otherLang: 'English',
     copyTitle: 'העתקת קישור', leaveQ: 'לצאת מהחדר?', reconnecting: 'מתחבר מחדש…',
     linkCopied: 'הקישור הועתק 📋', copyPrompt: 'העתיקו את הקישור:',
-    waText: (u) => `בואו לשחק איתי ארץ עיר! 🌍🏙️🐘\n${u}`,
+    waText: (u) => `🎲 בואו לשחק איתי ארץ עיר אונליין!\nלוחצים על הקישור, כותבים שם ונכנסים:\n${u}`,
+    shareResult: '📣 שתפו את התוצאה', resultText: (place, score, u) => `${place === 1 ? '🏆 ניצחתי' : `סיימתי במקום ${place}`} בארץ עיר אונליין עם ${score} נקודות! מי מעז לשחק נגדי? 🎲\n${u}`,
     roomCode: 'קוד החדר', sendWa: 'שליחה בוואטסאפ', copyLink: 'העתקת קישור', share: 'שיתוף…',
     aloneTitle: 'מחכים לחברים 👋', aloneText: 'שלחו להם את הקישור. מי שלוחץ עליו נכנס ישר לחדר הזה.',
     players: 'שחקנים', you: ' (את/ה)', host: 'מארח/ת', offline: 'לא מחובר/ת', makeHost: 'להעביר ניהול', kick: 'הוצאה מהחדר',
@@ -111,7 +112,8 @@ const I = {
     otherLang: 'עברית',
     copyTitle: 'Copy link', leaveQ: 'Leave the room?', reconnecting: 'Reconnecting…',
     linkCopied: 'Link copied 📋', copyPrompt: 'Copy the link:',
-    waText: (u) => `Come play Eretz Ir with me! 🌍🏙️🐘\n${u}`,
+    waText: (u) => `🎲 Come play Eretz Ir Online with me!\nTap the link, type your name and you're in:\n${u}`,
+    shareResult: '📣 Share your result', resultText: (place, score, u) => `${place === 1 ? '🏆 I won' : `I finished #${place}`} at Eretz Ir Online with ${score} points! Think you can beat me? 🎲\n${u}`,
     roomCode: 'Room code', sendWa: 'Send on WhatsApp', copyLink: 'Copy link', share: 'Share…',
     aloneTitle: 'Waiting for friends 👋', aloneText: 'Send them the link. Anyone who opens it lands right in this room.',
     players: 'Players', you: ' (you)', host: 'Host', offline: 'offline', makeHost: 'Make host', kick: 'Remove',
@@ -302,6 +304,7 @@ function renderHome(code, err) {
   S = null;
   screenKey = 'home';
   document.body.classList.remove('is-host');
+  document.body.classList.toggle('landing', !code);
   if (es) { es.close(); es = null; }
   const name = h('input', { class: 'inp big', id: 'name', maxlength: 16, placeholder: t('namePh'), value: lsGet(LS_NAME) || '', autocomplete: 'nickname', enterkeyhint: 'go', dir: 'auto' });
   const codeInp = h('input', { class: 'inp big ltr code-inp', id: 'code', inputmode: 'numeric', pattern: '[0-9]*', maxlength: 5, placeholder: t('codePh'), value: code || '' });
@@ -348,7 +351,7 @@ function renderHome(code, err) {
           h('div', { class: 'or' }, h('span', null, t('orJoin'))),
           h('div', { class: 'row' }, codeInp, h('button', { class: 'btn', onclick: (e) => join(e.currentTarget) }, t('join'))))),
     howToCard()));
-  if (!name.value) name.focus();
+  if (!name.value && matchMedia('(pointer: fine)').matches) name.focus();
 }
 
 function howToCard() {
@@ -358,6 +361,7 @@ function howToCard() {
 }
 
 function connect(r) {
+  document.body.classList.remove('landing');
   session = { room: r.room, pid: r.pid, token: r.token };
   lsSet(LS_KEY, JSON.stringify(session));
   if (location.pathname !== '/' + r.room) history.replaceState(null, '', '/' + r.room);
@@ -990,6 +994,16 @@ function updateFinal() {
     h('thead', null, h('tr', null, h('th', null, t('letter')), ...ids.map((id) => h('th', null, pname(id))))),
     h('tbody', null, ...S.history.map((r) => h('tr', null, h('th', null, `${r.round}. ${r.letter}`),
       ...ids.map((id) => h('td', null, r.totals[id] != null ? r.totals[id] : '–'))))))));
+  const ranked = [...S.players].sort((a, b) => b.score - a.score);
+  const meP = player(S.you);
+  if (meP && !document.getElementById('fn-share')) {
+    const place = ranked.findIndex((p) => p.score === meP.score) + 1;
+    document.getElementById('fn-table').after(h('button', { class: 'btn wa result-share', id: 'fn-share', style: { width: '100%' }, onclick: () => {
+      const text = t('resultText', place, meP.score, location.origin + '/' + (ui === 'en' ? '?lang=en' : ''));
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ text }).catch(() => {});
+      else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+    } }, t('shareResult')));
+  }
   document.getElementById('fn-cta').replaceChildren(isHost()
     ? h('button', { class: 'btn primary xl', onclick: () => action('playAgain') }, t('playAgain'))
     : h('div', { class: 'waiting' }, h('span', { class: 'dots' }), t('hostCanRestart')));

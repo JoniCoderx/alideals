@@ -2,6 +2,7 @@
 // ה-DO מריץ את אותו מנוע חדר (room.mjs) כמו שרת ה-Node, עם אותו פרוטוקול (SSE + POST).
 
 import { Room, cleanName, metaPayload } from './room.mjs';
+import { renderIndex, robotsTxt, sitemapXml } from './seo.mjs';
 
 const json = (status, data) => new Response(JSON.stringify(data), {
   status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -13,6 +14,7 @@ function randomCode() {
   return String(1000 + (a[0] % 9000));
 }
 
+const text = (body, type) => new Response(body, { headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=3600' } });
 const roomStub = (env, code) => env.ROOMS.get(env.ROOMS.idFromName(code));
 
 export default {
@@ -48,8 +50,27 @@ export default {
 
     if (p.startsWith('/api/')) return json(404, { error: 'not_found' });
 
-    // קישור חדר (/1234) מגיש את דף המשחק
-    if (/^\/\d{4,5}\/?$/.test(p)) return env.ASSETS.fetch(new Request(new URL('/', url), req));
+    if (p === '/robots.txt') return text(robotsTxt(url.origin), 'text/plain; charset=utf-8');
+    if (p === '/sitemap.xml') return text(sitemapXml(url.origin), 'application/xml; charset=utf-8');
+
+    // דף הבית וקישורי חדר (/1234): index.html עם כתובות מלאות ותצוגה מקדימה מותאמת
+    const roomMatch = p.match(/^\/(\d{4,5})\/?$/);
+    if (p === '/' || p === '/index.html' || roomMatch) {
+      const asset = await env.ASSETS.fetch(new Request(new URL('/', url), { method: 'GET' }));
+      let room = null;
+      if (roomMatch) {
+        room = { code: roomMatch[1] };
+        try {
+          const r = await roomStub(env, roomMatch[1]).fetch('https://room/preview');
+          if (r.ok) Object.assign(room, await r.json());
+        } catch {}
+      }
+      const lang = url.searchParams.get('lang') === 'en' || (room && room.lang === 'en' && !url.searchParams.get('lang')) ? 'en' : 'he';
+      const html = renderIndex(await asset.text(), { origin: url.origin, lang, room });
+      const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' };
+      if (room) headers['X-Robots-Tag'] = 'noindex';
+      return new Response(req.method === 'HEAD' ? null : html, { headers });
+    }
     return env.ASSETS.fetch(req);
   },
 };
@@ -75,6 +96,12 @@ export class RoomDO {
     }
 
     const room = this.room && !this.room.closed ? this.room : null;
+
+    if (p === '/preview') {
+      if (!room) return json(404, { error: 'room_not_found' });
+      const host = room.players.get(room.hostId);
+      return json(200, { host: host ? host.name : null, players: room.players.size, lang: room.settings.lang });
+    }
 
     if (p === '/api/events') {
       if (!room) return json(404, { error: 'room_not_found' });

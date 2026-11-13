@@ -7,6 +7,7 @@ import { randomInt } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Room, cleanName, metaPayload } from './room.mjs';
+import { renderIndex, robotsTxt, sitemapXml } from './seo.mjs';
 
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -24,12 +25,35 @@ function newCode() {
   return String(randomInt(10000, 100000));
 }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
-const STATIC = new Set(['/index.html', '/style.css', '/app.js', '/icon.svg', '/manifest.webmanifest', '/check.mjs', '/dict-data.mjs']);
+const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
+const STATIC = new Set(['/index.html', '/style.css', '/app.js', '/icon.svg', '/manifest.webmanifest', '/check.mjs', '/dict-data.mjs', '/og-image.png', '/og-image-en.png', '/icon-192.png', '/icon-512.png', '/icon-maskable-512.png', '/apple-touch-icon.png', '/favicon-32.png']);
 const cache = new Map();
 
-async function serveStatic(res, pathname) {
-  const file = pathname === '/' || /^\/\d{4,5}\/?$/.test(pathname) ? '/index.html' : pathname;
+function originOf(req) {
+  const proto = String(req.headers['x-forwarded-proto'] || 'http').split(',')[0];
+  return `${proto}://${req.headers['x-forwarded-host'] || req.headers.host || 'localhost'}`;
+}
+
+async function serveStatic(req, res, url) {
+  const pathname = url.pathname;
+  const origin = originOf(req);
+  if (pathname === '/robots.txt') { res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end(robotsTxt(origin)); }
+  if (pathname === '/sitemap.xml') { res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' }); return res.end(sitemapXml(origin)); }
+  const roomMatch = pathname.match(/^\/(\d{4,5})\/?$/);
+  if (pathname === '/' || pathname === '/index.html' || roomMatch) {
+    const html = (await readFile(path.join(PUBLIC, 'index.html'))).toString('utf8');
+    let room = null;
+    if (roomMatch) {
+      const r = rooms.get(roomMatch[1]);
+      room = { code: roomMatch[1], host: r ? r.players.get(r.hostId)?.name : null, lang: r ? r.settings.lang : null };
+    }
+    const lang = url.searchParams.get('lang') === 'en' || (room && room.lang === 'en' && !url.searchParams.get('lang')) ? 'en' : 'he';
+    const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' };
+    if (room) headers['X-Robots-Tag'] = 'noindex';
+    res.writeHead(200, headers);
+    return res.end(renderIndex(html, { origin, lang, room }));
+  }
+  const file = pathname;
   if (!STATIC.has(file)) return json(res, 404, { error: 'not_found' });
   let body = cache.get(file);
   if (!body || process.env.NODE_ENV === 'development') {
@@ -38,7 +62,7 @@ async function serveStatic(res, pathname) {
   }
   res.writeHead(200, {
     'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
-    'Cache-Control': 'no-cache',
+    'Cache-Control': file.endsWith('.png') ? 'public, max-age=604800' : 'no-cache',
     'X-Content-Type-Options': 'nosniff',
   });
   res.end(body);
@@ -113,7 +137,7 @@ const server = http.createServer(async (req, res) => {
       }
       return json(res, 404, { error: 'not_found' });
     }
-    if (req.method === 'GET' || req.method === 'HEAD') return await serveStatic(res, url.pathname);
+    if (req.method === 'GET' || req.method === 'HEAD') return await serveStatic(req, res, url);
     json(res, 405, { error: 'method' });
   } catch (e) {
     if (!res.headersSent) json(res, 400, { error: e.message || 'error' });

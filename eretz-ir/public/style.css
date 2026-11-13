@@ -4,10 +4,10 @@
   --ink: #1f2335;
   --muted: #6b7088;
   --line: #ece4da;
-  --brand: #ff6b35;
-  --brand-d: #e8541f;
+  --brand: #ef5b24;
+  --brand-d: #c9461a;
   --yellow: #ffd23f;
-  --green: #0ead69;
+  --green: #0a8a52;
   --green-bg: #e6f8ef;
   --blue: #3b5bdb;
   --blue-bg: #edf1ff;
@@ -55,7 +55,7 @@ button { font-family: inherit; }
 .btn.primary { background: var(--brand); border-color: var(--brand-d); color: #fff; box-shadow: 0 4px 0 var(--brand-d); }
 .btn.primary:active:not(:disabled) { box-shadow: 0 1px 0 var(--brand-d); transform: translateY(3px); }
 .btn.xl { width: 100%; font-size: 1.2rem; padding: 15px 18px; border-radius: 16px; }
-.btn.wa { background: #25d366; border-color: #1da851; color: #fff; }
+.btn.wa { background: #168a45; border-color: #11733a; color: #fff; }
 .btn.link { border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 8px; width: 100%; font-weight: 500; }
 .btn.stop { background: var(--red); border-color: #b02525; color: #fff; box-shadow: 0 4px 0 #b02525; }
 .btn.stop:disabled { background: #c9c9d1; border-color: #b4b4bd; box-shadow: 0 4px 0 #b4b4bd; opacity: 1; color: #fff; }
@@ -209,7 +209,7 @@ body.offline .conn { display: inline; animation: blink 1s infinite; }
 .st-solo .pts b { color: var(--blue); }
 .st-ok .pts b { color: var(--green); }
 .st-shared { background: var(--amber-bg); }
-.st-shared .pts b { color: #b07800; }
+.st-shared .pts b { color: #8a6100; }
 .st-zero .what { color: var(--muted); font-weight: 500; }
 .st-rej { background: var(--red-bg); }
 .st-rej .what { text-decoration: line-through; color: var(--red); }
@@ -305,7 +305,7 @@ details > summary { cursor: pointer; font-weight: 700; }
 .field-row .num .ck { display: none; }
 .field-row.good .num .n { display: none; }
 .field-row.good .num .ck { display: inline; }
-.inp.ans::placeholder { color: #c9c0b5; font-weight: 700; }
+.inp.ans::placeholder { color: #b3a99d; font-weight: 700; }
 .letter-tile.reveal { animation: reveal .6s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes reveal { 0% { transform: scale(.3) rotate(-20deg); } 100% { transform: none; } }
 .btn.stop.ready { animation: wiggle 1.4s infinite; }
@@ -341,3 +341,35 @@ details > summary { cursor: pointer; font-weight: 700; }
 .what .maybe { display: block; font-size: .78rem; font-weight: 500; color: var(--muted); }
 .vote.up.on { background: var(--green); border-color: #0a8a55; }
 .vote.up.on small { color: #fff; }
+
+/* ---- v4: דף נחיתה / SEO ---- */
+.seo { display: none; }
+body.landing .seo { display: block; max-width: 680px; margin: 0 auto; padding: 8px 16px 56px; color: #3d4256; }
+html[lang="en"] .seo-he, html[lang="he"] .seo-en { display: none; }
+.seo h2 { font-size: 1.35rem; margin: 28px 0 10px; color: var(--ink); }
+.seo h3 { font-size: 1.02rem; margin: 0 0 4px; color: var(--ink); }
+.seo p { margin: 0 0 10px; }
+.seo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+.seo-grid > div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); }
+.seo-grid p { margin: 0; font-size: .93rem; }
+.seo-steps { padding-inline-start: 22px; margin: 0; }
+.seo-steps li { margin-bottom: 6px; }
+.seo details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+.seo details p { margin: 8px 0 0; }
+@media (max-width: 480px) { .seo-grid { grid-template-columns: 1fr; } }
+.result-share { margin-top: 10px; }
+.icon-btn { min-width: 40px; min-height: 40px; }
+.mini { min-width: 34px; min-height: 32px; }
+.chip.code { min-height: 34px; }
+.chip { white-space: nowrap; }
+main.home { padding-bottom: 24px; }
+body.landing .home .rules { display: none; }
+@media (max-width: 420px) {
+  .logo-tiles { gap: 4px; flex-wrap: nowrap; }
+  .logo-tiles span { width: 38px; height: 44px; font-size: 1.35rem; border-radius: 9px; }
+  .logo-tiles span.gap { margin-inline-start: 6px; }
+  .topbar { gap: 4px; padding-inline: 10px; }
+  .icon-btn { min-width: 36px; }
+}
+.sticky-cta { background: linear-gradient(to top, var(--bg) 82%, rgba(255, 248, 240, 0)); padding-top: 22px; }
+.cta-note { background: var(--bg); border-radius: 10px; padding: 2px 8px; }
