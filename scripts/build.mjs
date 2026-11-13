@@ -1099,7 +1099,7 @@ function picksSection() {
   <p class="muted picks-sub">בחירה ידנית: דירוג גבוה ואלפי מכירות. מחירים מעליאקספרס, ${esc(topAt)}.<span class="picks-note">המחיר המחוק לפי עליאקספרס.</span></p>
   <div class="picks-row" tabindex="0" aria-label="מוצרים נבחרים">${list.map((x) => {
     const o = x.live; const off = o.orig > o.price ? Math.round((1 - o.price / o.orig) * 100) : 0;
-    return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-pid="${esc(o.id)}" data-ctx="picks"><span class="pick-media"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async">${off >= 5 ? `<i class="pick-off">-${off}%</i>` : ''}</span><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
+    return `<a class="pick" href="${esc(o.link)}" ${OUT} target="_blank" data-pid="${esc(o.id)}" data-ctx="picks"><span class="pick-media"><picture><source type="image/webp" srcset="/assets/picks/${esc(x.id)}.webp 1x, /assets/picks/${esc(x.id)}@2x.webp 2x"><img src="/assets/picks/${esc(x.id)}.jpg" alt="${esc(o.title)}" width="432" height="540" loading="lazy" decoding="async"></picture>${off >= 5 ? `<i class="pick-off">-${off}%</i>` : ''}</span><span class="pick-info"><b class="pick-title">${esc(o.title)}</b><span class="pick-price"><b>${ilsFmt(o.price)}</b>${off >= 5 ? `<s>${ilsFmt(o.orig)}</s>` : ''}</span><span class="pick-cta">לצפייה בעליאקספרס ←</span></span></a>`;
   }).join('')}</div>
 </div></section>`;
 }
