@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ארץ עיר אונליין – משחק עם חברים בחינם, בלי הורדה</title>
+  <meta name="description" content="משחק ארץ עיר אונליין עם חברים: פותחים חדר, שולחים קישור בוואטסאפ ומשחקים מהנייד. טיימר, כפתור עצור!, בדיקת תשובות אוטומטית מול מילון וניקוד. בחינם, בלי הרשמה, בעברית ובאנגלית.">
+  <link rel="canonical" href="/">
+  <link rel="alternate" hreflang="he" href="/">
+  <link rel="alternate" hreflang="en" href="/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="/">
+  <meta name="theme-color" content="#ff6b35">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-title" content="ארץ עיר">
+  <meta name="application-name" content="ארץ עיר">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ארץ עיר אונליין">
+  <meta property="og:locale" content="he_IL">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:url" content="/">
+  <meta property="og:title" content="ארץ עיר אונליין – בואו לשחק עם חברים!">
+  <meta property="og:description" content="פותחים חדר, שולחים קישור ומשחקים. טיימר, עצור! וניקוד אוטומטי. בחינם, בלי הרשמה.">
+  <meta property="og:image" content="/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ארץ עיר אונליין – משחק מילים עם חברים">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ארץ עיר אונליין – בואו לשחק עם חברים!">
+  <meta name="twitter:description" content="פותחים חדר, שולחים קישור ומשחקים. טיימר, עצור! וניקוד אוטומטי.">
+  <meta name="twitter:image" content="/og-image.png">
+
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- הגופן לא חוסם את התצוגה: הדף מוצג מיד בגופן המערכת ומתחלף ל-Rubik כשהוא נטען -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap"></noscript>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="modulepreload" href="/check.mjs">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["WebApplication", "VideoGame"],
+        "name": "ארץ עיר אונליין",
+        "alternateName": ["Eretz Ir Online", "ארץ עיר", "Country City game"],
+        "url": "/",
+        "description": "משחק ארץ עיר מרובה משתתפים בדפדפן: חדר עם קישור, טיימר, עצור!, בדיקת תשובות מול מילון וניקוד אוטומטי.",
+        "applicationCategory": "GameApplication",
+        "genre": ["Word game", "Party game"],
+        "operatingSystem": "Any",
+        "inLanguage": ["he", "en"],
+        "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 16 },
+        "playMode": "MultiPlayer",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ILS" },
+        "image": "/og-image.png"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "איך משחקים ארץ עיר אונליין עם חברים?",
+            "acceptedAnswer": { "@type": "Answer", "text": "פותחים חדר, שולחים לחברים את הקישור בוואטסאפ, וכל מי שלוחץ עליו נכנס לחדר. המארח מתחיל, מוגרלת אות, וכולם ממלאים מילה בכל קטגוריה לפני שהזמן נגמר." } },
+          { "@type": "Question", "name": "צריך להוריד אפליקציה או להירשם?",
+            "acceptedAnswer": { "@type": "Answer", "text": "לא. המשחק עובד בדפדפן בנייד ובמחשב, בלי הורדה ובלי הרשמה. כותבים שם ומשחקים." } },
+          { "@type": "Question", "name": "איך נקבע הניקוד בארץ עיר?",
+            "acceptedAnswer": { "@type": "Answer", "text": "תשובה ייחודית מקבלת 10 נקודות, תשובה שגם שחקן אחר כתב מקבלת 5, ומי שהיחיד שענה בקטגוריה מקבל 15. תשובה ריקה, שלא מתחילה באות או שנפסלה מקבלת 0." } },
+          { "@type": "Question", "name": "איך המשחק יודע אם תשובה נכונה?",
+            "acceptedAnswer": { "@type": "Answer", "text": "כל תשובה נבדקת מול מילון של אלפי מילים לפי קטגוריה. תשובה עם שגיאת כתיב או מילה שלא נמצאה נספרת רק אם השחקנים האחרים מאשרים אותה, ואות בודדת או ג'יבריש מקבלות 0." } },
+          { "@type": "Question", "name": "כמה שחקנים יכולים לשחק?",
+            "acceptedAnswer": { "@type": "Answer", "text": "עד 16 שחקנים בחדר אחד. אפשר גם לשחק לבד כדי להתאמן." } }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body class="landing">
+  <div id="app">
+    <!-- המסך הראשון בנוי כאן מראש כדי שיופיע מיד; app.js מחליף אותו במסך האינטראקטיבי -->
+    <main class="home">
+      <div class="home-top"><span class="lang-btn" aria-hidden="true">🌐 English</span></div>
+      <div class="hero">
+        <div class="logo-tiles" aria-hidden="true"><span>א</span><span>ר</span><span>ץ</span><span class="gap">ע</span><span>י</span><span>ר</span></div>
+        <h1>ארץ עיר <span class="accent">אונליין</span></h1>
+        <p class="sub">פותחים חדר, שולחים קישור לחברים, ומשחקים. בלי הרשמה ובלי הורדות.</p>
+      </div>
+      <div class="card">
+        <label class="lbl" for="name-ph">השם שלך</label>
+        <input class="inp big" id="name-ph" placeholder="איך קוראים לך?" disabled>
+        <div><span class="btn primary xl" aria-disabled="true" style="display:block;text-align:center;margin-top:12px">➕ פתיחת חדר חדש</span></div>
+      </div>
+    </main>
+  </div>
+
+  <section class="seo" id="seo" aria-label="מידע על המשחק">
+    <div lang="he" dir="rtl" class="seo-he">
+      <h2>ארץ עיר אונליין: המשחק הקלאסי, עם חברים, מכל מקום</h2>
+      <p>ארץ עיר הוא משחק המילים שכולם שיחקו בכיתה ובטיולים: מגרילים אות, וכל אחד ממלא מילה שמתחילה בה בכל קטגוריה, כמו ארץ, עיר, חי, צומח, דומם, מקצוע ושם. כאן משחקים אותו אונליין: כל אחד מהטלפון שלו, ביחד, גם כשלא נמצאים באותו חדר.</p>
+      <div class="seo-grid">
+        <div><h3>🔗 חדר עם קישור</h3><p>פותחים חדר ושולחים את הקישור בוואטסאפ. מי שלוחץ נכנס ישר למשחק, בלי הרשמה ובלי הורדה. עד 16 שחקנים.</p></div>
+        <div><h3>⏱️ טיימר ועצור!</h3><p>טיימר אחד לכולם. מי שמילא הכול לוחץ "עצור!", ולשאר נשארות כמה שניות.</p></div>
+        <div><h3>✓ בדיקת תשובות</h3><p>כל תשובה נבדקת מול מילון. שגיאת כתיב לא נספרת (ומקבלים הצעה לתיקון), ואות בודדת לא שווה נקודות.</p></div>
+        <div><h3>🏆 ניקוד אוטומטי</h3><p>ייחודי 10, כפול 5, רק את/ה ענית בקטגוריה 15. טבלה אחרי כל סיבוב ופודיום בסוף.</p></div>
+        <div><h3>🎯 קטגוריות משלכם</h3><p>8 קטגוריות קלאסיות, 20 הצעות (מאכל, מותג, סרט או סדרה, זמר/ת…) או קטגוריה שאתם ממציאים.</p></div>
+        <div><h3>🇬🇧 גם באנגלית</h3><p>אפשר לשחק בעברית או באנגלית, וכל שחקן בוחר לעצמו את שפת התצוגה.</p></div>
+      </div>
+      <h2>איך משחקים ארץ עיר?</h2>
+      <ol class="seo-steps">
+        <li>כותבים שם ולוחצים "פתיחת חדר חדש".</li>
+        <li>שולחים לחברים את הקישור או את קוד החדר.</li>
+        <li>המארח בוחר זמן, מספר סיבובים וקטגוריות, ולוחץ "מתחילים".</li>
+        <li>מוגרלת אות. ממלאים מילה בכל קטגוריה לפני שהזמן נגמר.</li>
+        <li>בודקים ביחד: 👍 לאישור תשובה, 👎 לפסילה. הניקוד מתעדכן לבד.</li>
+      </ol>
+      <h2>שאלות נפוצות</h2>
+      <details><summary>צריך להוריד אפליקציה?</summary><p>לא. המשחק עובד בדפדפן בכל טלפון ומחשב. אפשר גם להוסיף אותו למסך הבית.</p></details>
+      <details><summary>זה בחינם?</summary><p>כן, לגמרי. בלי הרשמה ובלי פרסומות בזמן המשחק.</p></details>
+      <details><summary>מה קורה אם מישהו כותב סתם אות או מילה לא נכונה?</summary><p>אות בודדת או ג'יבריש מקבלות 0. מילה שלא נמצאה במילון, למשל עם שגיאת כתיב, נספרת רק אם החברים מאשרים אותה. ותמיד אפשר לפסול תשובה ברוב קולות.</p></details>
+      <details><summary>מה אם נסגר לי הדפדפן באמצע?</summary><p>נכנסים שוב לאותו קישור וחוזרים לאותו מקום, עם התשובות שכבר כתבתם.</p></details>
+      <details><summary>אפשר לשחק בזום או בשיחת וידאו?</summary><p>בטח. פותחים את השיחה, ושולחים בצ'אט את הקישור לחדר. כל אחד משחק מהטלפון או מהמחשב.</p></details>
+    </div>
+    <div lang="en" dir="ltr" class="seo-en">
+      <h2>Eretz Ir Online: the classic Country–City word game, with friends</h2>
+      <p>Eretz Ir ("Country, City") is the word game also known as Stop or Categories. A random letter is drawn and everyone writes a word starting with it for each category: country, city, animal, plant, thing, job, name and more. Play it online with friends: open a room, share the link on WhatsApp, and play from your phones.</p>
+      <div class="seo-grid">
+        <div><h3>🔗 Rooms with a link</h3><p>No sign-up, no download, up to 16 players.</p></div>
+        <div><h3>⏱️ Timer and Stop!</h3><p>One shared timer. Filled everything? Hit Stop! and the others get a few seconds left.</p></div>
+        <div><h3>✓ Answer checking</h3><p>Answers are checked against a dictionary. Typos get a suggestion, gibberish scores 0.</p></div>
+        <div><h3>🏆 Automatic scoring</h3><p>Unique 10, shared 5, the only answer in a category 15.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

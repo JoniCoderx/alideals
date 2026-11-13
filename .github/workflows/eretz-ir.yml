@@ -1,0 +1,45 @@
+name: Eretz Ir game – test & deploy
+
+# The game runs on Cloudflare Workers + Durable Objects at https://eretz-ir.<account>.workers.dev
+# (separate from the coupon site; uses the same CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets).
+on:
+  push:
+    branches: [main, claude/festive-goodall-jrw5w4]
+    paths: ['eretz-ir/**', '.github/workflows/eretz-ir.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: eretz-ir
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    defaults:
+      run:
+        working-directory: eretz-ir
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tests
+        run: node --test
+      - name: Deploy to Cloudflare
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npx -y wrangler@4 deploy
+      - name: Smoke test
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: |
+          URL=https://eretz-ir.joni0000.workers.dev
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS "$URL/healthz" && curl -fsS "$URL/" | grep -q 'ארץ עיר'; then echo; echo "LIVE: $URL"; exit 0; fi
+            sleep 10
+          done
+          echo "Game did not respond at $URL"; exit 1
