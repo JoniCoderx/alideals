@@ -184,7 +184,8 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     product() {
       const pick = products
         .map((x, i) => ({ x, i, id: `product|${x.id}`, last: state.history[`product|${x.id}`] || '' }))
-        .filter(({ id, x }) => x.link && x.image && fresh(id, 14))
+        // During a sale products come back after 4 days (the rotation is ~23 products), otherwise after 14.
+        .filter(({ id, x }) => x.link && x.image && fresh(id, events.some((e) => e.start <= today && e.end >= today) ? 4 : 14))
         .sort((a, b) => a.last.localeCompare(b.last) || a.i - b.i)[0];
       if (!pick) return null;
       const x = pick.x;
@@ -199,10 +200,13 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     spot() {
       // Sale days: codes for everyday carts (minimum up to $200) first; the big-ticket ones only when those are on gap.
       const saleNow = events.some((e) => e.start <= today && e.end >= today);
-      const pool = saleNow && real.some((c) => c.minOrder <= 200 && fresh(`spot|${c.code}`, spotGapDays)) ? real.filter((c) => c.minOrder <= 200) : real;
+      const everyday = real.filter((c) => c.minOrder <= 200);
+      // Sale days: only everyday-cart codes; when all were shown recently, repeat the least recent one rather than a big-ticket code.
+      const pool = saleNow && everyday.length ? everyday : real;
+      const gap = saleNow && everyday.length && !everyday.some((c) => fresh(`spot|${c.code}`, spotGapDays)) ? 0 : spotGapDays;
       const pick = pool
         .map((c, i) => ({ c, i, id: `spot|${c.code}`, last: state.history[`spot|${c.code}`] || '' }))
-        .filter(({ id }) => fresh(id, spotGapDays))
+        .filter(({ id }) => fresh(id, gap))
         .sort((a, b) => a.last.localeCompare(b.last) || (b.c.featured ? 1 : 0) - (a.c.featured ? 1 : 0) || a.i - b.i)[0];
       if (!pick) return null;
       const c = pick.c;
