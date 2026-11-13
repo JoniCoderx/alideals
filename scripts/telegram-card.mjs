@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// House style: an emoji never leads a label ("⚡ הקוד של עכשיו" → "הקוד של עכשיו ⚡").
+const emojiLast = (l) => { const m = String(l || '').match(/^(\p{Extended_Pictographic}[\u{FE0F}\u{200D}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}]*)\s+(.+)$/u); return m ? `${m[2]} ${m[1]}` : String(l || ''); };
 const money = (n, cur = 'USD') => (cur === 'ILS' ? `₪${n}` : `$${n}`);
 
 const BUBBLE = (fill, mark) => `<svg viewBox="0 0 64 64" width="76" height="76"><path d="M32 4C16.5 4 4 15.2 4 29c0 6.7 3 12.8 7.8 17.3L8 60l15-6.6c2.8.8 5.9 1.2 9 1.2 15.5 0 28-11.2 28-25S47.5 4 32 4z" fill="${fill}"/><path d="M22 39 42 19" stroke="${mark}" stroke-width="5.5" stroke-linecap="round"/><circle cx="23" cy="21" r="5" fill="${mark}"/><circle cx="41" cy="37" r="5" fill="${mark}"/></svg>`;
@@ -61,7 +63,7 @@ li b{flex:none;display:grid;place-items:center;width:60px;height:60px;border-rad
     ? `<div class="big">${esc(bigNumber)}</div><div class="biglabel">${esc(bigLabel || '')}</div>${t.codeTitle ? `<div class="codebox">${esc(title)}</div>` : `<h1 style="margin-top:26px">${esc(title)}</h1>`}`
     : `<div class="head"><div class="tile">${emoji || '💡'}</div><h1>${esc(title)}</h1></div>`;
   const html = `<div class="deco"><div class="pct">%</div><div class="ring"></div></div>
-<div class="top"><div class="brand">${brand}<span>${esc(name)}<span style="color:${t.bang}">!</span></span></div><div class="badge">${esc(t.badge)}</div></div>
+<div class="top"><div class="brand">${brand}<span>${esc(name)}<span style="color:${t.bang}">!</span></span></div><div class="badge">${esc(emojiLast(t.badge))}</div></div>
 <div class="main">
   ${head}
   ${pts.length ? `<ul>${pts.map((p, i) => `<li><b>${i + 1}</b><span>${esc(p)}</span></li>`).join('')}</ul>` : ''}
@@ -108,7 +110,7 @@ h1{font-size:${big ? 80 : 66}px;font-weight:800;line-height:1.05;margin-top:30px
 .url{background:#fff;color:#c8102e;border-radius:999px;padding:12px 28px}
 </style></head><body>
 <div class="pct">%</div>
-<div class="top"><div class="brand">${BUBBLE('#fff', '#e5122f')}<span>${esc(name)}!</span></div><div class="badge">${esc(t.badge)}</div></div>
+<div class="top"><div class="brand">${BUBBLE('#fff', '#e5122f')}<span>${esc(name)}!</span></div><div class="badge">${esc(emojiLast(t.badge))}</div></div>
 <h1>${esc(title)}</h1>
 ${subtitle ? `<div class="sub">${esc(subtitle)}</div>` : ''}
 <div class="grid">${list.map((c) => `<div class="c"><div><div class="amt">${money(c.discount, c.currency)}</div><div class="min">מעל ${money(c.minOrder, c.currency)}</div></div><div class="code">${esc(c.code)}</div></div>`).join('')}</div>

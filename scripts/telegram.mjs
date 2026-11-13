@@ -169,12 +169,14 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     weekly() {
       const weekKey = `weekly|${today.slice(0, 4)}-${Math.ceil(daysBetween(`${today.slice(0, 4)}-01-01`, today) / 7)}`;
       if (weekday !== 5 || !real.length || state.history[weekKey]) return null;
-      const top = [...real].sort((a, b) => b.discount - a.discount).slice(0, 3);
+      // The most useful codes for everyday carts (the order report: median item ~$3): the 3 biggest with a minimum up to $215.
+      const everyday = real.filter((c) => c.minOrder <= 215);
+      const top = [...(everyday.length >= 3 ? everyday : real)].sort((a, b) => b.discount - a.discount).slice(0, 3);
       const mid = real[Math.floor(real.length / 2)];
       return [weekKey, {
         kind: 'weekly',
-        card: { kind: 'weekly', title: 'הקודים הכי שווים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
-        text: `🏆 <b>הקודים הכי שווים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לעגלה ממוצעת, הקוד המשתלם בדרך כלל הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
+        card: { kind: 'weekly', title: 'הקודים הכי שימושיים השבוע', subtitle: 'לעליאקספרס · לישראל', codes: top, footer: 'סופ"ש של קניות 🛍️', site: host },
+        text: `🏆 <b>הקודים הכי שימושיים השבוע לעליאקספרס</b>\n\n${top.map(line).join('\n')}\n\n💡 לעגלה ממוצעת, הקוד המשתלם בדרך כלל הוא <code>${esc(mid.code)}</code> (${money(mid.discount, mid.currency)} מעל ${money(mid.minOrder, mid.currency)}). לא בטוחים? המחשבון יגיד לכם.`,
         buttons: [[{ text: '🧮 איזה קוד מתאים לי?', url: link('/#calc', 'weekly') }], [{ text: '🛒 לעליאקספרס', url: link(`/go/${top[0].id}/`, 'weekly') }]],
       }];
     },
@@ -310,7 +312,8 @@ export function planQueue({ queue = [], regular = {}, today, hour, days = 2, eve
   const MONEY = new Set(['product', 'spot', 'event', 'new', 'ending', 'countdown', 'weekly']);
   const saleOn = (d) => events.some((e) => e.start <= d && e.end >= d);
   // On sale days the 'code of the moment' should fit a normal cart: big-ticket codes (minimum over $200) are re-planned.
-  const bigTicket = (q) => q.kind === 'spot' && Number((String(q.card?.bigLabel || '').match(/\$(\d+)/) || [])[1]) > 200;
+  const bigTicket = (q) => (q.kind === 'spot' && Number((String(q.card?.bigLabel || '').match(/\$(\d+)/) || [])[1]) > 200)
+    || (q.kind === 'weekly' && (q.card?.codes || []).some((c) => c.minOrder > 215));
   keep = keep.filter((q) => q.annId || (MONEY.has(q.kind) && !(saleOn(q.date) && bigTicket(q) && !(q.date === today && q.hour <= hour + 1))) || !saleOn(q.date) || q.date > addDays(today, 1) || (q.date === today && q.hour <= hour + 1));
   // A new one-time announcement jumps the queue: it replaces the next planned slot.
   const annList = announcements || telegramAnnouncements;
