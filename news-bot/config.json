@@ -34,7 +34,7 @@
     "רק נטו\\s*חדשות.*$"
   ],
   "prefix": "🔴 ",
-  "footer": "📡 מקור: @{source}",
+  "footer": "",
   "rewrite": true,
   "rewrite_model": "claude-haiku-5-5",
   "send_photos": true

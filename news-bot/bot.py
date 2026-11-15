@@ -193,11 +193,13 @@ def build_caption(text: str, source: str, cfg: dict) -> str:
         if i == 0 and len(ln) <= 110:
             esc = f"<b>{esc}</b>"
         body_html.append(esc)
-    footer = cfg.get("footer", "📡 מקור: @{source}").format(source=source)
+    footer = cfg.get("footer", "").format(source=source)
     prefix = cfg.get("prefix", "🔴 ")
     body = "\n".join(body_html)
     if body_html:
         body = prefix + body
+    if not footer:
+        return body
     return f"{body}\n\n{html.escape(footer)}" if body else html.escape(footer)
 
 
