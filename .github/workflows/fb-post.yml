@@ -1,0 +1,25 @@
+name: Facebook page posts
+on:
+  schedule:
+    # Israel 10:05, 14:05, 19:05 (UTC+2 in winter) — the same cards as the Telegram slots at 10, 14 and 19.
+    - cron: '5 8 * * *'
+    - cron: '5 12 * * *'
+    - cron: '5 17 * * *'
+  workflow_dispatch:
+    inputs:
+      slot: { description: 'Telegram slot hour to post (8,10,12,14,17,19,21). Empty = current hour', required: false }
+      dry: { description: 'Dry run (print only)', type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node scripts/fb-post.mjs
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          SLOT: ${{ inputs.slot }}
+          DRY: ${{ inputs.dry && '1' || '' }}
