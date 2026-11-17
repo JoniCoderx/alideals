@@ -1,10 +1,12 @@
 name: Facebook page posts
 on:
   schedule:
-    # Israel 10:05, 14:05, 19:05 (UTC+2 in winter) — the same cards as the Telegram slots at 10, 14 and 19.
+    # Israel 10:05, 12:05, 14:05, 19:05, 21:05 (UTC+2 in winter): the same cards as those Telegram slots.
     - cron: '5 8 * * *'
+    - cron: '5 10 * * *'
     - cron: '5 12 * * *'
     - cron: '5 17 * * *'
+    - cron: '5 19 * * *'
   workflow_dispatch:
     inputs:
       slot: { description: 'Telegram slot hour to post (8,10,12,14,17,19,21). Empty = current hour', required: false }
@@ -21,6 +23,6 @@ jobs:
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
-          SLOT: ${{ inputs.slot || (github.event.schedule == '5 8 * * *' && '10') || (github.event.schedule == '5 12 * * *' && '14') || (github.event.schedule == '5 17 * * *' && '19') || '' }}
+          SLOT: ${{ inputs.slot || (github.event.schedule == '5 8 * * *' && '10') || (github.event.schedule == '5 10 * * *' && '12') || (github.event.schedule == '5 12 * * *' && '14') || (github.event.schedule == '5 17 * * *' && '19') || (github.event.schedule == '5 19 * * *' && '21') || '' }}
           MAX_LATE_H: ${{ github.event_name == 'schedule' && '4' || '' }}
           DRY: ${{ inputs.dry && '1' || '' }}
