@@ -21,5 +21,6 @@ jobs:
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
-          SLOT: ${{ inputs.slot }}
+          SLOT: ${{ inputs.slot || (github.event.schedule == '5 8 * * *' && '10') || (github.event.schedule == '5 12 * * *' && '14') || (github.event.schedule == '5 17 * * *' && '19') || '' }}
+          MAX_LATE_H: ${{ github.event_name == 'schedule' && '4' || '' }}
           DRY: ${{ inputs.dry && '1' || '' }}

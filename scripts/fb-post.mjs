@@ -33,6 +33,8 @@ export function fbMessage(item) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const q = await (await fetch(`${SITE}/tg-queue/queue.json?t=${Date.now()}`)).json();
   const item = q.items.find((i) => i.date === date && i.hour === slot);
+  const late = Number(get('hour')) - slot;
+  if (process.env.MAX_LATE_H && (late < 0 || late > Number(process.env.MAX_LATE_H))) { console.log(`run is ${late}h off slot ${slot}:00, skipping (GitHub cron delay)`); process.exit(0); }
   if (!item) { console.log(`no planned post for ${date} ${slot}:00`); process.exit(0); }
   if (!['product', 'spot', 'weekly', 'deal'].includes(item.kind)) { console.log(`skip kind ${item.kind}`); process.exit(0); }
   const message = fbMessage(item);
