@@ -2,6 +2,7 @@
 //   GET /api/cheapest?url=<AliExpress product link or id>
 // Secrets (wrangler secret put): ALI_APP_KEY, ALI_APP_SECRET, ALI_TRACKING_ID
 // Vars (wrangler.toml): ALLOWED_ORIGIN
+import { fbMessage, FB_HOURS } from '../../src/fb-copy.mjs';
 import { parseProductInput, extractIdFromUrl, keywordsFromTitle, normalizeProduct, rankAlternatives } from '../../scripts/cheapest-lib.mjs';
 import { classifyMatch } from '../../src/v2/logic.mjs';
 import { collectReports, uhash, pickDailyDeal, dailyDealPost } from '../../scripts/telegram-bot.mjs';
@@ -171,6 +172,23 @@ export function israelNow(d = new Date()) {
 }
 
 /** Hourly: publish the Telegram post planned (by CI) for this Israel-time slot, if any. */
+// Facebook Page: the same planned card at FB_HOURS (Worker cron is on time; GitHub cron was hours late).
+export async function publishFacebook(env, now = new Date(), fetchImpl = fetch) {
+  if (!env.FB_PAGE_ID || !env.FB_PAGE_TOKEN || !env.SITE_URL) return { skipped: 'fb not configured' };
+  const { date, hour } = israelNow(now);
+  if (!FB_HOURS.includes(hour)) return { skipped: `fb not a slot ${hour}` };
+  const res = await fetchImpl(`${env.SITE_URL}/tg-queue/queue.json?t=${Date.now()}`, { cf: { cacheTtl: 0 } });
+  if (!res.ok) return { error: `queue ${res.status}` };
+  const { items = [] } = await res.json();
+  const item = items.find((i) => i.date === date && i.hour === hour);
+  if (!item || !['product', 'spot', 'weekly', 'deal'].includes(item.kind)) return { none: `${date} ${hour} ${item?.kind || ''}` };
+  const message = fbMessage(item);
+  const body = new URLSearchParams({ access_token: env.FB_PAGE_TOKEN, ...(item.img ? { url: `${env.SITE_URL}/tg-queue/${item.img}`, caption: message } : { message }) });
+  const r = await fetchImpl(`https://graph.facebook.com/v21.0/${env.FB_PAGE_ID}/${item.img ? 'photos' : 'feed'}`, { method: 'POST', body });
+  const j = await r.json().catch(() => ({}));
+  return { fb: item.key, ok: !j.error, id: j.post_id || j.id, error: j.error ? `${j.error.code} ${j.error.message}`.slice(0, 160) : undefined };
+}
+
 export async function publishQueued(env, now = new Date(), fetchImpl = fetch) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TG_CHAT || !env.SITE_URL) return { skipped: 'not configured' };
   const { date, hour } = israelNow(now);
@@ -423,6 +441,7 @@ export default {
     const deal = ilHour === DEAL_HOUR ? postDailyDeal(env).catch((e) => ({ error: e.message })) : Promise.resolve(null);
     ctx.waitUntil(deal.then((d) => { if (d) console.log('daily deal', JSON.stringify(d)); return d?.posted ? { replacedBy: 'daily deal' } : publishQueued(env); })
       .then((r) => console.log('telegram slot', JSON.stringify(r))).catch((e) => console.log('telegram slot error', e.message)));
+    ctx.waitUntil(publishFacebook(env, new Date(event.scheduledTime || Date.now())).then((r) => console.log('facebook', JSON.stringify(r))).catch((e) => console.log('facebook error', e.message)));
     ctx.waitUntil(dispatchWorkflow(env).then((r) => console.log('clock dispatch', JSON.stringify(r))).catch((e) => console.log('clock error', e.message)));
     const hr = new Date(event.scheduledTime || Date.now()).getUTCHours();
     if (hr % 6 === 3) ctx.waitUntil(trackPrices(env).then((r) => console.log('prices', JSON.stringify(r))).catch((e) => console.log('prices error', e.message)));

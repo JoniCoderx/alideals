@@ -165,7 +165,7 @@ jobs:
           if [ -z "$KV_ID" ]; then KV_ID=$(npx -y wrangler@4 kv namespace create yeshdeal-bot 2>&1 | grep -oE '[0-9a-f]{32}' | head -1 || true); fi
           if [ -n "$KV_ID" ]; then printf '\n[[kv_namespaces]]\nbinding = "BOT"\nid = "%s"\n' "$KV_ID" >> wrangler.toml; echo "bot KV: $KV_ID"; else echo "bot KV unavailable (token lacks Workers KV permission)"; fi
           npx -y wrangler@4 deploy
-          for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID GH_DISPATCH_TOKEN TELEGRAM_BOT_TOKEN; do
+          for k in ALI_APP_KEY ALI_APP_SECRET ALI_TRACKING_ID GH_DISPATCH_TOKEN TELEGRAM_BOT_TOKEN FB_PAGE_ID FB_PAGE_TOKEN; do
             v="${!k}"
             if [ -n "$v" ]; then printf '%s' "$v" | npx -y wrangler@4 secret put "$k"; fi
           done
@@ -175,6 +175,8 @@ jobs:
           ALI_TRACKING_ID: ${{ secrets.ALI_TRACKING_ID }}
           GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
       - name: Connect Telegram bot webhook
         if: env.CLOUDFLARE_API_TOKEN != ''
         working-directory: worker
