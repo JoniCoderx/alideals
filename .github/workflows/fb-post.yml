@@ -5,6 +5,7 @@ on:
     inputs:
       slot: { description: 'Telegram slot hour to post (8,10,12,14,17,19,21). Empty = current hour', required: false }
       dry: { description: 'Dry run (print only)', type: boolean, default: false }
+      stats: { description: 'Only print engagement of recent posts', type: boolean, default: false }
 permissions: { contents: read }
 jobs:
   post:
@@ -20,3 +21,4 @@ jobs:
           SLOT: ${{ inputs.slot || (github.event.schedule == '5 8 * * *' && '10') || (github.event.schedule == '5 10 * * *' && '12') || (github.event.schedule == '5 12 * * *' && '14') || (github.event.schedule == '5 17 * * *' && '19') || (github.event.schedule == '5 19 * * *' && '21') || '' }}
           MAX_LATE_H: ${{ github.event_name == 'schedule' && '4' || '' }}
           DRY: ${{ inputs.dry && '1' || '' }}
+          STATS: ${{ inputs.stats && '1' || '' }}

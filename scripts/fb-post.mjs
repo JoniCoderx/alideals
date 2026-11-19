@@ -15,6 +15,14 @@ const slot = Number(process.env.SLOT || get('hour'));
 import { toPlain, fbMessage } from '../src/fb-copy.mjs';
 export { toPlain, fbMessage };
 
+if (import.meta.url === `file://${process.argv[1]}` && process.env.STATS === '1') {
+  // Engagement of the latest Page posts (no secrets printed).
+  const u = `https://graph.facebook.com/v21.0/${page}/posts?limit=25&fields=created_time,message,shares,reactions.summary(true).limit(0),comments.summary(true).limit(0)&access_token=${token}`;
+  const j = await (await fetch(u)).json();
+  if (j.error) { console.error('facebook error:', j.error.code, j.error.message); process.exit(1); }
+  for (const p of j.data || []) console.log([p.created_time.slice(0, 16), `reactions=${p.reactions?.summary?.total_count ?? 0}`, `comments=${p.comments?.summary?.total_count ?? 0}`, `shares=${p.shares?.count ?? 0}`, (p.message || '').split('\n').filter(Boolean).slice(0, 2).join(' | ').slice(0, 70)].join('  '));
+  process.exit(0);
+}
 if (import.meta.url === `file://${process.argv[1]}`) {
   const q = await (await fetch(`${SITE}/tg-queue/queue.json?t=${Date.now()}`)).json();
   const item = q.items.find((i) => i.date === date && i.hour === slot);
