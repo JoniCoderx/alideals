@@ -129,8 +129,8 @@ export const SLOTS = [
   { id: 'noon', from: 12, to: 14, prefer: ['weekly', 'category'] },
   { id: 'afternoon', from: 14, to: 16, prefer: ['product'] },
   { id: 'evening', from: 17, to: 19, prefer: ['spot'] },
-  { id: 'prime', from: 19, to: 21, prefer: ['countdown'] },
-  { id: 'night', from: 21, to: 23, prefer: ['category'] },
+  { id: 'prime', from: 19, to: 21, prefer: ['countdown', 'product'] },
+  { id: 'night', from: 21, to: 23, prefer: ['product', 'category'] },
 ];
 
 export function planRegular({ today, hour, weekday, regular = {}, events = [], coupons = [], siteUrl, library = telegramPosts, announcements = telegramAnnouncements, cats = categories, products = [], minGapDays = 8, spotGapDays = 3, catGapDays = 10 }) {
@@ -184,8 +184,8 @@ export function planRegular({ today, hour, weekday, regular = {}, events = [], c
     product() {
       const pick = products
         .map((x, i) => ({ x, i, id: `product|${x.id}`, last: state.history[`product|${x.id}`] || '' }))
-        // During a sale products come back after 4 days (the rotation is ~23 products), otherwise after 14.
-        .filter(({ id, x }) => x.link && x.image && fresh(id, events.some((e) => e.start <= today && e.end >= today) ? 4 : 14))
+        // During a sale products come back after 4 days (the rotation is ~23 products), otherwise after 6 (14 left whole days with no products).
+        .filter(({ id, x }) => x.link && x.image && fresh(id, events.some((e) => e.start <= today && e.end >= today) ? 4 : 6))
         .sort((a, b) => a.last.localeCompare(b.last) || a.i - b.i)[0];
       if (!pick) return null;
       const x = pick.x;

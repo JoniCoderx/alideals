@@ -26,6 +26,7 @@ const QUESTIONS = {
 };
 const hookFor = (item, title) => {
   if (item.kind === 'spot' || item.kind === 'weekly') return 'לפני שמשלמים באלי אקספרס, תעצרו שנייה ⚡';
+  if (item.kind !== 'product') return 'טיפ ששווה לשמור';
   const emo = (title.match(/\p{Extended_Pictographic}\uFE0F?$/u) || [''])[0];
   return { '🔋': 'מוצר שכל אחד צריך בתיק', '🚗': 'שדרוג קטן לרכב', '🏠': 'עוד מציאה לבית', '🎮': 'לשולחן העבודה', '🎧': 'לאוהבי סאונד' }[emo] || 'מצאנו לכם משהו שווה';
 };
@@ -44,6 +45,10 @@ export function fbMessage(item) {
     if (buy) out.push(`להפעלת הקוד באלי אקספרס: ${buy.url}`);
     out.push(`כל הקודים לפי סכום העגלה + מחשבון: ${site ? fbUrl(site.url) : `${SITE}/?${FB}&utm_medium=social&utm_campaign=spot#calc`}`);
     out.push('', 'שמרו את הפוסט לקנייה הבאה 📌');
+  } else if (item.kind !== 'product') {
+    if (site) out.push(`המדריך המלא והקודים: ${fbUrl(site.url)}`);
+    if (buy) out.push(`לעליאקספרס: ${buy.url}`);
+    out.push('', 'יש לכם עוד טיפ? כתבו בתגובות 💬');
   } else {
     if (buy) out.push(`לצפייה במוצר ובמחיר העדכני: ${buy.url}`);
     out.push(`איזה קוד קופון מתאים לעגלה שלכם: ${site ? fbUrl(site.url) : `${SITE}/?${FB}&utm_medium=social&utm_campaign=product#calc`}`);

@@ -181,7 +181,7 @@ export async function publishFacebook(env, now = new Date(), fetchImpl = fetch) 
   if (!res.ok) return { error: `queue ${res.status}` };
   const { items = [] } = await res.json();
   const item = items.find((i) => i.date === date && i.hour === hour);
-  if (!item || !['product', 'spot', 'weekly', 'deal'].includes(item.kind)) return { none: `${date} ${hour} ${item?.kind || ''}` };
+  if (!item || !['product', 'spot', 'weekly', 'deal', 'category', 'tip', 'feature'].includes(item.kind)) return { none: `${date} ${hour} ${item?.kind || ''}` };
   const message = fbMessage(item);
   const body = new URLSearchParams({ access_token: env.FB_PAGE_TOKEN, ...(item.img ? { url: `${env.SITE_URL}/tg-queue/${item.img}`, caption: message } : { message }) });
   const r = await fetchImpl(`https://graph.facebook.com/v21.0/${env.FB_PAGE_ID}/${item.img ? 'photos' : 'feed'}`, { method: 'POST', body });
