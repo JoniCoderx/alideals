@@ -17,10 +17,18 @@ export { toPlain, fbMessage };
 
 if (import.meta.url === `file://${process.argv[1]}` && process.env.STATS === '1') {
   // Engagement of the latest Page posts (no secrets printed).
-  const u = `https://graph.facebook.com/v21.0/${page}/posts?limit=25&fields=created_time,message,shares,reactions.summary(true).limit(0),comments.summary(true).limit(0)&access_token=${token}`;
-  const j = await (await fetch(u)).json();
-  if (j.error) { console.error('facebook error:', j.error.code, j.error.message); process.exit(1); }
-  for (const p of j.data || []) console.log([p.created_time.slice(0, 16), `reactions=${p.reactions?.summary?.total_count ?? 0}`, `comments=${p.comments?.summary?.total_count ?? 0}`, `shares=${p.shares?.count ?? 0}`, (p.message || '').split('\n').filter(Boolean).slice(0, 2).join(' | ').slice(0, 70)].join('  '));
+  const G = 'https://graph.facebook.com/v21.0';
+  const tries = [
+    `${page}?fields=name,followers_count,fan_count`,
+    `${page}/photos?type=uploaded&limit=15&fields=created_time,name,link`,
+    `${page}/published_posts?limit=15&fields=created_time,message`,
+    `${page}/posts?limit=15&fields=created_time,message,shares,reactions.summary(true).limit(0),comments.summary(true).limit(0)`,
+  ];
+  for (const t of tries) {
+    const j = await (await fetch(`${G}/${t}&access_token=${token}`)).json();
+    console.log('==', t.split('?')[0].replace(page, 'PAGE'), j.error ? `error ${j.error.code}: ${j.error.message}` : '');
+    if (!j.error) for (const p of j.data || [j]) console.log(JSON.stringify({ t: p.created_time, n: (p.name || p.message || '').split('\n')[0].slice(0, 50), f: p.followers_count, fan: p.fan_count, r: p.reactions?.summary?.total_count, c: p.comments?.summary?.total_count, s: p.shares?.count }));
+  }
   process.exit(0);
 }
 if (import.meta.url === `file://${process.argv[1]}`) {
