@@ -1,0 +1,41 @@
+{
+  "target": "@milhamra",
+  "poll_seconds": 20,
+  "max_age_minutes": 15,
+  "sources": [
+    {
+      "channel": "abualiexpress",
+      "skip": []
+    },
+    {
+      "channel": "raknetoooooo",
+      "skip": [
+        "מחיר",
+        "משלוח",
+        "מבצע",
+        "הנחה",
+        "קטלוג",
+        "לפרטים"
+      ]
+    }
+  ],
+  "global_skip": [
+    "לרכישה",
+    "תוכן שיווקי",
+    "הזמינו",
+    "ליצירת קשר",
+    "wa.me",
+    "bit.ly",
+    "t.me/+"
+  ],
+  "strip_patterns": [
+    "^\\s*[🔻🔺⚠️]*\\s*(ערוץ|לחצו|הצטרפו|עקבו)\\b.*$",
+    "כדי להגיב לכתבה.*$",
+    "רק נטו\\s*חדשות.*$"
+  ],
+  "prefix": "🔴 ",
+  "footer": "",
+  "rewrite": true,
+  "rewrite_model": "claude-haiku-5-5",
+  "send_photos": true
+}
