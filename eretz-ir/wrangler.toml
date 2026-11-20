@@ -1,0 +1,21 @@
+# "ארץ עיר אונליין" על Cloudflare Workers + Durable Objects.
+# נפרס אוטומטית ע"י .github/workflows/eretz-ir.yml (משתמש בסוד CLOUDFLARE_API_TOKEN הקיים).
+# כתובת: https://eretz-ir.<account>.workers.dev
+name = "eretz-ir"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+# הבית וקישורי החדרים עוברים דרך ה-Worker כדי לקבל כתובות מלאות ותצוגה מקדימה אישית
+run_worker_first = ["/", "/index.html", "/api/*", "/robots.txt", "/sitemap.xml", "/healthz"]
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "RoomDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RoomDO"]

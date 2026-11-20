@@ -1,0 +1,13 @@
+{
+  "name": "eretz-ir-online",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ארץ עיר אונליין – משחק מרובה משתתפים בעברית",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "NODE_ENV=development node --watch server.mjs",
+    "test": "node --test"
+  }
+}
